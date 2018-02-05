@@ -8,7 +8,8 @@
                  [ns-tracker "0.3.1"]
                  [compojure "1.6.0"]
                  [yogthos/config "1.1"]
-                 [ring "1.6.3"]]
+                 [ring "1.6.3"]
+                 [aleph "0.4.4"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-garden "0.2.8"]]
@@ -44,7 +45,8 @@
 
     :plugins      [[lein-figwheel "0.5.13"]
                    [lein-doo "0.1.8"]
-                   [lein-pdo "0.1.1"]]}}
+                   [lein-pdo "0.1.1"]]
+    :source-paths ["dev"]}}
 
   :cljsbuild
   {:builds
@@ -83,6 +85,4 @@
   :aot [luma.server]
 
   :uberjar-name "luma.jar"
-
-  :prep-tasks [["cljsbuild" "once" "min"]["garden" "once"] "compile"]
   )
