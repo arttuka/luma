@@ -1,14 +1,14 @@
 (defproject luma "0.1.0-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.9.908"]
+  :dependencies [[org.clojure/clojure "1.9.0"]
+                 [org.clojure/clojurescript "1.9.946"]
                  [reagent "0.7.0"]
-                 [re-frame "0.10.2"]
+                 [re-frame "0.10.4"]
                  [secretary "1.2.3"]
-                 [garden "1.3.2"]
-                 [ns-tracker "0.3.0"]
-                 [compojure "1.5.0"]
-                 [yogthos/config "0.8"]
-                 [ring "1.4.0"]]
+                 [garden "1.3.3"]
+                 [ns-tracker "0.3.1"]
+                 [compojure "1.6.0"]
+                 [yogthos/config "1.1"]
+                 [ring "1.6.3"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-garden "0.2.8"]]
@@ -39,7 +39,7 @@
 
   :profiles
   {:dev
-   {:dependencies [[binaryage/devtools "0.9.4"]
+   {:dependencies [[binaryage/devtools "0.9.9"]
                    [re-frisk "0.5.3"]]
 
     :plugins      [[lein-figwheel "0.5.13"]
