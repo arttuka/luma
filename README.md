@@ -1,4 +1,4 @@
-# LUMA Universal Music Archive
+# LUMA Ultimate Music Archive
 
 A web service that presents the user a sortable and filterable view of their Spotify library.
 
