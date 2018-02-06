@@ -12,7 +12,8 @@
                  [ring "1.6.3"]
                  [ring/ring-defaults "0.3.1"]
                  [ring/ring-json "0.4.0"]
-                 [http-kit "2.2.0"]]
+                 [http-kit "2.2.0"]
+                 [mount "0.1.11"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-garden "0.2.8"]]
@@ -49,7 +50,8 @@
     :plugins      [[lein-figwheel "0.5.13"]
                    [lein-doo "0.1.8"]
                    [lein-pdo "0.1.1"]]
-    :source-paths ["dev"]}
+    :source-paths ["dev"]
+    :resource-paths ["dev-resources"]}
    :prod
    {:source-paths ["prod"]}}
 
