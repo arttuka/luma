@@ -13,14 +13,18 @@
                  [ring/ring-defaults "0.3.1"]
                  [ring/ring-json "0.4.0"]
                  [http-kit "2.2.0"]
-                 [mount "0.1.11"]]
+                 [mount "0.1.11"]
+                 [com.taoensso/sente "1.12.0"]
+                 [com.taoensso/timbre "4.10.0"]
+                 [com.cognitect/transit-clj "0.8.300"]
+                 [com.cognitect/transit-cljs "0.8.243"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-garden "0.2.8"]]
 
   :min-lein-version "2.5.3"
 
-  :source-paths ["src/clj"]
+  :source-paths ["src/clj" "src/cljc"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"
                                     "test/js"
@@ -58,7 +62,7 @@
   :cljsbuild
   {:builds
    [{:id           "dev"
-     :source-paths ["src/cljs"]
+     :source-paths ["src/cljs" "src/cljc"]
      :figwheel     {:on-jsload "luma.core/mount-root"}
      :compiler     {:main                 luma.core
                     :output-to            "resources/public/js/compiled/app.js"
@@ -71,7 +75,7 @@
                     }}
 
     {:id           "min"
-     :source-paths ["src/cljs"]
+     :source-paths ["src/cljs" "src/cljc"]
      :jar true
      :compiler     {:main            luma.core
                     :output-to       "resources/public/js/compiled/app.js"
@@ -80,16 +84,16 @@
                     :pretty-print    false}}
 
     {:id           "test"
-     :source-paths ["src/cljs" "test/cljs"]
+     :source-paths ["src/cljs" "src/cljc" "test/cljs"]
      :compiler     {:main          luma.runner
                     :output-to     "resources/public/js/compiled/test.js"
                     :output-dir    "resources/public/js/compiled/test/out"
                     :optimizations :none}}
     ]}
 
-  :main luma.server
+  :main luma.main
 
-  :aot [luma.server]
+  :aot [luma.main]
 
   :uberjar-name "luma.jar"
   )
