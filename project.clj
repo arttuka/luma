@@ -1,6 +1,7 @@
 (defproject luma "0.1.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
+                 [org.clojure/data.codec "0.1.1"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.4"]
                  [secretary "1.2.3"]
@@ -9,7 +10,9 @@
                  [compojure "1.6.0"]
                  [yogthos/config "1.1"]
                  [ring "1.6.3"]
-                 [aleph "0.4.4"]]
+                 [ring/ring-defaults "0.3.1"]
+                 [ring/ring-json "0.4.0"]
+                 [http-kit "2.2.0"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-garden "0.2.8"]]
@@ -23,7 +26,7 @@
                                     "resources/public/css"]
 
   :figwheel {:css-dirs ["resources/public/css"]
-             :ring-handler luma.handler/dev-handler}
+             :ring-handler luma.handler/handler}
 
   :garden {:builds [{:id           "screen"
                      :source-paths ["src/clj"]
@@ -46,7 +49,9 @@
     :plugins      [[lein-figwheel "0.5.13"]
                    [lein-doo "0.1.8"]
                    [lein-pdo "0.1.1"]]
-    :source-paths ["dev"]}}
+    :source-paths ["dev"]}
+   :prod
+   {:source-paths ["prod"]}}
 
   :cljsbuild
   {:builds

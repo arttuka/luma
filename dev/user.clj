@@ -1,16 +1,16 @@
 (ns user
-  (:require [aleph.http :as http]
+  (:require [org.httpkit.server :as http]
             [clojure.tools.namespace.repl :as repl]
-            [luma.handler :refer [dev-handler]]))
+            [luma.handler :refer [handler]]))
 
 (defonce ^:private server (atom nil))
 
 (defn stop! []
   (when-let [s @server]
-    (.close s)))
+    (s)))
 
 (defn start! []
-  (reset! server (http/start-server #'dev-handler {:port 8080})))
+  (reset! server (http/run-server handler {:port 8080})))
 
 (defn restart! []
   (stop!)
