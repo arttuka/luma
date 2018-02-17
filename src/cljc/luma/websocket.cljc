@@ -32,6 +32,8 @@
 
 (defmulti event-handler :id)
 
+(defmethod event-handler :chsk/ws-ping [_])
+
 #?(:clj
    (defmethod event-handler :default [{:keys [event ring-req]}]
      (log/debugf "Unhandled event %s from client %s" event (get-in ring-req [:session :uid]))))
@@ -46,11 +48,20 @@
 
 (defn stop-router [r]
   #?(:cljs (sente/chsk-disconnect! (:chsk r)))
-  ((:router r)))
+  ((:router #?(:clj r, :cljs @r))))
 
 (defstate router
   :start (start-router)
   :stop (stop-router router))
+
+
+#?(:clj
+   (defn send! [uid event]
+     ((:send! router) uid event))
+   :cljs
+   (defn send! [event]
+     ((:send! @router) event)))
+
 
 #?(:clj (defroutes routes
           (GET path request ((:ajax-get-or-ws-handshake-fn router) request))

@@ -6,7 +6,7 @@
             [luma.routes :as routes]
             [luma.views :as views]
             [luma.config :as config]
-            luma.websocket))
+            [luma.websocket :as ws]))
 
 
 (defn dev-setup []
@@ -25,3 +25,17 @@
   (dev-setup)
   (mount/start)
   (mount-root))
+
+(defmethod ws/event-handler :chsk/state
+  [{:keys [?data]}]
+  (let [[_ new-data] ?data]
+    (when (:first-open? new-data)
+      (re-frame/dispatch [::ws/send [::ws/connect]])
+      (re-frame/dispatch [::events/set-uid (:uid new-data)]))))
+
+(defmethod ws/event-handler :chsk/recv
+  [{:keys [?data send-fn]}]
+  (let [[event data] ?data]
+    (if (= event :chsk/ws-ping)
+      (send-fn :chsk/ws-ping)
+      (re-frame/dispatch [event data]))))

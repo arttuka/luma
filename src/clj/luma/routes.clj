@@ -3,12 +3,17 @@
             [compojure.route :refer [resources]]
             [ring.util.response :refer [resource-response content-type]]
             [luma.integration.spotify :as spotify]
-            [luma.websocket :as websocket]))
+            [luma.websocket :as websocket])
+  (:import (java.util UUID)))
 
 (defroutes routes
-  (GET "/" [] (->
-                (resource-response "index.html" {:root "public"})
-                (content-type "text/html")))
+  (GET "/" req
+    (let [session (:session req)
+          response (->
+                     (resource-response "index.html" {:root "public"})
+                     (content-type "text/html"))
+          uid (or (:uid session) (UUID/randomUUID))]
+      (assoc response :session (assoc session :uid uid))))
   spotify/routes
   websocket/routes
   (resources "/"))
