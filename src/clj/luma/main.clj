@@ -1,7 +1,8 @@
 (ns luma.main
   (:require [mount.core :as mount]
             luma.server
-            luma.websocket)
+            luma.websocket
+            luma.db)
   (:gen-class))
 
 (defn -main []

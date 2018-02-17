@@ -1,4 +1,4 @@
-(ns handler
+(ns luma.handler
     (:require [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
               [luma.routes :refer [routes]]))
 
