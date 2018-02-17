@@ -13,12 +13,12 @@
 
 (defstate db
   :start (hikari/make-datasource datasource-options)
-  :stop (hikari/close-datasource db))
+  :stop (hikari/close-datasource @db))
 
 (def ^:dynamic *db* nil)
 
 (defmacro with-transaction [& body]
-  `(jdbc/with-db-transaction [conn# {:datasource db}]
+  `(jdbc/with-db-transaction [conn# {:datasource @db}]
      (binding [*db* conn#]
        ~@body)))
 

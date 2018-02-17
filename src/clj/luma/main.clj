@@ -6,4 +6,5 @@
   (:gen-class))
 
 (defn -main []
+  (mount/in-cljc-mode)
   (mount/start))

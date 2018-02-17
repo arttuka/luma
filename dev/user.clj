@@ -7,6 +7,7 @@
   (mount/stop))
 
 (defn start! []
+  (mount/in-cljc-mode)
   (mount/start))
 
 (defn restart! []

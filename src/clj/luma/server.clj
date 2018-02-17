@@ -6,4 +6,4 @@
             luma.events))
 
 (defstate server :start (http/run-server handler {:port (or (env :port) 8080)})
-                 :stop (server))
+                 :stop (@server))

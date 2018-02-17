@@ -48,21 +48,21 @@
 
 (defn stop-router [r]
   #?(:cljs (sente/chsk-disconnect! (:chsk r)))
-  ((:router #?(:clj r, :cljs @r))))
+  ((:router r)))
 
 (defstate router
   :start (start-router)
-  :stop (stop-router router))
+  :stop (stop-router @router))
 
 
 #?(:clj
    (defn send! [uid event]
-     ((:send! router) uid event))
+     ((:send! @router) uid event))
    :cljs
    (defn send! [event]
      ((:send! @router) event)))
 
 
 #?(:clj (defroutes routes
-          (GET path request ((:ajax-get-or-ws-handshake-fn router) request))
-          (POST path request ((:ajax-post-fn router) request))))
+          (GET path request ((:ajax-get-or-ws-handshake-fn @router) request))
+          (POST path request ((:ajax-post-fn @router) request))))
