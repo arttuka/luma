@@ -14,8 +14,26 @@
       (if @spotify-id
         [:span (str "Logged in as " @spotify-id)]
         [:a {:href (gstring/format "https://accounts.spotify.com/authorize?client_id=%s&response_type=%s&state=%s&scope=%s&redirect_uri=%s"
-                                 client-id response-type @uid scopes redirect-uri)}
-       "Login with Spotify"]))))
+                                   client-id response-type @uid scopes redirect-uri)}
+         "Login with Spotify"]))))
+
+(defn albums []
+  (let [data (re-frame/subscribe [::subs/albums])]
+    (fn []
+      [:div#albums
+       (for [album @data]
+         ^{:key (:id album)}
+         [:a.album
+          {:href (:uri album)}
+          [:img.cover {:src (:image album)}]
+          [:div.title
+           (:title album)]
+          [:div.artists
+           (for [artist (:artists album)]
+             ^{:key (str (:id album) (:artist_id artist))}
+             [:div.artist (:name artist)])]])])))
 
 (defn main-panel []
-  [:div [spotify-login]])
+  [:div
+   [spotify-login]
+   [albums]])

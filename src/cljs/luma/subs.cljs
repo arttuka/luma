@@ -10,3 +10,8 @@
   ::spotify-id
   (fn [db _]
     (:spotify-id db)))
+
+(re-frame/reg-sub
+  ::albums
+  (fn [db _]
+    (:albums db)))

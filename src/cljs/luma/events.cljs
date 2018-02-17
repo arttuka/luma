@@ -23,6 +23,11 @@
   (fn [db [_ spotify-id]]
     (assoc db :spotify-id spotify-id)))
 
+(re-frame/reg-event-db
+  ::albums
+  (fn [db [_ albums]]
+    (assoc db :albums albums)))
+
 (re-frame/reg-event-fx
   ::ws/send
   (fn [_ [_ event]]

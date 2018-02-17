@@ -3,7 +3,8 @@
             [clojure.java.jdbc :as jdbc]
             [clj-time.core :as time]
             clj-time.jdbc
-            [hikari-cp.core :as hikari]))
+            [hikari-cp.core :as hikari]
+            [luma.util :refer [grouping]]))
 
 (def datasource-options {:adapter       "postgresql"
                          :username      "luma"
@@ -66,3 +67,14 @@
         (run! save-album albums)
         (save-user-albums (map :id albums))
         (jdbc/update! *db* :account {:last_loaded (time/now)} ["id = ?" user-id])))))
+
+(defn get-albums [user-id]
+  (with-transaction
+    (let [data (jdbc/query *db* ["SELECT album.id, album.title, album.uri, album.image, artist.id artist_id, artist.name
+                                  FROM album
+                                  JOIN album_artist ON album.id = album_artist.album
+                                  JOIN artist ON artist.id = album_artist.artist
+                                  JOIN account_album ON album.id = account_album.album
+                                  WHERE account_album.account = ?"
+                                 user-id])]
+      (grouping [:title :uri :image :id] :artists data))))
