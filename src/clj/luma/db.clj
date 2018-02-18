@@ -2,6 +2,7 @@
   (:require [mount.core :refer [defstate]]
             [clojure.set :refer [union]]
             [clojure.java.jdbc :as jdbc]
+            [clojure.string :as str]
             [clj-time.core :as time]
             clj-time.jdbc
             [hikari-cp.core :as hikari]
@@ -71,26 +72,40 @@
 
 (defn get-albums [user-id]
   (with-transaction
-    (let [data (jdbc/query *db* ["SELECT album.id, album.title, album.uri, album.image, artist.id artist_id, artist.name
+    (let [data (jdbc/query *db* ["WITH album_tags AS (
+                                    SELECT album, tag
+                                    FROM album_tag
+                                    UNION
+                                    SELECT album, tag
+                                    FROM album_artist
+                                    JOIN artist_tag ON album_artist.artist = artist_tag.artist
+                                  )
+                                  SELECT album.id, album.title, album.uri, album.image, artist.id artist_id, artist.name, album_tags.tag
                                   FROM album
                                   JOIN album_artist ON album.id = album_artist.album
                                   JOIN artist ON artist.id = album_artist.artist
                                   JOIN account_album ON album.id = account_album.album
+                                  JOIN album_tags ON album.id = album_tags.album
                                   WHERE account_album.account = ?"
                                  user-id])]
-      (grouping [:title :uri :image :id] :artists data))))
+      (->> data
+           (grouping [:title :uri :image :id :artist_id :name] :tags)
+           (map #(update % :tags (partial map :tag)))
+           (grouping [:title :uri :image :id :tags] :artists)))))
 
 (defn save-album-tags [album tags]
   (with-transaction
-    (let [existing-tags (set (map :tag (jdbc/query *db* "SELECT tag FROM tag")))
+    (let [tags (map str/lower-case tags)
+          existing-tags (set (map :tag (jdbc/query *db* "SELECT tag FROM tag")))
           new-tags (remove existing-tags tags)]
       (jdbc/insert-multi! *db* :tag (vec (for [tag new-tags] {:tag tag})))
       (jdbc/delete! *db* :album_tag ["album = ?" album])
-      (jdbc/insert-multi! *db* :album_tag (vec (for [tag tags] {:tag tag, :album album}))))))
+      (jdbc/insert-multi! *db* :album_tag (for [tag tags] {:tag tag, :album album})))))
 
 (defn save-artist-tags [artist tags]
   (with-transaction
-    (let [existing-tags (set (map :tag (jdbc/query *db* "SELECT tag FROM tag")))
+    (let [tags (map str/lower-case tags)
+          existing-tags (set (map :tag (jdbc/query *db* "SELECT tag FROM tag")))
           new-tags (remove existing-tags tags)]
       (jdbc/insert-multi! *db* :tag (for [tag new-tags] {:tag tag}))
       (jdbc/delete! *db* :artist_tag ["artist = ?" artist])

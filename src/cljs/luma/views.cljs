@@ -17,21 +17,27 @@
                                    client-id response-type @uid scopes redirect-uri)}
          "Login with Spotify"]))))
 
+(defn album [a]
+  [:a.album
+   {:href (:uri a)}
+   [:img.cover {:src (:image a)}]
+   [:div.title
+    (:title a)]
+   [:div.artists
+    (for [artist (:artists a)]
+      ^{:key (str (:id a) (:artist_id artist))}
+      [:div.artist (:name artist)])]
+   [:div.tags
+    (for [tag (interpose " · " (:tags a))]
+      tag)]])
+
 (defn albums []
   (let [data (re-frame/subscribe [::subs/albums])]
     (fn []
       [:div#albums
-       (for [album @data]
-         ^{:key (:id album)}
-         [:a.album
-          {:href (:uri album)}
-          [:img.cover {:src (:image album)}]
-          [:div.title
-           (:title album)]
-          [:div.artists
-           (for [artist (:artists album)]
-             ^{:key (str (:id album) (:artist_id artist))}
-             [:div.artist (:name artist)])]])])))
+       (for [a @data]
+         ^{:key (:id a)}
+         [album a])])))
 
 (defn main-panel []
   [:div
