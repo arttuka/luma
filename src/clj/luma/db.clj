@@ -1,5 +1,6 @@
 (ns luma.db
   (:require [mount.core :refer [defstate]]
+            [clojure.set :refer [union]]
             [clojure.java.jdbc :as jdbc]
             [clj-time.core :as time]
             clj-time.jdbc
@@ -78,3 +79,34 @@
                                   WHERE account_album.account = ?"
                                  user-id])]
       (grouping [:title :uri :image :id] :artists data))))
+
+(defn save-album-tags [album tags]
+  (with-transaction
+    (let [existing-tags (set (map :tag (jdbc/query *db* "SELECT tag FROM tag")))
+          new-tags (remove existing-tags tags)]
+      (jdbc/insert-multi! *db* :tag (vec (for [tag new-tags] {:tag tag})))
+      (jdbc/delete! *db* :album_tag ["album = ?" album])
+      (jdbc/insert-multi! *db* :album_tag (vec (for [tag tags] {:tag tag, :album album}))))))
+
+(defn save-artist-tags [artist tags]
+  (with-transaction
+    (let [existing-tags (set (map :tag (jdbc/query *db* "SELECT tag FROM tag")))
+          new-tags (remove existing-tags tags)]
+      (jdbc/insert-multi! *db* :tag (for [tag new-tags] {:tag tag}))
+      (jdbc/delete! *db* :artist_tag ["artist = ?" artist])
+      (jdbc/insert-multi! *db* :artist_tag (for [tag tags] {:tag tag, :artist artist})))))
+
+(defn get-tags [artist album]
+  (with-transaction
+    (jdbc/query *db* ["SELECT tag
+                       FROM album_tag
+                       JOIN album ON album.id = album_tag.album
+                       JOIN album_artist ON album_artist.album = album.id
+                       JOIN artist ON artist.id = album_artist.artist
+                       WHERE album.title = ? OR artist.name = ?
+                       UNION ALL
+                       SELECT tag
+                       FROM artist_tag
+                       JOIN artist ON artist.id = artist_tag.artist
+                       WHERE artist.name = ?"
+                      album artist artist])))
