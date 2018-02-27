@@ -18,24 +18,37 @@
            :else not-found)))
 
      IPersistentSet
-     (disjoin [this key])
-     (contains [this key])
-     (get [this key])
-     (count [this])
+     (disjoin [this key]
+       (let [[c & cs] key]
+         (if (not c)
+           (Trie. value false children)
+           (Trie. value contains (update children c disj cs)))))
+     (contains [this key]
+       (let [not-found (Object.)]
+         (not= not-found (get this key not-found))))
+     (get [this key]
+       (.valAt this key))
+     (count [this]
+       (count (seq this)))
      (cons [this o]
        (let [[c & cs] o]
          (cond
            (not c) (Trie. value true children)
            (contains? children c) (Trie. value contains (update children c conj cs))
            :else (Trie. value contains (assoc children c (conj (Trie. (str value c) false {}) cs))))))
-     (empty [this])
-     (equiv [self o])
-     (seq [self])
+     (empty [this]
+       (Trie. "" false {}))
+     (equiv [this o]
+       (= (seq this) (seq o)))
+     (seq [self]
+       (let [ks (sort (keys children))
+             subseq (mapcat #(seq (get children %)) ks)]
+         (if contains
+           (cons value subseq)
+           subseq)))
 
      ITrie
      (search [this s])))
 
-(def empty (Trie. "" false {}))
-
 (defn make-trie [strs]
-  (into empty (set (map str/lower-case strs))))
+  (into (Trie. "" false {}) (set (map str/lower-case strs))))
