@@ -6,38 +6,38 @@
 (deftest ilookup-test
   (testing "Trie implements clojure.lang.ILookup"
     (let [words ["bar" "foo" "foobar" "foobloo"]
-          trie (make-trie words)]
+          t (trie words)]
       (testing "valAt"
         (testing "Finds contained words"
           (doseq [word words]
-            (is (= word (get trie word)))))
+            (is (= word (get t word)))))
         (testing "Doesn't find invalid words"
           (doseq [word ["fo" "foob" "trollface"]]
-            (is (nil? (get trie word)))
-            (is (= ::not-found (get trie word ::not-found)))))))))
+            (is (nil? (get t word)))
+            (is (= ::not-found (get t word ::not-found)))))))))
 
 (deftest ipersistentcollection-test
   (testing "Trie implements clojure.lang.IPersistentCollection"
     (let [words ["bar" "foo" "foobar" "foobloo"]
-          trie (make-trie words)]
+          t (trie words)]
       (testing "contains"
         (testing "finds contained words"
           (doseq [word words]
-            (is (contains? trie word))))
+            (is (contains? t word))))
         (testing "doesn't find invalid words"
           (doseq [word ["fo" "foob" "trollface"]]
-            (is (not (contains? trie word))))))
+            (is (not (contains? t word))))))
       (testing "disjoin"
-        (let [new-trie (disj trie "foo")]
+        (let [new-trie (disj t "foo")]
           (testing "returns a Trie"
             (is (instance? Trie new-trie)))
           (testing "removes disjoined word"
             (is (not (contains? new-trie "foo"))))
           (testing "doesn't affect other words with same prefix"
-            (is (contains? trie "foobar"))
-            (is (contains? trie "foobloo")))))
+            (is (contains? t "foobar"))
+            (is (contains? t "foobloo")))))
       (testing "cons"
-        (let [new-trie (conj trie "foob" "zing")]
+        (let [new-trie (conj t "foob" "zing")]
           (testing "returns a Trie"
             (is (instance? Trie new-trie)))
           (testing "adds words to trie"
@@ -48,40 +48,40 @@
               (is (contains? new-trie word))))))
       (testing "count"
         (testing "returns count of elements in the trie"
-          (is (= 4 (count trie)))))
+          (is (= 4 (count t)))))
       (testing "empty"
-        (let [empty-trie (empty trie)]
+        (let [empty-trie (empty t)]
           (testing "returns an empty trie"
             (is (instance? Trie empty-trie))
             (is (zero? (count empty-trie))))))
       (testing "equiv"
-        (let [other-trie (make-trie ["bar" "foo" "foobar"])]
+        (let [other-trie (trie ["bar" "foo" "foobar"])]
           (testing "compares tries based on their contents"
-            (is (not= trie other-trie))
-            (is (= trie (conj other-trie "foobloo")))
-            (is (not= trie (conj other-trie "foobloo" "trollface"))))))
+            (is (not= t other-trie))
+            (is (= t (conj other-trie "foobloo")))
+            (is (not= t (conj other-trie "foobloo" "trollface"))))))
       (testing "seq"
         (testing "returns contained strings in alphabetical order"
-          (is (= words (seq trie))))))))
+          (is (= words (seq t))))))))
 
 (deftest itrie-test
   (testing "Trie implements luma.trie.ITrie"
     (let [words ["bar" "foo" "foobar" "foobloo"]
-          trie (make-trie words)]
+          t (trie words)]
       (testing "search"
         (testing "returns matching words in alphabetical order"
-          (is (= ["foo" "foobar" "foobloo"] (search trie "foo"))))
+          (is (= ["foo" "foobar" "foobloo"] (search t "foo"))))
         (testing "returns empty sequence if nothing is found"
-          (is (empty? (search trie "trollface"))))))))
+          (is (empty? (search t "trollface"))))))))
 
 (deftest persistent-test
   (let [words ["bar" "foo" "foobar" "foobloo"]
-        trie (make-trie words)]
+        t (trie words)]
     (testing "conj doesn't change the trie"
-      (let [new-trie (conj trie "foob")]
+      (let [new-trie (conj t "foob")]
         (is (= ["bar" "foo" "foob" "foobar" "foobloo"] (seq new-trie)))
-        (is (= words (seq trie)))))
+        (is (= words (seq t)))))
     (testing "disj doesn't change the trie"
-      (let [new-trie (disj trie "foo")]
+      (let [new-trie (disj t "foo")]
         (is (= ["bar" "foobar" "foobloo"] (seq new-trie)))
-        (is (= words (seq trie)))))))
+        (is (= words (seq t)))))))

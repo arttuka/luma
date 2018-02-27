@@ -5,24 +5,58 @@
 (defprotocol ITrie
   (search [trie s] "Find all strings that start with s"))
 
+(declare make-trie)
+
+(defn ^:private empty-trie [] (make-trie "" false {}))
+
+(defn ^:private trie-lookup [{:keys [value contains children]} k not-found]
+  (let [[c & cs] k]
+    (cond
+      (and (not c) contains) value
+      (and c (contains? children c)) (get (get children c) cs not-found)
+      :else not-found)))
+
+(defn ^:private trie-disjoin [{:keys [value contains children] :as trie} k]
+  (let [[c & cs] k]
+    (cond
+      (not c) {:value value, :contains false, :children children}
+      (contains? children c) {:value value, :contains contains, :children (update children c disj cs)}
+      :else trie)))
+
+(defn ^:private trie-conj [{:keys [value contains children]} s]
+  (let [[c & cs] s]
+    (cond
+      (not c) {:value value, :contains true, :children children}
+      (contains? children c) {:value value, :contains contains, :children (update children c conj cs)}
+      :else {:value    value
+             :contains contains
+             :children (assoc children c (conj (make-trie (str value c) false {}) cs))})))
+
+(defn ^:private trie-seq [{:keys [value contains children]}]
+  (let [ks (sort (keys children))
+        subseq (mapcat #(seq (get children %)) ks)]
+    (if contains
+      (cons value subseq)
+      subseq)))
+
+(defn ^:private trie-search [{:keys [children] :as trie} s]
+  (let [[c & cs] s]
+    (cond
+      (not c) (trie-seq trie)
+      (contains? children c) (search (get children c) cs)
+      :else [])))
+
 #?(:clj
-   (deftype Trie [value contains children]
+   (deftype Trie [trie]
      ILookup
      (valAt [this k]
        (.valAt this k nil))
      (valAt [this k not-found]
-       (let [[c & cs] k]
-         (cond
-           (and (not c) contains) value
-           (and c (contains? children c)) (.valAt (get children c) cs not-found)
-           :else not-found)))
+       (trie-lookup trie k not-found))
 
      IPersistentSet
      (disjoin [this key]
-       (let [[c & cs] key]
-         (if (not c)
-           (Trie. value false children)
-           (Trie. value contains (update children c disj cs)))))
+       (Trie. (trie-disjoin trie key)))
      (contains [this key]
        (let [not-found (Object.)]
          (not= not-found (get this key not-found))))
@@ -31,29 +65,25 @@
      (count [this]
        (count (seq this)))
      (cons [this o]
-       (let [[c & cs] o]
-         (cond
-           (not c) (Trie. value true children)
-           (contains? children c) (Trie. value contains (update children c conj cs))
-           :else (Trie. value contains (assoc children c (conj (Trie. (str value c) false {}) cs))))))
+       (Trie. (trie-conj trie o)))
      (empty [this]
-       (Trie. "" false {}))
+       (empty-trie))
      (equiv [this o]
        (= (seq this) (seq o)))
      (seq [self]
-       (let [ks (sort (keys children))
-             subseq (mapcat #(seq (get children %)) ks)]
-         (if contains
-           (cons value subseq)
-           subseq)))
+       (trie-seq trie))
 
      ITrie
      (search [this s]
-       (let [[c & cs] s]
-         (cond
-           (not c) (seq this)
-           (contains? children c) (search (get children c) cs)
-           :else [])))))
+       (trie-search trie s))))
 
-(defn make-trie [strs]
-  (into (Trie. "" false {}) (set (map str/lower-case strs))))
+(defn ^:private make-trie [value contains children]
+  (Trie. {:value    value
+          :contains contains
+          :children children}))
+
+(defn trie
+  ([]
+   (empty-trie))
+  ([strs]
+   (into (empty-trie) (set (map str/lower-case strs)))))
