@@ -1,6 +1,6 @@
 (ns luma.trie
   (:require [clojure.string :as str])
-  (:import (clojure.lang ILookup IPersistentSet)))
+  #?(:clj (:import (clojure.lang ILookup IPersistentSet))))
 
 (defprotocol ITrie
   (search [trie s] "Find all strings that start with s"))
@@ -71,6 +71,42 @@
      (equiv [this o]
        (= (seq this) (seq o)))
      (seq [self]
+       (trie-seq trie))
+
+     ITrie
+     (search [this s]
+       (trie-search trie s)))
+
+   :cljs
+   (deftype Trie [trie]
+     cljs.core/ILookup
+     (-lookup [this k]
+       (-lookup this k nil))
+     (-lookup [this k not-found]
+       (trie-lookup trie k not-found))
+
+     cljs.core/ISet
+     (-disjoin [this key]
+       (Trie. (trie-disjoin trie key)))
+
+     cljs.core/ICounted
+     (-count [this]
+       (count (seq this)))
+
+     cljs.core/ICollection
+     (-conj [this o]
+       (Trie. (trie-conj trie o)))
+
+     cljs.core/IEmptyableCollection
+     (-empty [this]
+       (empty-trie))
+
+     cljs.core/IEquiv
+     (-equiv [this o]
+       (= (seq this) (seq o)))
+
+     cljs.core/ISeqable
+     (-seq [this]
        (trie-seq trie))
 
      ITrie

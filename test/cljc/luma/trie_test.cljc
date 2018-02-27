@@ -1,7 +1,8 @@
 (ns luma.trie-test
-  (:require [clojure.test :refer :all]
-            [luma.trie :refer :all])
-  (:import (luma.trie Trie)))
+  (:require #?(:clj [clojure.test :refer :all]
+               :cljs [cljs.test :refer-macros [deftest testing is]])
+            [luma.trie :refer [trie search #?(:cljs Trie)]])
+  #?(:clj (:import (luma.trie Trie))))
 
 (deftest ilookup-test
   (testing "Trie implements clojure.lang.ILookup"

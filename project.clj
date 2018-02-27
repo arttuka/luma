@@ -58,7 +58,7 @@
     :plugins      [[lein-figwheel "0.5.13"]
                    [lein-doo "0.1.8"]
                    [lein-pdo "0.1.1"]]
-    :source-paths ["dev"]
+    :source-paths ["dev" "test/clj" "test/cljc"]
     :resource-paths ["dev-resources"]}
    :prod
    {:source-paths ["prod"]}}
@@ -88,7 +88,7 @@
                     :pretty-print    false}}
 
     {:id           "test"
-     :source-paths ["src/cljs" "src/cljc" "test/cljs"]
+     :source-paths ["src/cljs" "src/cljc" "test/cljs" "test/cljc"]
      :compiler     {:main          luma.runner
                     :output-to     "resources/public/js/compiled/test.js"
                     :output-dir    "resources/public/js/compiled/test/out"
