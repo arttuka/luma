@@ -1,5 +1,6 @@
 (ns luma.trie
-  (:require [clojure.string :as str])
+  (:require [clojure.string :as str]
+            [luma.util :refer [lazy-mapcat]])
   #?(:clj (:import (clojure.lang ILookup IPersistentSet))))
 
 (defprotocol ITrie
@@ -34,7 +35,7 @@
 
 (defn ^:private trie-seq [{:keys [value contains children]}]
   (let [ks (sort (keys children))
-        subseq (mapcat #(seq (get children %)) ks)]
+        subseq (lazy-mapcat #(seq (get children %)) ks)]
     (if contains
       (cons value subseq)
       subseq)))

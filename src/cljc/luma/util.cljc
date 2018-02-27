@@ -12,3 +12,9 @@
   (let [gp (group-by #(select-keys % group-keys) coll)]
     (for [[k v] gp]
       (assoc k sub-key (map #(apply dissoc % group-keys) v)))))
+
+(defn lazy-mapcat [f coll]
+  (lazy-seq
+    (when (seq coll)
+      (concat (f (first coll))
+              (lazy-mapcat f (rest coll))))))
