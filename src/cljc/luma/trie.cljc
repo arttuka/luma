@@ -10,28 +10,25 @@
 
 (defn ^:private empty-trie [] (make-trie "" false {}))
 
-(defn ^:private trie-lookup [{:keys [value contains children]} k not-found]
-  (let [[c & cs] k]
-    (cond
-      (and (not c) contains) value
-      (and c (contains? children c)) (get (get children c) cs not-found)
-      :else not-found)))
+(defn ^:private trie-lookup [{:keys [value contains children]} [c & cs] not-found]
+  (cond
+    (and (not c) contains) value
+    (and c (contains? children c)) (get (get children c) cs not-found)
+    :else not-found))
 
-(defn ^:private trie-disjoin [{:keys [value contains children] :as trie} k]
-  (let [[c & cs] k]
-    (cond
-      (not c) {:value value, :contains false, :children children}
-      (contains? children c) {:value value, :contains contains, :children (update children c disj cs)}
-      :else trie)))
+(defn ^:private trie-disjoin [{:keys [value contains children] :as trie} [c & cs]]
+  (cond
+    (not c) {:value value, :contains false, :children children}
+    (contains? children c) {:value value, :contains contains, :children (update children c disj cs)}
+    :else trie))
 
-(defn ^:private trie-conj [{:keys [value contains children]} s]
-  (let [[c & cs] s]
-    (cond
-      (not c) {:value value, :contains true, :children children}
-      (contains? children c) {:value value, :contains contains, :children (update children c conj cs)}
-      :else {:value    value
-             :contains contains
-             :children (assoc children c (conj (make-trie (str value c) false {}) cs))})))
+(defn ^:private trie-conj [{:keys [value contains children]} [c & cs]]
+  (cond
+    (not c) {:value value, :contains true, :children children}
+    (contains? children c) {:value value, :contains contains, :children (update children c conj cs)}
+    :else {:value    value
+           :contains contains
+           :children (assoc children c (conj (make-trie (str value c) false {}) cs))}))
 
 (defn ^:private trie-seq [{:keys [value contains children]}]
   (let [ks (sort (keys children))
@@ -40,12 +37,11 @@
       (cons value subseq)
       subseq)))
 
-(defn ^:private trie-search [{:keys [children] :as trie} s]
-  (let [[c & cs] s]
-    (cond
-      (not c) (trie-seq trie)
-      (contains? children c) (search (get children c) cs)
-      :else [])))
+(defn ^:private trie-search [{:keys [children] :as trie} [c & cs]]
+  (cond
+    (not c) (trie-seq trie)
+    (contains? children c) (search (get children c) cs)
+    :else []))
 
 #?(:clj
    (deftype Trie [trie]
