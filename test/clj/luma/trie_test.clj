@@ -64,6 +64,16 @@
         (testing "returns contained strings in alphabetical order"
           (is (= words (seq trie))))))))
 
+(deftest itrie-test
+  (testing "Trie implements luma.trie.ITrie"
+    (let [words ["bar" "foo" "foobar" "foobloo"]
+          trie (make-trie words)]
+      (testing "search"
+        (testing "returns matching words in alphabetical order"
+          (is (= ["foo" "foobar" "foobloo"] (search trie "foo"))))
+        (testing "returns empty sequence if nothing is found"
+          (is (empty? (search trie "trollface"))))))))
+
 (deftest persistent-test
   (let [words ["bar" "foo" "foobar" "foobloo"]
         trie (make-trie words)]

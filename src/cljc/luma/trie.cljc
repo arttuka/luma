@@ -48,7 +48,12 @@
            subseq)))
 
      ITrie
-     (search [this s])))
+     (search [this s]
+       (let [[c & cs] s]
+         (cond
+           (not c) (seq this)
+           (contains? children c) (search (get children c) cs)
+           :else [])))))
 
 (defn make-trie [strs]
   (into (Trie. "" false {}) (set (map str/lower-case strs))))
