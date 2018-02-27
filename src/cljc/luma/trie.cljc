@@ -1,46 +1,52 @@
 (ns luma.trie
   (:require [clojure.string :as str]
             [luma.util :refer [lazy-mapcat]])
-  #?(:clj (:import (clojure.lang ILookup IPersistentSet))))
+  #?(:clj
+     (:import (clojure.lang ILookup IPersistentSet))))
 
 (defprotocol ITrie
   (search [trie s] "Find all strings that start with s"))
 
-(declare make-trie)
+(declare empty-trie)
 
-(defn ^:private empty-trie [] (make-trie "" false {}))
+(defn ^:private trie-lookup [{:keys [end-of-word children]} [c & cs]]
+  (if c
+    (when (contains? children c)
+      (recur (get children c) cs))
+    end-of-word))
 
-(defn ^:private trie-lookup [{:keys [value end-of-word children]} [c & cs] not-found]
+(defn ^:private clean-trie [{:keys [children] :as trie} c]
+  (if (empty? (get children c))
+    (let [trie (update trie :children dissoc c)]
+      (if (empty? (:children trie))
+        (dissoc trie :children)
+        trie))
+    trie))
+
+(defn ^:private trie-disj [{:keys [children] :as trie} [c & cs]]
   (cond
-    (and (not c) end-of-word) value
-    (and c (contains? children c)) (get (get children c) cs not-found)
-    :else not-found))
-
-(defn ^:private trie-disjoin [{:keys [value end-of-word children] :as trie} [c & cs]]
-  (cond
-    (not c) {:value value, :end-of-word false, :children children}
-    (contains? children c) {:value value, :end-of-word end-of-word, :children (update children c disj cs)}
+    (not c) (dissoc trie :end-of-word)
+    (contains? children c) (-> trie
+                             (update-in [:children c] trie-disj cs)
+                             (clean-trie c))
     :else trie))
 
-(defn ^:private trie-conj [{:keys [value end-of-word children]} [c & cs]]
-  (cond
-    (not c) {:value value, :end-of-word true, :children children}
-    (contains? children c) {:value value, :end-of-word end-of-word, :children (update children c conj cs)}
-    :else {:value       value
-           :end-of-word end-of-word
-           :children    (assoc children c (conj (make-trie (str value c) false {}) cs))}))
+(defn ^:private trie-conj [trie [c & cs]]
+  (if (not c)
+    (assoc trie :end-of-word true)
+    (update-in trie [:children c] trie-conj cs)))
 
-(defn ^:private trie-seq [{:keys [value end-of-word children]}]
+(defn ^:private trie-seq [{:keys [end-of-word children]} prefix]
   (let [ks (sort (keys children))
-        subseq (lazy-mapcat #(seq (get children %)) ks)]
+        subseq (lazy-mapcat #(trie-seq (get children %) (str prefix %)) ks)]
     (if end-of-word
-      (cons value subseq)
+      (cons prefix subseq)
       subseq)))
 
-(defn ^:private trie-search [{:keys [children] :as trie} [c & cs]]
+(defn ^:private trie-search [{:keys [children] :as trie} prefix [c & cs]]
   (cond
-    (not c) (trie-seq trie)
-    (contains? children c) (search (get children c) cs)
+    (not c) (trie-seq trie prefix)
+    (contains? children c) (recur (get children c) (str prefix c) cs)
     :else []))
 
 #?(:clj
@@ -48,75 +54,71 @@
      ILookup
      (valAt [this k]
        (.valAt this k nil))
-     (valAt [this k not-found]
-       (trie-lookup trie k not-found))
+     (valAt [_ k not-found]
+       (if (trie-lookup trie k) k not-found))
 
      IPersistentSet
-     (disjoin [this key]
-       (Trie. (trie-disjoin trie key)))
-     (contains [this key]
-       (let [not-found (Object.)]
-         (not= not-found (get this key not-found))))
+     (disjoin [_ key]
+       (Trie. (trie-disj trie key)))
+     (contains [_ key]
+       (boolean (trie-lookup trie key)))
      (get [this key]
-       (.valAt this key))
+       (.valAt this key nil))
      (count [this]
        (count (seq this)))
-     (cons [this o]
+     (cons [_ o]
        (Trie. (trie-conj trie o)))
-     (empty [this]
-       (empty-trie))
+     (empty [_]
+       empty-trie)
      (equiv [this o]
        (= (seq this) (seq o)))
-     (seq [self]
-       (trie-seq trie))
+     (seq [_]
+       (trie-seq trie ""))
 
      ITrie
-     (search [this s]
-       (trie-search trie s)))
+     (search [_ s]
+       (trie-search trie "" s)))
 
    :cljs
    (deftype Trie [trie]
      cljs.core/ILookup
      (-lookup [this k]
        (-lookup this k nil))
-     (-lookup [this k not-found]
-       (trie-lookup trie k not-found))
+     (-lookup [_ k not-found]
+       (if (trie-lookup trie k) k not-found))
 
      cljs.core/ISet
-     (-disjoin [this key]
-       (Trie. (trie-disjoin trie key)))
+     (-disjoin [_ key]
+       (Trie. (trie-disj trie key)))
 
      cljs.core/ICounted
      (-count [this]
        (count (seq this)))
 
      cljs.core/ICollection
-     (-conj [this o]
+     (-conj [_ o]
        (Trie. (trie-conj trie o)))
 
      cljs.core/IEmptyableCollection
-     (-empty [this]
-       (empty-trie))
+     (-empty [_]
+       empty-trie)
 
      cljs.core/IEquiv
      (-equiv [this o]
        (= (seq this) (seq o)))
 
      cljs.core/ISeqable
-     (-seq [this]
-       (trie-seq trie))
+     (-seq [_]
+       (trie-seq trie ""))
 
      ITrie
-     (search [this s]
-       (trie-search trie s))))
+     (search [_ s]
+       (trie-search trie "" s))))
 
-(defn ^:private make-trie [value end-of-word children]
-  (Trie. {:value       value
-          :end-of-word end-of-word
-          :children    children}))
+(def ^:private empty-trie (Trie. {}))
 
 (defn trie
   ([]
-   (empty-trie))
+   empty-trie)
   ([strs]
-   (into (empty-trie) (set (map str/lower-case strs)))))
+   (into empty-trie (set (map str/lower-case strs)))))
