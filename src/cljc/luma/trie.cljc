@@ -10,30 +10,30 @@
 
 (defn ^:private empty-trie [] (make-trie "" false {}))
 
-(defn ^:private trie-lookup [{:keys [value contains children]} [c & cs] not-found]
+(defn ^:private trie-lookup [{:keys [value end-of-word children]} [c & cs] not-found]
   (cond
-    (and (not c) contains) value
+    (and (not c) end-of-word) value
     (and c (contains? children c)) (get (get children c) cs not-found)
     :else not-found))
 
-(defn ^:private trie-disjoin [{:keys [value contains children] :as trie} [c & cs]]
+(defn ^:private trie-disjoin [{:keys [value end-of-word children] :as trie} [c & cs]]
   (cond
-    (not c) {:value value, :contains false, :children children}
-    (contains? children c) {:value value, :contains contains, :children (update children c disj cs)}
+    (not c) {:value value, :end-of-word false, :children children}
+    (contains? children c) {:value value, :end-of-word end-of-word, :children (update children c disj cs)}
     :else trie))
 
-(defn ^:private trie-conj [{:keys [value contains children]} [c & cs]]
+(defn ^:private trie-conj [{:keys [value end-of-word children]} [c & cs]]
   (cond
-    (not c) {:value value, :contains true, :children children}
-    (contains? children c) {:value value, :contains contains, :children (update children c conj cs)}
-    :else {:value    value
-           :contains contains
-           :children (assoc children c (conj (make-trie (str value c) false {}) cs))}))
+    (not c) {:value value, :end-of-word true, :children children}
+    (contains? children c) {:value value, :end-of-word end-of-word, :children (update children c conj cs)}
+    :else {:value       value
+           :end-of-word end-of-word
+           :children    (assoc children c (conj (make-trie (str value c) false {}) cs))}))
 
-(defn ^:private trie-seq [{:keys [value contains children]}]
+(defn ^:private trie-seq [{:keys [value end-of-word children]}]
   (let [ks (sort (keys children))
         subseq (lazy-mapcat #(seq (get children %)) ks)]
-    (if contains
+    (if end-of-word
       (cons value subseq)
       subseq)))
 
@@ -110,10 +110,10 @@
      (search [this s]
        (trie-search trie s))))
 
-(defn ^:private make-trie [value contains children]
-  (Trie. {:value    value
-          :contains contains
-          :children children}))
+(defn ^:private make-trie [value end-of-word children]
+  (Trie. {:value       value
+          :end-of-word end-of-word
+          :children    children}))
 
 (defn trie
   ([]
