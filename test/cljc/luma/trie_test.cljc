@@ -75,6 +75,16 @@
         (testing "returns empty sequence if nothing is found"
           (is (empty? (search t "trollface"))))))))
 
+(deftest ifn-test
+  (testing "Trie implements IFn"
+    (let [words ["bar" "foo" "foobar" "foobloo"]
+          t (trie words)]
+      (testing "search"
+        (testing "returns matching words in alphabetical order"
+          (is (= ["foo" "foobar" "foobloo"] (t "foo"))))
+        (testing "returns empty sequence if nothing is found"
+          (is (empty? (t "trollface"))))))))
+
 (deftest persistent-test
   (let [words ["bar" "foo" "foobar" "foobloo"]
         t (trie words)]

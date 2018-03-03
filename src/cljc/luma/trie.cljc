@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [luma.util :refer [lazy-mapcat]])
   #?(:clj
-     (:import (clojure.lang ILookup IPersistentSet))))
+     (:import (clojure.lang IFn ILookup IPersistentSet))))
 
 (defprotocol ITrie
   (search [trie s] "Find all strings that start with s"))
@@ -77,6 +77,10 @@
 
      ITrie
      (search [_ s]
+       (trie-search trie "" s))
+
+     IFn
+     (invoke [_ s]
        (trie-search trie "" s)))
 
    :cljs
@@ -113,6 +117,10 @@
 
      ITrie
      (search [_ s]
+       (trie-search trie "" s))
+
+     cljs.core/IFn
+     (-invoke [_ s]
        (trie-search trie "" s))))
 
 (def ^:private empty-trie (Trie. {}))
