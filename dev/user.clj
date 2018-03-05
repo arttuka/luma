@@ -1,7 +1,7 @@
 (ns user
   (:require [mount.core :as mount]
             [clojure.tools.namespace.repl :as repl]
-            [luma.handler :refer [handler]]))
+            luma.main))
 
 (defn stop! []
   (mount/stop))
