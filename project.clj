@@ -1,17 +1,22 @@
 (defproject luma "0.1.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [org.clojure/clojurescript "1.9.946"]
+                 [org.clojure/clojurescript "1.10.126"]
                  [org.clojure/data.codec "0.1.1"]
+                 [org.clojure/tools.logging "0.4.0"]
                  [reagent "0.7.0"]
-                 [re-frame "0.10.4"]
+                 [re-frame "0.10.5" :exclusions [org.clojure/tools.logging]]
+                 [cljs-react-material-ui "0.2.50"]
+                 [cljsjs/react "16.2.0-3"]
+                 [cljsjs/react-dom "16.2.0-3"]
+                 [cljsjs/react-autosuggest "9.3.2-0"]
                  [secretary "1.2.3"]
-                 [garden "1.3.3"]
+                 [garden "1.3.4"]
                  [ns-tracker "0.3.1"]
-                 [compojure "1.6.0"]
+                 [compojure "1.6.0" :exclusions [ring/ring-core commons-codec]]
                  [yogthos/config "1.1"]
                  [ring "1.6.3"]
                  [ring/ring-defaults "0.3.1"]
-                 [ring/ring-json "0.4.0"]
+                 [ring/ring-json "0.4.0" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [http-kit "2.2.0"]
                  [mount "0.1.12"]
                  [com.taoensso/sente "1.12.0"]
@@ -24,7 +29,7 @@
                  [clj-time "0.14.2"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
-            [lein-garden "0.2.8"]]
+            [lein-garden "0.2.8" :exclusions [org.apache.commons/commons-compress]]]
 
   :min-lein-version "2.5.3"
 
@@ -34,8 +39,7 @@
                                     "test/js"
                                     "resources/public/css"]
 
-  :figwheel {:css-dirs ["resources/public/css"]
-             :ring-handler luma.handler/handler}
+  :figwheel {:css-dirs ["resources/public/css"]}
 
   :garden {:builds [{:id           "screen"
                      :source-paths ["src/clj"]
@@ -43,61 +47,53 @@
                      :compiler     {:output-to     "resources/public/css/screen.css"
                                     :pretty-print? true}}]}
 
-  :aliases {"dev" ["do" "clean"
-                        ["pdo" ["figwheel" "dev"]
-                               ["garden" "auto"]]]
+  :aliases {"dev"   ["do" "clean"
+                     ["pdo" ["figwheel" "dev"]
+                      ["garden" "auto"]]]
             "build" ["do" "clean"
-                          ["cljsbuild" "once" "min"]
-                          ["garden" "once"]]}
+                     ["cljsbuild" "once" "min"]
+                     ["garden" "once"]]}
 
-  :profiles
-  {:dev
-   {:dependencies [[binaryage/devtools "0.9.9"]
-                   [re-frisk "0.5.3"]]
+  :profiles {:dev  {:dependencies   [[binaryage/devtools "0.9.9"]
+                                     [re-frisk "0.5.3"]
+                                     [org.clojure/tools.namespace "0.2.11"]]
 
-    :plugins      [[lein-figwheel "0.5.13"]
-                   [lein-doo "0.1.8"]
-                   [lein-pdo "0.1.1"]]
-    :source-paths ["dev" "test/clj" "test/cljc"]
-    :resource-paths ["dev-resources"]}
-   :prod
-   {:source-paths ["prod"]}}
+                    :plugins        [[lein-figwheel "0.5.15"]
+                                     [lein-doo "0.1.8" :exclusions [org.clojure/tools.reader]]
+                                     [lein-pdo "0.1.1"]]
+                    :source-paths   ["dev" "test/clj" "test/cljc"]
+                    :resource-paths ["dev-resources"]}
+             :prod {:source-paths ["prod"]}}
 
-  :cljsbuild
-  {:builds
-   [{:id           "dev"
-     :source-paths ["src/cljs" "src/cljc"]
-     :figwheel     {:on-jsload "luma.core/mount-root"}
-     :compiler     {:main                 luma.core
-                    :output-to            "resources/public/js/compiled/app.js"
-                    :output-dir           "resources/public/js/compiled/out"
-                    :asset-path           "js/compiled/out"
-                    :source-map-timestamp true
-                    :preloads             [devtools.preload
-                                           re-frisk.preload]
-                    :external-config      {:devtools/config {:features-to-install :all}}
-                    }}
+  :cljsbuild {:builds [{:id           "dev"
+                        :source-paths ["src/cljs" "src/cljc"]
+                        :figwheel     {:on-jsload "luma.core/mount-root"}
+                        :compiler     {:main                 luma.core
+                                       :output-to            "resources/public/js/compiled/app.js"
+                                       :output-dir           "resources/public/js/compiled/out"
+                                       :asset-path           "js/compiled/out"
+                                       :source-map-timestamp true
+                                       :preloads             [devtools.preload
+                                                              re-frisk.preload]
+                                       :external-config      {:devtools/config {:features-to-install :all}}
+                                       }}
 
-    {:id           "min"
-     :source-paths ["src/cljs" "src/cljc"]
-     :jar true
-     :compiler     {:main            luma.core
-                    :output-to       "resources/public/js/compiled/app.js"
-                    :optimizations   :advanced
-                    :closure-defines {goog.DEBUG false}
-                    :pretty-print    false}}
+                       {:id           "min"
+                        :source-paths ["src/cljs" "src/cljc"]
+                        :jar          true
+                        :compiler     {:main            luma.core
+                                       :output-to       "resources/public/js/compiled/app.js"
+                                       :optimizations   :advanced
+                                       :closure-defines {goog.DEBUG false}
+                                       :pretty-print    false}}
 
-    {:id           "test"
-     :source-paths ["src/cljs" "src/cljc" "test/cljs" "test/cljc"]
-     :compiler     {:main          luma.runner
-                    :output-to     "resources/public/js/compiled/test.js"
-                    :output-dir    "resources/public/js/compiled/test/out"
-                    :optimizations :none}}
-    ]}
+                       {:id           "test"
+                        :source-paths ["src/cljs" "src/cljc" "test/cljs" "test/cljc"]
+                        :compiler     {:main          luma.runner
+                                       :output-to     "resources/public/js/compiled/test.js"
+                                       :output-dir    "resources/public/js/compiled/test/out"
+                                       :optimizations :none}}]}
 
   :main luma.main
-
   :aot [luma.main]
-
-  :uberjar-name "luma.jar"
-  )
+  :uberjar-name "luma.jar")
