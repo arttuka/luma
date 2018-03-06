@@ -16,9 +16,9 @@
 (defn get-and-save-spotify-albums [user]
   (db/save-albums (:id user) (spotify/get-user-albums (:id user) (:access_token user) (:refresh_token user))))
 
-(defn get-and-save-lastfm-tags [user]
+(defn get-and-save-lastfm-tags [user-id]
   (db/with-transaction
-    (let [albums (db/get-albums user)
+    (let [albums (db/get-albums user-id)
           artists (into #{} (mapcat :artists albums))]
       (doseq [album albums
               :let [tags (into #{} (mapcat #(lastfm/get-album-tags (:name %) (:title album)) (:artists album)))]]
@@ -37,5 +37,5 @@
       (when (or (not (:last_loaded user))
                 (time/after? (time/now) (time/plus (:last_loaded user) (time/hours 24))))
         (get-and-save-spotify-albums user)
-        (get-and-save-lastfm-tags user)
+        (get-and-save-lastfm-tags (:id user))
         (ws/send! uid [::albums (db/get-albums spotify-id)])))))

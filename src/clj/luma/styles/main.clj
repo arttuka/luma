@@ -1,5 +1,6 @@
-(ns luma.css
-  (:require [garden.def :refer [defstyles]]))
+(ns luma.styles.main
+  (:require [garden.def :refer [defstyles]]
+            [garden.core :as garden]))
 
 (defstyles album
   [:& {:border  "1px solid #444444"
@@ -32,3 +33,4 @@
           :font-family :sans-serif}]
   album-list)
 
+(def css (garden/css screen))

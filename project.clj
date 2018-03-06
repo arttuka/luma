@@ -9,9 +9,7 @@
                  [cljsjs/react "16.2.0-3"]
                  [cljsjs/react-dom "16.2.0-3"]
                  [cljsjs/react-autosuggest "9.3.2-0"]
-                 [secretary "1.2.3"]
                  [garden "1.3.4"]
-                 [ns-tracker "0.3.1"]
                  [compojure "1.6.0" :exclusions [ring/ring-core commons-codec]]
                  [yogthos/config "1.1"]
                  [ring "1.6.3"]
@@ -29,6 +27,7 @@
                  [clj-time "0.14.2"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
+            [lein-figwheel "0.5.14"]
             [lein-garden "0.2.8" :exclusions [org.apache.commons/commons-compress]]]
 
   :min-lein-version "2.5.3"
@@ -43,7 +42,7 @@
 
   :garden {:builds [{:id           "screen"
                      :source-paths ["src/clj"]
-                     :stylesheet   luma.css/screen
+                     :stylesheet   luma.styles.main/screen
                      :compiler     {:output-to     "resources/public/css/screen.css"
                                     :pretty-print? true}}]}
 
@@ -55,6 +54,9 @@
                      ["garden" "once"]]}
 
   :profiles {:dev  {:dependencies   [[binaryage/devtools "0.9.9"]
+                                     [figwheel-sidecar "0.5.14" :exclusions [org.clojure/tools.nrepl]]
+                                     [com.cemerick/piggieback "0.2.2"]
+                                     [hawk "0.2.11"]
                                      [re-frisk "0.5.3"]
                                      [org.clojure/tools.namespace "0.2.11"]]
 
@@ -64,6 +66,8 @@
                     :source-paths   ["dev" "test/clj" "test/cljc"]
                     :resource-paths ["dev-resources"]}
              :prod {:source-paths ["prod"]}}
+
+  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
   :cljsbuild {:builds [{:id           "dev"
                         :source-paths ["src/cljs" "src/cljc"]
