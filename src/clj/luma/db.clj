@@ -98,7 +98,7 @@
     (let [tags (map str/lower-case tags)
           existing-tags (set (map :tag (jdbc/query *db* "SELECT tag FROM tag")))
           new-tags (remove existing-tags tags)]
-      (jdbc/insert-multi! *db* :tag (vec (for [tag new-tags] {:tag tag})))
+      (jdbc/insert-multi! *db* :tag (for [tag new-tags] {:tag tag}))
       (jdbc/delete! *db* :album_tag ["album = ?" album])
       (jdbc/insert-multi! *db* :album_tag (for [tag tags] {:tag tag, :album album})))))
 

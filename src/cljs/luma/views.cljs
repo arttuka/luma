@@ -1,7 +1,10 @@
 (ns luma.views
   (:require [re-frame.core :as re-frame]
+            [re-com.typeahead :refer [typeahead]]
             [goog.string :as gstring]
-            [luma.subs :as subs]))
+            [luma.events :as events]
+            [luma.subs :as subs]
+            [luma.trie :as trie]))
 
 (defn spotify-login []
   (let [uid (re-frame/subscribe [::subs/uid])
@@ -16,6 +19,24 @@
         [:a {:href (gstring/format "https://accounts.spotify.com/authorize?client_id=%s&response_type=%s&state=%s&scope=%s&redirect_uri=%s"
                                    client-id response-type @uid scopes redirect-uri)}
          "Login with Spotify"]))))
+
+(defn selected-tags []
+  (let [selected-tags (re-frame/subscribe [::subs/selected-tags])]
+    (fn []
+      [:div
+       (for [tag @selected-tags]
+         [:div.selected-tag tag])])))
+
+(defn tag-filter []
+  (let [all-tags (re-frame/subscribe [::subs/all-tags])]
+    (fn []
+      (when @all-tags
+        [:div
+         [typeahead
+          :data-source #(trie/search @all-tags %)
+          :change-on-blur? true
+          :on-change #(re-frame/dispatch [::events/select-tag %])]
+         [selected-tags]]))))
 
 (defn album [a]
   [:a.album
@@ -32,7 +53,7 @@
       tag)]])
 
 (defn albums []
-  (let [data (re-frame/subscribe [::subs/albums])]
+  (let [data (re-frame/subscribe [::subs/filtered-albums])]
     (fn []
       [:div#albums
        (for [a @data]
@@ -42,4 +63,5 @@
 (defn main-panel []
   [:div
    [spotify-login]
+   [tag-filter]
    [albums]])

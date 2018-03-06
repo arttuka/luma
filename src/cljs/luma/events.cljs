@@ -1,6 +1,7 @@
 (ns luma.events
   (:require [re-frame.core :as re-frame]
             [luma.db :as db]
+            [luma.trie :refer [trie]]
             [luma.websocket :as ws]))
 
 (re-frame/reg-fx
@@ -26,7 +27,22 @@
 (re-frame/reg-event-db
   ::albums
   (fn [db [_ albums]]
-    (assoc db :albums albums)))
+    (let [tags (into (trie) (mapcat :tags) albums)
+          tags-to-albums (apply merge-with concat (for [album albums
+                                                        tag (:tags album)]
+                                                    {tag [(:id album)]}))
+          albums (into {} (for [album albums]
+                            [(:id album) album]))]
+      (assoc db :tags tags
+                :albums albums
+                :tags-to-albums tags-to-albums))))
+
+(re-frame/reg-event-db
+  ::select-tag
+  (fn [db [_ tag]]
+    (if (contains? (:tags db) tag)
+      (update db :selected-tags conj tag)
+      db)))
 
 (re-frame/reg-event-fx
   ::ws/send
