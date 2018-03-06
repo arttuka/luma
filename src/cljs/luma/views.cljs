@@ -1,10 +1,12 @@
 (ns luma.views
-  (:require [re-frame.core :as re-frame]
-            [re-com.typeahead :refer [typeahead]]
+  (:require [cljsjs.material-ui]
+            [cljs-react-material-ui.core :refer [get-mui-theme]]
+            [cljs-react-material-ui.reagent :as ui]
+            [re-frame.core :as re-frame]
             [goog.string :as gstring]
+            [luma.components.autosuggest :refer [autosuggest]]
             [luma.events :as events]
-            [luma.subs :as subs]
-            [luma.trie :as trie]))
+            [luma.subs :as subs]))
 
 (defn spotify-login []
   (let [uid (re-frame/subscribe [::subs/uid])
@@ -32,10 +34,8 @@
     (fn []
       (when @all-tags
         [:div
-         [typeahead
-          :data-source #(trie/search @all-tags %)
-          :change-on-blur? true
-          :on-change #(re-frame/dispatch [::events/select-tag %])]
+         [autosuggest {:datasource @all-tags
+                       :on-change  #(re-frame/dispatch [::events/select-tag %])}]
          [selected-tags]]))))
 
 (defn album [a]
@@ -61,7 +61,9 @@
          [album a])])))
 
 (defn main-panel []
-  [:div
-   [spotify-login]
-   [tag-filter]
-   [albums]])
+  [ui/mui-theme-provider
+   {:mui-theme (get-mui-theme)}
+   [:div
+    [spotify-login]
+    [tag-filter]
+    [albums]]])
