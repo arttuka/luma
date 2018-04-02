@@ -25,19 +25,28 @@
 
 (defn selected-tags []
   (let [selected-tags (re-frame/subscribe [::subs/selected-tags])]
-    (fn []
-      [:div
+    (fn selected-tags-render []
+      [:div.selected-tags
        (for [tag @selected-tags]
-         [:div.selected-tag tag])])))
+         ^{:key (str "selected-tag-" tag)}
+         [ui/chip
+          {:class             :selected-tag
+           :style             {:margin-right "5px"}
+           :on-request-delete #(re-frame/dispatch [::events/unselect-tag tag])}
+          tag])])))
 
 (defn tag-filter []
   (let [all-tags (re-frame/subscribe [::subs/all-tags])]
-    (fn []
+    (fn tag-filter-render []
       (when @all-tags
-        [:div
-         [autosuggest {:datasource @all-tags
-                       :on-change  #(re-frame/dispatch [::events/select-tag %])}]
-         [selected-tags]]))))
+        [autosuggest {:datasource @all-tags
+                      :on-change  #(re-frame/dispatch [::events/select-tag %])
+                      :hint-text  "Filter by tag"}]))))
+
+(defn toolbar []
+  [ui/paper {:id :toolbar}
+   [tag-filter]
+   [selected-tags]])
 
 (defn album [a]
   (let [depth (atom 1)]
@@ -75,5 +84,5 @@
    {:mui-theme (get-mui-theme)}
    [:div
     [spotify-login]
-    [tag-filter]
+    [toolbar]
     [albums]]])

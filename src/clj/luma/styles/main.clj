@@ -8,7 +8,7 @@
     :flex-wrap :wrap}
    [:a
     {:text-decoration :none
-     :margin "0 auto 40px"}]
+     :margin          "0 auto 40px"}]
    [:.album-card
     {:width "320px"}
     [:.title
@@ -18,10 +18,18 @@
     [:.artist
      {:font-size "16px"}]]])
 
+(defstyles toolbar
+  [:#toolbar
+   {:padding       "10px"
+    :margin-bottom "20px"}
+   [:.selected-tags
+    {:display :flex
+     :flex-wrap :wrap
+     :min-height "32px"}]])
+
 (defstyles screen
-  [:body {:color       "red"
-          :padding     "50px"
-          :font-family :sans-serif}]
-  album-list)
+  [:body {:font-family :sans-serif}]
+  album-list
+  toolbar)
 
 (def css (garden/css screen))

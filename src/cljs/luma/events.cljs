@@ -44,6 +44,11 @@
       (update db :selected-tags conj tag)
       db)))
 
+(re-frame/reg-event-db
+  ::unselect-tag
+  (fn [db [_ tag]]
+    (update db :selected-tags disj tag)))
+
 (re-frame/reg-event-fx
   ::ws/send
   (fn [_ [_ event]]
