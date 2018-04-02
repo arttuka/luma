@@ -58,7 +58,7 @@
           query (format "SELECT tag
                          FROM album_tag
                          WHERE title = ? AND artist IN (%s) AND tag != ''
-                         UNION ALL
+                         UNION
                          SELECT tag
                          FROM artist_tag
                          WHERE artist IN (%s)"
