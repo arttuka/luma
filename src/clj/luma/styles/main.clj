@@ -4,11 +4,12 @@
 
 (defstyles album-list
   [:#albums
-   {:display   :flex
-    :flex-wrap :wrap}
+   {:display         :flex
+    :flex-wrap       :wrap
+    :justify-content :space-evenly}
    [:a
     {:text-decoration :none
-     :margin          "0 auto 40px"}]
+     :margin-bottom   "40px"}]
    [:.album-card
     {:width "320px"}
     [:.title
@@ -30,7 +31,7 @@
     :line-height      "30px"
     :border-radius    "15px"
     :padding-right    "6px"
-    :float :right}
+    :float            :right}
    [:img
     {:height "24px"
      :float  :left
@@ -44,8 +45,8 @@
    {:padding       "10px"
     :margin-bottom "20px"}
    [:.selected-tags
-    {:display :flex
-     :flex-wrap :wrap
+    {:display    :flex
+     :flex-wrap  :wrap
      :min-height "32px"}]]
   spotify-login-button)
 

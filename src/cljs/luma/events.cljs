@@ -1,5 +1,6 @@
 (ns luma.events
   (:require [re-frame.core :as re-frame]
+            [clojure.set :refer [union]]
             [luma.db :as db]
             [luma.trie :refer [trie]]
             [luma.websocket :as ws]))
@@ -10,9 +11,9 @@
     (ws/send! event)))
 
 (re-frame/reg-event-db
- ::initialize-db
- (fn  [_ _]
-   db/default-db))
+  ::initialize-db
+  (fn [_ _]
+    db/default-db))
 
 (re-frame/reg-event-db
   ::set-uid
@@ -28,9 +29,9 @@
   ::albums
   (fn [db [_ albums]]
     (let [tags (into (trie) (mapcat :tags) albums)
-          tags-to-albums (apply merge-with concat (for [album albums
-                                                        tag (:tags album)]
-                                                    {tag [(:id album)]}))
+          tags-to-albums (apply merge-with union (for [album albums
+                                                       tag (:tags album)]
+                                                   {tag #{(:id album)}}))
           albums (into {} (for [album albums]
                             [(:id album) album]))]
       (assoc db :tags tags

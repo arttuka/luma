@@ -1,5 +1,6 @@
 (ns luma.subs
-  (:require [re-frame.core :as re-frame]))
+  (:require [re-frame.core :as re-frame]
+            [clojure.set :refer [intersection]]))
 
 (re-frame/reg-sub
   ::uid
@@ -38,7 +39,7 @@
   :<- [::tags-to-albums]
   (fn [[albums selected-tags tags-to-albums] [_]]
     (if (seq selected-tags)
-      (sequence (comp (mapcat tags-to-albums)
-                      (distinct)
-                      (map albums)) selected-tags)
+      (->> (map tags-to-albums selected-tags)
+           (reduce intersection)
+           (map albums))
       (vals albums))))
