@@ -65,9 +65,9 @@
                        :primary-text "Artist"}]
         [ui/menu-item {:value        :album
                        :primary-text "Album title"}]]
-       [ui/icon-button {:on-click   #(re-frame/dispatch [::events/change-sort-dir])
-                        :style {:position :absolute
-                                :top "24px"}}
+       [ui/icon-button {:on-click #(re-frame/dispatch [::events/change-sort-dir])
+                        :style    {:position :absolute
+                                   :top      "24px"}}
         [icons/av-sort-by-alpha {:color (if @sort-asc
                                           (.-primary1Color palette)
                                           (.-accent1Color palette))}]]])))
@@ -111,9 +111,16 @@
          ^{:key (:id a)}
          [album a])])))
 
+(defn header []
+  (let [palette (.-palette (get-mui-theme))]
+    [:div#header {:style {:background-color (.-primary1Color palette)
+                          :color            :white}}
+     "LUMA Ultimate Music Archive"]))
+
 (defn main-panel []
   [ui/mui-theme-provider
    {:mui-theme (get-mui-theme)}
    [:div
+    [header]
     [toolbar]
     [albums]]])

@@ -45,11 +45,11 @@
    {:padding       "10px"
     :margin-bottom "20px"}
    [:.tag-filter
-    {:float :left
-     :width "256px"
+    {:float        :left
+     :width        "256px"
      :margin-right "12px"}]
    [:.sort-container
-    {:float :left
+    {:float    :left
      :position :relative}]
    [:.selected-tags
     {:float      :left
@@ -59,10 +59,17 @@
      :min-height "32px"}]]
   spotify-login-button)
 
+(defstyles header
+  [:#header
+   {:padding "20px"
+    :font-size "24px"}])
+
 (defstyles screen
-  [:body {:font-family :sans-serif}]
+  [:body {:font-family "Roboto, sans-serif"
+          :margin      0}]
   [:* {:box-sizing :border-box}]
   album-list
-  toolbar)
+  toolbar
+  header)
 
 (def css (garden/css screen))
