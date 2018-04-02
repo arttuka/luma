@@ -6,7 +6,8 @@
   [:#albums
    {:display         :flex
     :flex-wrap       :wrap
-    :justify-content :space-evenly}
+    :justify-content :space-evenly
+    :min-height      "1000px"}
    [:a
     {:text-decoration :none
      :margin-bottom   "40px"}]
@@ -91,6 +92,23 @@
      :min-height "32px"}]]
   spotify-login-button)
 
+(defstyles terms-of-use
+  [:.terms-of-use
+   {:font-size  "20px"
+    :text-align :center
+    :color      "#666666"}
+   [:a
+    {:text-decoration :none
+     :color           :black}]
+   [:img
+    {:height         "1em"
+     :vertical-align :baseline}]
+   [:.terms-of-use-dialog
+    [:close-button
+     {:position :absolute
+      :top "10px"
+      :right "10px"}]]])
+
 (defstyles header
   [:#header
    {:padding   "20px"
@@ -102,6 +120,7 @@
   [:* {:box-sizing :border-box}]
   album-list
   toolbar
-  header)
+  header
+  terms-of-use)
 
 (def css (garden/css screen))

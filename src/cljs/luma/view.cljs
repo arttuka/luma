@@ -3,7 +3,7 @@
             [cljs-react-material-ui.core :refer [get-mui-theme]]
             [cljs-react-material-ui.reagent :as ui]
             [cljs-react-material-ui.icons :as icons]
-            [reagent.core :refer [atom]]
+            [reagent.core :as reagent :refer [atom]]
             [re-frame.core :as re-frame]
             [goog.string :as gstring]
             [luma.components.autosuggest :refer [autosuggest]]
@@ -135,12 +135,94 @@
             tag)]]]])))
 
 (defn albums []
-  (let [data (re-frame/subscribe [::subs/sorted-albums])]
-    (fn []
+  (let [data (re-frame/subscribe [::subs/sorted-albums])
+        spotify-id (re-frame/subscribe [::subs/spotify-id])]
+    (fn albums-render []
       [:div#albums
-       (for [a @data]
-         ^{:key (:id a)}
-         [album a])])))
+       (if @spotify-id
+         (if (seq @data)
+           (for [a @data]
+             ^{:key (:id a)}
+             [album a])
+           [ui/circular-progress {:style     {:margin-top "20px"}
+                                  :size      100
+                                  :thickness 5}])
+         [ui/paper {:class-name :intro
+                    :style      {:width   "600px"
+                                 :padding "10px"
+                                 :height  "220px"}}
+          [:h2 "LUMA Ultimate Music Archive"]
+          [:p "Welcome to LUMA, a music archive that helps you sort your Spotify Music Library."]
+          [:p "To begin, login with your Spotify account."]
+          [:p "By logging in, you allow LUMA to use and process data about your Spotify account. For more information, see terms of use."]])])))
+
+(defn terms-of-use []
+  (let [dialog-open (atom false)]
+    (fn terms-of-use-render []
+      [:div.terms-of-use
+       [:hr]
+       [:p
+        "LUMA Copyright © Arttu Kaipiainen 2018. "
+        [:a {:href "#" :on-click #(reset! dialog-open true)}
+         "View terms of use."]
+        [:br]
+        "Data from "
+        [:a.spotify {:href "https://www.spotify.com"}
+         [:img {:src "/images/Spotify_Logo_RGB_Black.png"
+                :alt "Spotify"}]]
+        " used with permission."
+        [:br]
+        "Data from "
+        [:a.lastfm {:href "https://www.last.fm"}
+         [:img {:src "/images/Last.fm_Logo_Black.png"
+                :alt "Last.fm"}]]
+        " used with permission."
+        [:br]
+        [:a.github {:href "https://github.com/arttuka/luma"}
+         "View source on "
+         [:img {:src "/images/GitHub-Mark-32px.png"
+                :alt "GitHub logo"}]
+         [:img {:src "/images/GitHub_Logo.png"
+                :alt "GitHub"}]
+         "."]]
+       [ui/dialog {:class-name               :terms-of-use-dialog
+                   :title                    "Terms of Use"
+                   :modal                    false
+                   :open                     @dialog-open
+                   :on-request-close         #(reset! dialog-open false)
+                   :auto-scroll-body-content true
+                   :actions                  [(reagent/as-element [ui/flat-button {:label    "Close"
+                                                                                   :primary  true
+                                                                                   :on-click #(reset! dialog-open false)}])]}
+        [:p "Terms of use of LUMA Ultimate Music Archive (\"service\") as required by European Union General Data Protection Regulation (EU 2016/679) and Finnish Personal Data Act (FIN 523/1999)"]
+
+        [:h4 "Controller of data"]
+        [:p
+         "LUMA Ultimate Music Archive, representative Arttu Kaipiainen "
+         [:a {:href "mailto:admin@luma.dy.fi"}
+          "admin@luma.dy.fi"]]
+        [:h4 "Purpose of processing personal data"]
+        [:p
+         "Augmenting and displaying data from user's Spotify music library"]
+        [:h4 "Personal data processed"]
+        [:p
+         "Data from user's Spotify music library, including but not limited to user's Spotify ID and saved albums."]
+        [:h4 "Storage of personal data"]
+        [:p
+         "No personal data is stored anywhere except the user's web browser. Any personal data is erased when user logs out or otherwise stops using the service."]
+        [:h4 "Consent to process personal data"]
+        [:p
+         "The user gives their consent to process any personal data from their Spotify account by logging into the service with their Spotify account.
+          The user may withdraw this consent at any time by logging out of the service."]
+        [:h4 "Right to obtain personal data"]
+        [:p
+         "All personal data being processed is visible on the front page of the service. No personal data is stored otherwise by the service."]
+        [:h4 "Right to be forgotten"]
+        [:p
+         "Any personal data is erased when user logs out or otherwise stops using the service."]
+        [:h4 "Processing of sensitive personal data"]
+        [:p
+         "The service doesn't process any sensitive personal data."]]])))
 
 (defn header []
   (let [palette (.-palette (get-mui-theme))]
@@ -154,4 +236,5 @@
    [:div
     [header]
     [toolbar]
-    [albums]]])
+    [albums]
+    [terms-of-use]]])
