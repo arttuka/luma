@@ -13,9 +13,8 @@
     [ui/paper (js->clj (.-containerProps props)) (.-children props)]))
 
 (defn ^:private input [props]
-  (let [props (js->clj props)]
-    (reagent/as-element
-      [ui/text-field props])))
+  (reagent/as-element
+    [ui/text-field (js->clj props)]))
 
 (def ^:private styles
   {:container                  {:flex-grow 1
@@ -35,19 +34,25 @@
   (let [suggestions (atom [])
         value (atom "")]
     (fn autosuggest-render [{:keys [datasource on-change] :as options}]
-      (let [input-props (merge (dissoc options :datasource :on-change)
-                               {:onChange (fn [event new-value]
-                                            (condp contains? (.-method new-value)
-                                              #{"click" "enter"} (do
-                                                                   (on-change (.-newValue new-value))
-                                                                   (reset! value ""))
-                                              #{"type"} (reset! value (.-value (.-target event)))
-                                              nil))
-                                :value    @value})]
+      (let [select-suggestion #(do
+                                 (on-change %)
+                                 (reset! value ""))
+            input-props (merge (dissoc options :datasource :on-change)
+                               {:on-change    (fn [event new-value]
+                                                (when (= "type" (.-method new-value))
+                                                  (reset! value (.-value (.-target event)))))
+                                :on-key-press (fn [event]
+                                                (when (and (= 13 (.-charCode event))
+                                                           (some #{@value} @suggestions))
+                                                  (.preventDefault event)
+                                                  (select-suggestion @value)))
+                                :value        @value})]
         [:> js/Autosuggest {:suggestions                    @suggestions
                             :on-suggestions-fetch-requested (fn [event]
                                                               (reset! suggestions (datasource (.-value event))))
                             :on-suggestions-clear-requested #(reset! suggestions [])
+                            :on-suggestion-selected         (fn [_ suggestion]
+                                                              (select-suggestion (.-suggestion suggestion)))
                             :get-suggestion-value           identity
                             :render-suggestions-container   suggestion-container
                             :render-suggestion              suggestion
