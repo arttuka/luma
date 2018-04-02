@@ -76,7 +76,7 @@
             tag)]]]])))
 
 (defn albums []
-  (let [data (re-frame/subscribe [::subs/filtered-albums])]
+  (let [data (re-frame/subscribe [::subs/sorted-albums])]
     (fn []
       [:div#albums
        (for [a @data]

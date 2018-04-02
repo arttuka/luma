@@ -50,6 +50,16 @@
   (fn [db [_ tag]]
     (update db :selected-tags disj tag)))
 
+(re-frame/reg-event-db
+  ::sort-albums
+  (fn [db [_ sort-key]]
+    (assoc db :sort-key sort-key)))
+
+(re-frame/reg-event-db
+  ::change-sort-dir
+  (fn [db _]
+    (update db :sort-asc not)))
+
 (re-frame/reg-event-fx
   ::ws/send
   (fn [_ [_ event]]

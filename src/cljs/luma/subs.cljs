@@ -43,3 +43,27 @@
            (reduce intersection)
            (map albums))
       (vals albums))))
+
+(re-frame/reg-sub
+  ::sort-key
+  (fn [db _]
+    (:sort-key db)))
+
+(re-frame/reg-sub
+  ::sort-asc
+  (fn [db _]
+    (:sort-asc db)))
+
+(re-frame/reg-sub
+  ::sorted-albums
+  :<- [::filtered-albums]
+  :<- [::sort-key]
+  :<- [::sort-asc]
+  (fn [[albums sort-key sort-asc] _]
+    (let [sort-fn (case sort-key
+                    :artist (comp :name first :artists)
+                    :album :title)
+          sort-comp (if sort-asc
+                      compare
+                      (comp - compare))]
+      (sort-by sort-fn sort-comp albums))))
