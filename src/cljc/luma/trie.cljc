@@ -25,16 +25,16 @@
 
 (defn ^:private trie-disj [{:keys [children] :as trie} [c & cs]]
   (cond
-    (not c) (dissoc trie :end-of-word)
+    (nil? c) (dissoc trie :end-of-word)
     (contains? children c) (-> trie
                              (update-in [:children c] trie-disj cs)
                              (clean-trie c))
     :else trie))
 
 (defn ^:private trie-conj [trie [c & cs]]
-  (if (not c)
-    (assoc trie :end-of-word true)
-    (update-in trie [:children c] trie-conj cs)))
+  (if c
+    (update-in trie [:children c] trie-conj cs)
+    (assoc trie :end-of-word true)))
 
 (defn ^:private trie-seq [{:keys [end-of-word children]} prefix]
   (let [ks (sort (keys children))
@@ -45,7 +45,7 @@
 
 (defn ^:private trie-search [{:keys [children] :as trie} prefix [c & cs]]
   (cond
-    (not c) (trie-seq trie prefix)
+    (nil? c) (trie-seq trie prefix)
     (contains? children c) (recur (get children c) (str prefix c) cs)
     :else []))
 
