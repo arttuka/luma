@@ -1,7 +1,7 @@
 (ns luma.events
-  (:require [clj-time.core :as time]
-            [luma.websocket :as ws]
+  (:require [clojure.core.async :refer [go go-loop <! >! chan]]
             [luma.db :as db]
+            [luma.websocket :as ws]
             [luma.integration.spotify :as spotify]
             [luma.integration.lastfm :as lastfm]))
 
@@ -13,29 +13,47 @@
   :chsk/uidport-close
   [_])
 
-(defn get-and-save-spotify-albums [user]
-  (db/save-albums (:id user) (spotify/get-user-albums (:id user) (:access_token user) (:refresh_token user))))
+(defn get-and-save-artist-tags [artist]
+  (let [tags (lastfm/get-artist-tags artist)]
+    (db/save-artist-tags artist tags)
+    tags))
 
-(defn get-and-save-lastfm-tags [user-id]
+(defn get-and-save-album-tags [artist title]
+  (let [tags (lastfm/get-album-tags artist title)]
+    (db/save-album-tags artist title tags)
+    tags))
+
+(defn get-and-save-tags [artists title]
+  (let [album-tags (into #{} (mapcat #(get-and-save-album-tags % title) artists))
+        tags (into album-tags (mapcat get-and-save-artist-tags artists))]
+    tags))
+
+(defn get-album-tags [artists title]
   (db/with-transaction
-    (let [albums (db/get-albums user-id)
-          artists (into #{} (mapcat :artists albums))]
-      (doseq [album albums
-              :let [tags (into #{} (mapcat #(lastfm/get-album-tags (:name %) (:title album)) (:artists album)))]]
-        (db/save-album-tags (:id album) tags))
-      (doseq [artist artists
-              :let [tags (lastfm/get-artist-tags (:name artist))]]
-        (db/save-artist-tags (:artist_id artist) tags)))))
+    (if (db/has-tags? artists title)
+      (db/get-tags artists title)
+      (get-and-save-tags artists title))))
+
+(defn load-tags [albums progress-ch]
+  (go-loop [[album & albums] albums
+            album-tags (transient {})
+            i 0]
+    (if-not album
+      (persistent! album-tags)
+      (let [tags (get-album-tags (map :name (:artists album)) (:title album))]
+        (>! progress-ch i)
+        (recur albums (assoc! album-tags (:id album) tags) (inc i))))))
 
 (defmethod ws/event-handler
   ::ws/connect
-  [{:keys [uid ring-req] :as data}]
-  (when-let [spotify-id (get-in ring-req [:session :spotify-id])]
-    (ws/send! uid [::set-spotify-id spotify-id])
-    (ws/send! uid [::albums (db/get-albums spotify-id)])
-    (let [user (db/get-account spotify-id)]
-      (when (or (not (:last_loaded user))
-                (time/after? (time/now) (time/plus (:last_loaded user) (time/hours 24))))
-        (get-and-save-spotify-albums user)
-        (get-and-save-lastfm-tags (:id user))
-        (ws/send! uid [::albums (db/get-albums spotify-id)])))))
+  [{:keys [uid ring-req]}]
+  (when-let [spotify-user (get-in ring-req [:session :spotify-user])]
+    (ws/send! uid [::set-spotify-id (:id spotify-user)])
+    (let [albums (spotify/get-user-albums (:access_token spotify-user))
+          progress-ch (chan 10)]
+      (ws/send! uid [::albums albums])
+      (go-loop [i (<! progress-ch)]
+        (when i
+          (ws/send! uid [::progress i])
+          (recur (<! progress-ch))))
+      (go (ws/send! uid [::tags (<! (load-tags albums progress-ch))])))))

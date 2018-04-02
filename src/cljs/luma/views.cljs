@@ -27,23 +27,41 @@
          [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
          "Login with Spotify"]))))
 
+(defn progress-bar []
+  (let [progress (re-frame/subscribe [::subs/progress])
+        albums (re-frame/subscribe [::subs/albums])]
+    (fn progress-bar-render []
+      [ui/linear-progress {:style {:margin-top "6px"}
+                           :mode  (if (seq @albums)
+                                    :determinate
+                                    :indeterminate)
+                           :max   (count @albums)
+                           :min   0
+                           :value @progress}])))
+
 (defn selected-tags []
-  (let [selected-tags (re-frame/subscribe [::subs/selected-tags])]
+  (let [selected-tags (re-frame/subscribe [::subs/selected-tags])
+        all-tags (re-frame/subscribe [::subs/all-tags])]
     (fn selected-tags-render []
       [:div.selected-tags
-       (for [tag @selected-tags]
-         ^{:key (str "selected-tag-" tag)}
-         [ui/chip
-          {:class             :selected-tag
-           :style             {:margin-right "5px"}
-           :on-request-delete #(re-frame/dispatch [::events/unselect-tag tag])}
-          tag])])))
+       (if @all-tags
+         (for [tag @selected-tags]
+           ^{:key (str "selected-tag-" tag)}
+           [ui/chip
+            {:class             :selected-tag
+             :style             {:margin-right "5px"}
+             :on-request-delete #(re-frame/dispatch [::events/unselect-tag tag])}
+            tag])
+         [:div.progress-bar-container
+          [:div "Loading tags..."]
+          [progress-bar]])])))
 
 (defn tag-filter []
   (let [all-tags (re-frame/subscribe [::subs/all-tags])]
     (fn tag-filter-render []
       [:div.tag-filter
-       [autosuggest {:datasource           @all-tags
+       [autosuggest {:disabled             (not @all-tags)
+                     :datasource           @all-tags
                      :on-change            #(re-frame/dispatch [::events/select-tag %])
                      :floating-label-text  "Filter by"
                      :floating-label-fixed true
@@ -73,12 +91,18 @@
                                           (.-accent1Color palette))}]]])))
 
 (defn toolbar []
-  [ui/paper {:id :toolbar}
-   [spotify-login]
-   [tag-filter]
-   [sort-dropdown]
-   [selected-tags]
-   [:div {:style {:clear :both}}]])
+  (let [spotify-id (re-frame/subscribe [::subs/spotify-id])]
+    (fn toolbar-render []
+      (if @spotify-id
+        [ui/paper {:id :toolbar}
+         [spotify-login]
+         [tag-filter]
+         [sort-dropdown]
+         [selected-tags]
+         [:div {:style {:clear :both}}]]
+        [ui/paper {:id :toolbar}
+         [spotify-login]
+         [:div {:style {:clear :both}}]]))))
 
 (defn album [a]
   (let [depth (atom 1)]

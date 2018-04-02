@@ -28,14 +28,29 @@
 (re-frame/reg-event-db
   ::albums
   (fn [db [_ albums]]
-    (let [tags (into (trie) (mapcat :tags) albums)
-          tags-to-albums (apply merge-with union (for [album albums
-                                                       tag (:tags album)]
-                                                   {tag #{(:id album)}}))
-          albums (into {} (for [album albums]
-                            [(:id album) album]))]
-      (assoc db :tags tags
-                :albums albums
+    (assoc db :albums (into {} (for [album albums]
+                                 [(:id album) album])))))
+
+(re-frame/reg-event-db
+  ::progress
+  (fn [db [_ progress]]
+    (assoc db :progress progress)))
+
+(defn ^:private add-tags-to-albums [albums tags]
+  (reduce (fn [albums [id tags]]
+            (assoc-in albums [id :tags] (sort tags)))
+          albums
+          tags))
+
+(re-frame/reg-event-db
+  ::tags
+  (fn [db [_ tags]]
+    (prn tags)
+    (let [tags-to-albums (apply merge-with union (for [[id album-tags] tags
+                                                       tag album-tags]
+                                                   {tag #{id}}))]
+      (assoc db :albums (add-tags-to-albums (:albums db) tags)
+                :tags (into (trie) (mapcat val) tags)
                 :tags-to-albums tags-to-albums))))
 
 (re-frame/reg-event-db

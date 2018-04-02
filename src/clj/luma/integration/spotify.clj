@@ -1,15 +1,12 @@
 (ns luma.integration.spotify
-  (:require [clojure.data.codec.base64 :as b64]
-            [compojure.core :refer [GET defroutes]]
+  (:require [compojure.core :refer [GET defroutes]]
             [ring.util.response :refer [response redirect]]
             [cheshire.core :as json]
             [org.httpkit.client :as http]
             [config.core :refer [env]]
             [luma.integration.oauth2 :as oauth2]
-            [clj-time.core :as time]
-            [luma.db :as db])
-  (:import (java.util UUID)
-           (clojure.lang ExceptionInfo)))
+            [clj-time.core :as time])
+  (:import (java.util UUID)))
 
 (defn ^:private refresh [refresh-token]
   (let [grant-type "refresh_token"
@@ -37,35 +34,19 @@
       (assoc :expiration (time/plus (time/now) (time/seconds (:expires_in body))))
       (select-keys [:access_token :refresh_token :expiration]))))
 
-(defn ^:private refreshing
-  ([method url user-id access-token refresh-token]
-   (refreshing method url {} user-id access-token refresh-token))
-  ([method url options user-id access-token refresh-token]
-   (let [http-fn (case method
-                   :get oauth2/http-get)]
-     (try
-       (http-fn url access-token options)
-       (catch ExceptionInfo ex
-         (if (and (= "HTTP error" (.getMessage ex))
-                  (= 401 (:status (ex-data ex))))
-           (let [token (refresh refresh-token)]
-             (db/save-account user-id token)
-             (http-fn url (:access_token token) options))
-           (throw ex)))))))
-
 (defn ^:private get-user-info [access-token]
   (oauth2/http-get "https://api.spotify.com/v1/me" access-token))
 
-(defn ^:private get-all-pages [url user-id access-token refresh-token]
+(defn ^:private get-all-pages [url access-token]
   (loop [data []
          url url]
     (if-not url
       data
-      (let [{:keys [items next]} (refreshing :get url user-id access-token refresh-token)]
+      (let [{:keys [items next]} (oauth2/http-get url access-token)]
         (recur (concat data items) next)))))
 
-(defn get-user-albums [user-id access-token refresh-token]
-  (for [a (get-all-pages "https://api.spotify.com/v1/me/albums" user-id access-token refresh-token)
+(defn get-user-albums [access-token]
+  (for [a (get-all-pages "https://api.spotify.com/v1/me/albums" access-token)
         :let [album (:album a)]]
     {:id      (:id album)
      :uri     (:uri album)
@@ -75,14 +56,23 @@
                 {:id   (:id artist)
                  :name (:name artist)})}))
 
+(defn wrap-refresh-spotify [handler]
+  (fn [request]
+    (let [spotify-user (get-in request [:session :spotify-user])]
+      (if (and spotify-user (time/before? (:expiration spotify-user) (time/now)))
+        (let [new-token (refresh (:refresh_token spotify-user))
+              new-session (update (:session request) :spotify-user merge new-token)
+              response (handler (assoc request :session new-session))]
+          (assoc response :session (merge new-session (:session response))))
+        (handler request)))))
+
 (defroutes routes
   (GET "/spotify-callback" [state code :as req]
     (if (not= (UUID/fromString state) (get-in req [:session :uid] ::not-found))
       {:status 400, :body "UID mismatch", :headers {"Content-Type" "text/plain"}}
       (let [token (get-access-token code)
             user-info (get-user-info (:access_token token))
-            session (assoc (:session req) :spotify-id (:id user-info))]
-        (db/save-account (:id user-info) token)
+            session (assoc (:session req) :spotify-user (assoc token :id (:id user-info)))]
         (->
           (redirect "/")
           (assoc :session session))))))

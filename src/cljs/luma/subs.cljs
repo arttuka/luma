@@ -1,6 +1,7 @@
 (ns luma.subs
   (:require [re-frame.core :as re-frame]
-            [clojure.set :refer [intersection]]))
+            [clojure.set :refer [intersection]]
+            [clojure.string :as str]))
 
 (re-frame/reg-sub
   ::uid
@@ -16,6 +17,11 @@
   ::albums
   (fn [db _]
     (:albums db)))
+
+(re-frame/reg-sub
+  ::progress
+  (fn [db _]
+    (:progress db)))
 
 (re-frame/reg-sub
   ::tags-to-albums
@@ -61,8 +67,8 @@
   :<- [::sort-asc]
   (fn [[albums sort-key sort-asc] _]
     (let [sort-fn (case sort-key
-                    :artist (comp :name first :artists)
-                    :album :title)
+                    :artist (comp str/lower-case :name first :artists)
+                    :album (comp str/lower-case :title))
           sort-comp (if sort-asc
                       compare
                       (comp - compare))]

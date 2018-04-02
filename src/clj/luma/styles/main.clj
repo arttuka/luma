@@ -44,6 +44,10 @@
   [:#toolbar
    {:padding       "10px"
     :margin-bottom "20px"}
+   [:.progress-bar-container
+    {:float        :left
+     :width        "256px"
+     :height       "32px"}]
    [:.tag-filter
     {:float        :left
      :width        "256px"
@@ -61,7 +65,7 @@
 
 (defstyles header
   [:#header
-   {:padding "20px"
+   {:padding   "20px"
     :font-size "24px"}])
 
 (defstyles screen
