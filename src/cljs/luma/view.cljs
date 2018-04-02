@@ -1,4 +1,4 @@
-(ns luma.views
+(ns luma.view
   (:require [cljsjs.material-ui]
             [cljs-react-material-ui.core :refer [get-mui-theme]]
             [cljs-react-material-ui.reagent :as ui]

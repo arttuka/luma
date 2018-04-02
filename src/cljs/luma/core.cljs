@@ -3,7 +3,7 @@
             [re-frame.core :as re-frame]
             [mount.core :as mount]
             [luma.events :as events]
-            [luma.views :as views]
+            [luma.view :as view]
             [luma.config :as config]
             [luma.websocket :as ws]))
 
@@ -15,7 +15,7 @@
 
 (defn mount-root []
   (re-frame/clear-subscription-cache!)
-  (reagent/render [views/main-panel]
+  (reagent/render [view/main-panel]
                   (.getElementById js/document "app")))
 
 (defn ^:export init []
