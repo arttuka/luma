@@ -20,7 +20,30 @@
      {:font-size "16px"}]]])
 
 (defstyles spotify-login-button
-  [:.login
+  [:.login-button-container
+   {:position    :relative
+    :float       :right
+    :width       "180px"
+    :height      "30px"
+    :perspective "1000px"
+    :cursor      :pointer}
+   [:.login :.logout
+    {:transform-style     :preserve-3d
+     :transition          "all 0.5s linear"
+     :backface-visibility :hidden
+     :position            :absolute
+     :overflow            :hidden
+     :top                 0
+     :right               0
+     :cursor              :pointer}]
+   [:.logout
+    {:transform "rotateX(180deg)"}]
+   [:&:hover
+    [:.login
+     {:transform "rotateX(180deg)"}]
+    [:.logout
+     {:transform "rotateX(360deg)"}]]]
+  [:.spotify-button
    {:background-color "#1db954"
     :color            :white
     :text-decoration  :none
@@ -28,6 +51,8 @@
     :font-weight      :bold
     :display          :inline-block
     :height           "30px"
+    :width            "180px"
+    :text-align       :center
     :line-height      "30px"
     :border-radius    "15px"
     :padding-right    "6px"
@@ -38,16 +63,19 @@
      :margin "3px"}]
    [:div
     {:display        :inline-block
-     :vertical-align :middle}]])
+     :vertical-align :middle}]
+
+   [:&.logout
+    {:background-color :black}]])
 
 (defstyles toolbar
   [:#toolbar
    {:padding       "10px"
     :margin-bottom "20px"}
    [:.progress-bar-container
-    {:float        :left
-     :width        "256px"
-     :height       "32px"}]
+    {:float  :left
+     :width  "256px"
+     :height "32px"}]
    [:.tag-filter
     {:float        :left
      :width        "256px"

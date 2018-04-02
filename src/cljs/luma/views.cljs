@@ -19,11 +19,16 @@
         scopes "user-library-read"]
     (fn spotify-login-render []
       (if @spotify-id
-        [:div.login
-         [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
-         (str "Logged in as " @spotify-id)]
-        [:a.login {:href (gstring/format "https://accounts.spotify.com/authorize?client_id=%s&response_type=%s&state=%s&scope=%s&redirect_uri=%s"
-                                         client-id response-type @uid scopes redirect-uri)}
+        [:div.login-button-container
+         [:div.login.spotify-button
+          [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
+          @spotify-id]
+         [:a.logout.spotify-button
+          {:href "/logout"}
+          [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
+          (str "Log out")]]
+        [:a.spotify-button {:href (gstring/format "https://accounts.spotify.com/authorize?client_id=%s&response_type=%s&state=%s&scope=%s&redirect_uri=%s"
+                                                  client-id response-type @uid scopes redirect-uri)}
          [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
          "Login with Spotify"]))))
 
