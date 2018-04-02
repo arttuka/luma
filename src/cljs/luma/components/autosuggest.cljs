@@ -6,7 +6,7 @@
 
 (defn ^:private suggestion [suggestion opts]
   (reagent/as-element
-    [ui/menu-item {:primaryText suggestion}]))
+    [ui/menu-item {:primary-text suggestion}]))
 
 (defn ^:private suggestion-container [props]
   (reagent/as-element
@@ -18,37 +18,39 @@
       [ui/text-field props])))
 
 (def ^:private styles
-  {:container                {:flexGrow 1
-                              :position "relative"
-                              :width    200}
-   :suggestionsContainerOpen {:position "absolute"
-                              :zIndex   1
-                              :left     0
-                              :right    0}
-   :suggestion               {:display "block"}
-   :suggestionsList          {:margin        0
-                              :padding       0
-                              :listStyleType "none"}
-   :suggestionHighlighted    {:background-color "rgba(0, 0, 0, 0.1)"}})
+  {:container                  {:flex-grow 1
+                                :position  "relative"
+                                :width     200}
+   :suggestions-container-open {:position "absolute"
+                                :z-index  1
+                                :left     0
+                                :right    0}
+   :suggestion                 {:display "block"}
+   :suggestions-list           {:margin          0
+                                :padding         0
+                                :list-style-type "none"}
+   :suggestion-highlighted     {:background-color "rgba(0, 0, 0, 0.1)"}})
 
 (defn autosuggest [{:keys [datasource on-change] :as options}]
   (let [suggestions (atom [])
         value (atom "")]
-    (fn [{:keys [datasource on-change] :as options}]
-      [:> js/Autosuggest {:suggestions                 @suggestions
-                          :onSuggestionsFetchRequested (fn [event]
-                                                         (reset! suggestions (datasource (.-value event))))
-                          :onSuggestionsClearRequested #(reset! suggestions [])
-                          :getSuggestionValue          identity
-                          :renderSuggestionsContainer  suggestion-container
-                          :renderSuggestion            suggestion
-                          :renderInputComponent        input
-                          :inputProps                  {:onChange (fn [event new-value]
-                                                                    (condp contains? (.-method new-value)
-                                                                      #{"click" "enter"} (do
-                                                                                           (on-change (.-newValue new-value))
-                                                                                           (reset! value ""))
-                                                                      #{"type"} (reset! value (.-value (.-target event)))
-                                                                      nil))
-                                                        :value    @value}
-                          :theme                       styles}])))
+    (fn autosuggest-render [{:keys [datasource on-change] :as options}]
+      (let [input-props (merge (dissoc options :datasource :on-change)
+                               {:onChange (fn [event new-value]
+                                            (condp contains? (.-method new-value)
+                                              #{"click" "enter"} (do
+                                                                   (on-change (.-newValue new-value))
+                                                                   (reset! value ""))
+                                              #{"type"} (reset! value (.-value (.-target event)))
+                                              nil))
+                                :value    @value})]
+        [:> js/Autosuggest {:suggestions                    @suggestions
+                            :on-suggestions-fetch-requested (fn [event]
+                                                              (reset! suggestions (datasource (.-value event))))
+                            :on-suggestions-clear-requested #(reset! suggestions [])
+                            :get-suggestion-value           identity
+                            :render-suggestions-container   suggestion-container
+                            :render-suggestion              suggestion
+                            :render-input-component         input
+                            :input-props                    input-props
+                            :theme                          styles}]))))
