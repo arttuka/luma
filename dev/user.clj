@@ -24,6 +24,7 @@
 
 (defstate garden-watcher
   :start (do
+           (compile-garden-css!)
            (hawk/watch! [{:paths   ["src/clj/luma/styles"]
                           :handler (fn [ctx e]
                                      (when (and (= :modify (:kind e))
