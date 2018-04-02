@@ -54,19 +54,22 @@
                      ["cljsbuild" "once" "min"]
                      ["garden" "once"]]}
 
-  :profiles {:dev  {:dependencies   [[binaryage/devtools "0.9.9"]
-                                     [figwheel-sidecar "0.5.15" :exclusions [org.clojure/tools.nrepl]]
-                                     [com.cemerick/piggieback "0.2.2"]
-                                     [hawk "0.2.11"]
-                                     [re-frisk "0.5.4"]
-                                     [org.clojure/tools.namespace "0.2.11"]]
+  :profiles {:dev     {:dependencies   [[binaryage/devtools "0.9.9"]
+                                        [figwheel-sidecar "0.5.15" :exclusions [org.clojure/tools.nrepl]]
+                                        [com.cemerick/piggieback "0.2.2"]
+                                        [hawk "0.2.11"]
+                                        [re-frisk "0.5.4"]
+                                        [org.clojure/tools.namespace "0.2.11"]]
 
-                    :plugins        [[lein-figwheel "0.5.15"]
-                                     [lein-doo "0.1.8" :exclusions [org.clojure/tools.reader]]
-                                     [lein-pdo "0.1.1"]]
-                    :source-paths   ["dev" "test/clj" "test/cljc"]
-                    :resource-paths ["dev-resources"]}
-             :prod {:source-paths ["prod"]}}
+                       :plugins        [[lein-figwheel "0.5.15"]
+                                        [lein-doo "0.1.8" :exclusions [org.clojure/tools.reader]]
+                                        [lein-pdo "0.1.1"]]
+                       :source-paths   ["dev" "test/clj" "test/cljc"]
+                       :resource-paths ["dev-resources"]}
+             :uberjar {:source-paths ["prod"]
+                       :prep-tasks   ["compile"
+                                      ["cljsbuild" "once" "min"]
+                                      ["garden" "once"]]}}
 
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
@@ -81,7 +84,7 @@
                                        :preloads             [devtools.preload
                                                               re-frisk.preload]
                                        :external-config      {:devtools/config {:features-to-install :all}}
-                                       }}
+                                       :optimizations        :none}}
 
                        {:id           "min"
                         :source-paths ["src/cljs" "src/cljc"]
