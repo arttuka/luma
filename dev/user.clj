@@ -33,6 +33,9 @@
                                      ctx)}]))
   :stop (hawk/stop! @garden-watcher))
 
+(defn cljs-repl []
+  (figwheel/cljs-repl))
+
 (defn stop! []
   (mount/stop))
 
