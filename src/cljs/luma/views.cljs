@@ -2,6 +2,7 @@
   (:require [cljsjs.material-ui]
             [cljs-react-material-ui.core :refer [get-mui-theme]]
             [cljs-react-material-ui.reagent :as ui]
+            [reagent.core :refer [atom]]
             [re-frame.core :as re-frame]
             [goog.string :as gstring]
             [luma.components.autosuggest :refer [autosuggest]]
@@ -39,18 +40,27 @@
          [selected-tags]]))))
 
 (defn album [a]
-  [:a.album
-   {:href (:uri a)}
-   [:img.cover {:src (:image a)}]
-   [:div.title
-    (:title a)]
-   [:div.artists
-    (for [artist (:artists a)]
-      ^{:key (str (:id a) (:artist_id artist))}
-      [:div.artist (:name artist)])]
-   [:div.tags
-    (for [tag (interpose " · " (:tags a))]
-      tag)]])
+  (let [depth (atom 1)]
+    (fn album-render [a]
+      [:a.album
+       {:href (:uri a)}
+       [ui/card {:class         :album-card
+                 :on-mouse-over #(reset! depth 5)
+                 :on-mouse-out  #(reset! depth 1)
+                 :z-depth       @depth}
+        [ui/card-media
+         [:img.cover {:src (:image a)}]]
+        [ui/card-title
+         [:div.title (:title a)]
+         [:div.artists
+          (for [artist (:artists a)]
+            ^{:key (str (:id a) (:artist_id artist))}
+            [:div.artist (:name artist)])]]
+        [ui/card-text
+
+         [:div.tags
+          (for [tag (interpose " · " (:tags a))]
+            tag)]]]])))
 
 (defn albums []
   (let [data (re-frame/subscribe [::subs/filtered-albums])]

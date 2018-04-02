@@ -2,30 +2,21 @@
   (:require [garden.def :refer [defstyles]]
             [garden.core :as garden]))
 
-(defstyles album
-  [:& {:border  "1px solid #444444"
-       :padding "5px"}
-   [:&:hover {:background-color "#cccccc"}]])
-
 (defstyles album-list
   [:#albums
-   [:.album
-    album
-    {:display         :block
-     :min-height      "160px"
-     :margin-bottom   "10px"
-     :text-decoration :none
-     :color           "#333333"}
+   {:display   :flex
+    :flex-wrap :wrap}
+   [:a
+    {:text-decoration :none
+     :margin "0 auto 40px"}]
+   [:.album-card
+    {:width "320px"}
     [:.title
-     {:font-size     "32px"
+     {:font-size     "24px"
       :font-weight   :bold
       :margin-bottom "5px"}]
     [:.artist
-     {:font-size "20px"}]
-    [:img
-     {:height       "160px"
-      :float        :left
-      :margin-right "20px"}]]])
+     {:font-size "16px"}]]])
 
 (defstyles screen
   [:body {:color       "red"
