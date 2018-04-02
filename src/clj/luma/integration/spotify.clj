@@ -5,7 +5,8 @@
             [org.httpkit.client :as http]
             [config.core :refer [env]]
             [luma.integration.oauth2 :as oauth2]
-            [clj-time.core :as time])
+            [clj-time.core :as time]
+            [clj-time.format :as time-fmt])
   (:import (java.util UUID)))
 
 (defn ^:private refresh [refresh-token]
@@ -52,6 +53,7 @@
      :uri     (:uri album)
      :title   (:name album)
      :image   (:url (first (:images album)))
+     :added   (time-fmt/parse (time-fmt/formatters :date-time-no-ms) (:added_at a))
      :artists (for [artist (:artists album)]
                 {:id   (:id artist)
                  :name (:name artist)})}))

@@ -3,13 +3,41 @@
             [taoensso.sente.packers.transit :as sente-transit]
             [taoensso.timbre :as log]
             [mount.core :refer [defstate]]
-    #?@(:clj [
+    #?@(:clj  [
             [taoensso.sente.server-adapters.http-kit :refer [get-sch-adapter]]
-            [compojure.core :refer [defroutes GET POST]]])))
+            [compojure.core :refer [defroutes GET POST]]]
+        :cljs [[goog.string :as gs]
+               goog.date.UtcDateTime])
+            [cognitect.transit :as transit])
+  #?(:clj (:import [org.joda.time])))
+
+(def DateTime #?(:clj org.joda.time.DateTime, :cljs goog.date.UtcDateTime))
+
+(defn read-date-time
+  "Read RFC3339 string to DateTime."
+  [s]
+  #?(:clj  (org.joda.time.DateTime/parse s)
+     :cljs (goog.date.UtcDateTime.fromIsoString s)))
+
+(defn write-date-time
+  "Represent DateTime in RFC3339 format string."
+  [d]
+  #?(:clj  (.toString (.withZone ^org.joda.time.DateTime d (org.joda.time.DateTimeZone/forID "UTC")))
+     :cljs (str (.getUTCFullYear d)
+                "-" (gs/padNumber (inc (.getUTCMonth d)) 2)
+                "-" (gs/padNumber (.getUTCDate d) 2)
+                "T" (gs/padNumber (.getUTCHours d) 2)
+                ":" (gs/padNumber (.getUTCMinutes d) 2)
+                ":" (gs/padNumber (.getUTCSeconds d) 2)
+                "." (gs/padNumber (.getUTCMilliseconds d) 3)
+                "Z")))
 
 (def packer (sente-transit/->TransitPacker :json
-                                           {:handlers {}}
-                                           {:handlers {}}))
+                                           {:handlers {DateTime (transit/write-handler
+                                                                  (constantly "datetime")
+                                                                  write-date-time
+                                                                  write-date-time)}}
+                                           {:handlers {"datetime" read-date-time}}))
 
 (def path "/chsk")
 

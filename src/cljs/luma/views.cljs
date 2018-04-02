@@ -87,7 +87,9 @@
         [ui/menu-item {:value        :artist
                        :primary-text "Artist"}]
         [ui/menu-item {:value        :album
-                       :primary-text "Album title"}]]
+                       :primary-text "Album title"}]
+        [ui/menu-item {:value        :added
+                       :primary-text "Added at"}]]
        [ui/icon-button {:on-click #(re-frame/dispatch [::events/change-sort-dir])
                         :style    {:position :absolute
                                    :top      "24px"}}
