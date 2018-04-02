@@ -44,8 +44,17 @@
   [:#toolbar
    {:padding       "10px"
     :margin-bottom "20px"}
+   [:.tag-filter
+    {:float :left
+     :width "256px"
+     :margin-right "12px"}]
+   [:.sort-container
+    {:float :left
+     :position :relative}]
    [:.selected-tags
-    {:display    :flex
+    {:float      :left
+     :clear      :left
+     :display    :flex
      :flex-wrap  :wrap
      :min-height "32px"}]]
   spotify-login-button)

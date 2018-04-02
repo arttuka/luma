@@ -2,6 +2,7 @@
   (:require [cljsjs.material-ui]
             [cljs-react-material-ui.core :refer [get-mui-theme]]
             [cljs-react-material-ui.reagent :as ui]
+            [cljs-react-material-ui.icons :as icons]
             [reagent.core :refer [atom]]
             [re-frame.core :as re-frame]
             [goog.string :as gstring]
@@ -41,16 +42,43 @@
 (defn tag-filter []
   (let [all-tags (re-frame/subscribe [::subs/all-tags])]
     (fn tag-filter-render []
-      (when @all-tags
-        [autosuggest {:datasource @all-tags
-                      :on-change  #(re-frame/dispatch [::events/select-tag %])
-                      :hint-text  "Filter by tag"}]))))
+      [:div.tag-filter
+       [autosuggest {:datasource           @all-tags
+                     :on-change            #(re-frame/dispatch [::events/select-tag %])
+                     :floating-label-text  "Filter by"
+                     :floating-label-fixed true
+                     :hint-text            "Tag"}]])))
+
+(defn sort-dropdown []
+  (let [sort-key (re-frame/subscribe [::subs/sort-key])
+        sort-asc (re-frame/subscribe [::subs/sort-asc])
+        value (atom @sort-key)
+        palette (.-palette (get-mui-theme))]
+    (fn sort-dropdown-render []
+      [:div.sort-container
+       [ui/select-field {:floating-label-text "Sort by"
+                         :value               @value
+                         :on-change           (fn [_ _ new-value]
+                                                (reset! value new-value)
+                                                (re-frame/dispatch [::events/sort-albums (keyword new-value)]))}
+        [ui/menu-item {:value        :artist
+                       :primary-text "Artist"}]
+        [ui/menu-item {:value        :album
+                       :primary-text "Album title"}]]
+       [ui/icon-button {:on-click   #(re-frame/dispatch [::events/change-sort-dir])
+                        :style {:position :absolute
+                                :top "24px"}}
+        [icons/av-sort-by-alpha {:color (if @sort-asc
+                                          (.-primary1Color palette)
+                                          (.-accent1Color palette))}]]])))
 
 (defn toolbar []
   [ui/paper {:id :toolbar}
    [spotify-login]
    [tag-filter]
-   [selected-tags]])
+   [sort-dropdown]
+   [selected-tags]
+   [:div {:style {:clear :both}}]])
 
 (defn album [a]
   (let [depth (atom 1)]
