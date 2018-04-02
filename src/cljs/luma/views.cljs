@@ -16,11 +16,14 @@
         redirect-uri "http://localhost:8080/spotify-callback"
         response-type "code"
         scopes "user-library-read"]
-    (fn []
+    (fn spotify-login-render []
       (if @spotify-id
-        [:span (str "Logged in as " @spotify-id)]
-        [:a {:href (gstring/format "https://accounts.spotify.com/authorize?client_id=%s&response_type=%s&state=%s&scope=%s&redirect_uri=%s"
-                                   client-id response-type @uid scopes redirect-uri)}
+        [:div.login
+         [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
+         (str "Logged in as " @spotify-id)]
+        [:a.login {:href (gstring/format "https://accounts.spotify.com/authorize?client_id=%s&response_type=%s&state=%s&scope=%s&redirect_uri=%s"
+                                         client-id response-type @uid scopes redirect-uri)}
+         [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
          "Login with Spotify"]))))
 
 (defn selected-tags []
@@ -45,6 +48,7 @@
 
 (defn toolbar []
   [ui/paper {:id :toolbar}
+   [spotify-login]
    [tag-filter]
    [selected-tags]])
 
@@ -83,6 +87,5 @@
   [ui/mui-theme-provider
    {:mui-theme (get-mui-theme)}
    [:div
-    [spotify-login]
     [toolbar]
     [albums]]])

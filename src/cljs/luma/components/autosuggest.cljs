@@ -22,7 +22,7 @@
                                 :position  "relative"
                                 :width     200}
    :suggestions-container-open {:position "absolute"
-                                :z-index  1
+                                :z-index  10
                                 :left     0
                                 :right    0}
    :suggestion                 {:display "block"}
