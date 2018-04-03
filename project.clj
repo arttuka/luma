@@ -10,6 +10,7 @@
                  [cljsjs/react "16.3.0-0"]
                  [cljsjs/react-dom "16.3.0-0"]
                  [cljsjs/react-autosuggest "9.3.2-0"]
+                 [binaryage/oops "0.5.8"]
                  [garden "1.3.5"]
                  [compojure "1.6.0" :exclusions [ring/ring-core commons-codec]]
                  [yogthos/config "1.1.1"]
@@ -91,7 +92,7 @@
                         :jar          true
                         :compiler     {:main            luma.core
                                        :output-to       "resources/public/js/compiled/app.js"
-                                       :optimizations   :advanced
+                                       :optimizations   :whitespace
                                        :closure-defines {goog.DEBUG false}
                                        :pretty-print    false}}
 

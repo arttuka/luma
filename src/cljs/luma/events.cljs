@@ -50,7 +50,6 @@
 (re-frame/reg-event-db
   ::tags
   (fn [db [_ tags]]
-    (prn tags)
     (let [tags-to-albums (apply merge-with union (for [[id album-tags] tags
                                                        tag album-tags]
                                                    {tag #{id}}))]

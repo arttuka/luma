@@ -6,6 +6,7 @@
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :as re-frame]
             [goog.string :as gstring]
+            [oops.core :refer [oget]]
             [luma.components.autosuggest :refer [autosuggest]]
             [luma.events :as events]
             [luma.subs :as subs]))
@@ -76,7 +77,7 @@
   (let [sort-key (re-frame/subscribe [::subs/sort-key])
         sort-asc (re-frame/subscribe [::subs/sort-asc])
         value (atom @sort-key)
-        palette (.-palette (get-mui-theme))]
+        palette (oget (get-mui-theme) "palette")]
     (fn sort-dropdown-render []
       [:div.sort-container
        [ui/select-field {:floating-label-text "Sort by"
@@ -94,8 +95,8 @@
                         :style    {:position :absolute
                                    :top      "24px"}}
         [icons/av-sort-by-alpha {:color (if @sort-asc
-                                          (.-primary1Color palette)
-                                          (.-accent1Color palette))}]]])))
+                                          (oget palette "primary1Color")
+                                          (oget palette "accent1Color"))}]]])))
 
 (defn toolbar []
   (let [spotify-id (re-frame/subscribe [::subs/spotify-id])]
@@ -224,8 +225,8 @@
          "The service doesn't process any sensitive personal data."]]])))
 
 (defn header []
-  (let [palette (.-palette (get-mui-theme))]
-    [:div#header {:style {:background-color (.-primary1Color palette)
+  (let [palette (oget (get-mui-theme) "palette")]
+    [:div#header {:style {:background-color (oget palette "primary1Color")
                           :color            :white}}
      "LUMA Ultimate Music Archive"]))
 
