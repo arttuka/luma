@@ -154,7 +154,7 @@
                                  :height  "220px"}}
           [:h2 "LUMA Ultimate Music Archive"]
           [:p "Welcome to LUMA, a music archive that helps you sort your Spotify Music Library."]
-          [:p "To begin, login with your Spotify account."]
+          [:p "To begin, login with your Spotify account. Loading the tags for your albums will take some time on the first login."]
           [:p "By logging in, you allow LUMA to use and process data about your Spotify account. For more information, see terms of use."]])])))
 
 (defn terms-of-use []
