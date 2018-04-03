@@ -162,7 +162,6 @@
       [:div.terms-of-use
        [:hr]
        [:p
-        "LUMA Copyright © Arttu Kaipiainen 2018. "
         [:a {:href "#" :on-click #(reset! dialog-open true)}
          "View terms of use."]
         [:br]
