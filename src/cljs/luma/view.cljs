@@ -136,15 +136,18 @@
             tag)]]]])))
 
 (defn albums []
-  (let [data (re-frame/subscribe [::subs/sorted-albums])
+  (let [has-data? (re-frame/subscribe [::subs/albums])
+        data (re-frame/subscribe [::subs/sorted-albums])
         spotify-id (re-frame/subscribe [::subs/spotify-id])]
     (fn albums-render []
       [:div#albums
        (if @spotify-id
-         (if (seq @data)
-           (for [a @data]
-             ^{:key (:id a)}
-             [album a])
+         (if @has-data?
+           (if (seq @data)
+             (for [a @data]
+               ^{:key (:id a)}
+               [album a])
+             [:p "You haven't saved any albums to your Spotify music library."])
            [ui/circular-progress {:style     {:margin-top "20px"}
                                   :size      100
                                   :thickness 5}])
