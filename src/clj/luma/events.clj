@@ -1,5 +1,6 @@
 (ns luma.events
   (:require [clojure.core.async :refer [go go-loop <! >! chan]]
+            [config.core :refer [env]]
             [luma.db :as db]
             [luma.websocket :as ws]
             [luma.integration.spotify :as spotify]
@@ -47,6 +48,8 @@
 (defmethod ws/event-handler
   ::ws/connect
   [{:keys [uid ring-req]}]
+  (ws/send! uid [::set-env {:spotify-client-id (env :spotify-client-id)
+                            :spotify-redirect-uri (str (env :baseurl) "/spotify-callback")}])
   (when-let [spotify-user (get-in ring-req [:session :spotify-user])]
     (ws/send! uid [::set-spotify-id (:id spotify-user)])
     (let [albums (spotify/get-user-albums (:access_token spotify-user))

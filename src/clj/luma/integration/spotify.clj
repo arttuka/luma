@@ -14,8 +14,8 @@
         response @(http/post "https://accounts.spotify.com/api/token"
                              {:form-params {:grant_type    grant-type
                                             :refresh_token refresh-token
-                                            :client_id     (env :client-id)
-                                            :client_secret (env :client-secret)}})
+                                            :client_id     (env :spotify-client-id)
+                                            :client_secret (env :spotify-client-secret)}})
         body (json/parse-string (:body response) true)]
     (-> body
       (assoc :expiration (time/plus (time/now) (time/seconds (:expires_in body))))
@@ -28,8 +28,8 @@
                              {:form-params {:code          code
                                             :grant_type    grant-type
                                             :redirect_uri  redirect-uri
-                                            :client_id     (env :client-id)
-                                            :client_secret (env :client-secret)}})
+                                            :client_id     (env :spotify-client-id)
+                                            :client_secret (env :spotify-client-secret)}})
         body (json/parse-string (:body response) true)]
     (-> body
       (assoc :expiration (time/plus (time/now) (time/seconds (:expires_in body))))

@@ -16,6 +16,11 @@
     db/default-db))
 
 (re-frame/reg-event-db
+  ::set-env
+  (fn [db [_ env]]
+    (assoc db :env env)))
+
+(re-frame/reg-event-db
   ::set-uid
   (fn [db [_ uid]]
     (assoc db :uid uid)))

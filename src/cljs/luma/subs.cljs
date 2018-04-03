@@ -9,6 +9,11 @@
     (:uid db)))
 
 (re-frame/reg-sub
+  ::env
+  (fn [db [_ k]]
+    (get-in db [:env k])))
+
+(re-frame/reg-sub
   ::spotify-id
   (fn [db _]
     (:spotify-id db)))
