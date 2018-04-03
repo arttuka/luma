@@ -3,17 +3,17 @@
             [clojure.set :refer [union]]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
-            [clj-time.core :as time]
             clj-time.jdbc
+            [config.core :refer [env]]
             [hikari-cp.core :as hikari]
             [luma.util :refer [grouping]]))
 
 (def datasource-options {:adapter       "postgresql"
-                         :username      "luma"
-                         :password      "luma"
-                         :database-name "luma"
-                         :server-name   "localhost"
-                         :port-number   5432})
+                         :username      (env :postgresql-user)
+                         :password      (env :postgresql-password)
+                         :database-name (env :postgresql-database)
+                         :server-name   (env :postgresql-server)
+                         :port-number   (env :postgresql-port)})
 
 (defstate db
   :start (hikari/make-datasource datasource-options)
