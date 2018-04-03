@@ -193,7 +193,7 @@
                    :actions                  [(reagent/as-element [ui/flat-button {:label    "Close"
                                                                                    :primary  true
                                                                                    :on-click #(reset! dialog-open false)}])]}
-        [:p "Terms of use of LUMA Ultimate Music Archive (\"service\") as required by European Union General Data Protection Regulation (EU 2016/679) and Finnish Personal Data Act (FIN 523/1999)"]
+        [:p "Terms of use of LUMA Ultimate Music Archive (\"service\") as required by European Union General Data Protection Regulation (EU 2016/679) and Finnish Personal Data Act (FI 523/1999)"]
 
         [:h4 "Controller of data"]
         [:p
@@ -202,13 +202,13 @@
           "admin@luma.dy.fi"]]
         [:h4 "Purpose of processing personal data"]
         [:p
-         "Augmenting and displaying data from user's Spotify music library"]
+         "Augmenting and displaying data from user's Spotify music library."]
         [:h4 "Personal data processed"]
         [:p
-         "Data from user's Spotify music library, including but not limited to user's Spotify ID and saved albums."]
+         "User's Spotify ID and saved albums in their Spotify music library."]
         [:h4 "Storage of personal data"]
         [:p
-         "No personal data is stored anywhere except the user's web browser. Any personal data is erased when user logs out or otherwise stops using the service."]
+         "No personal data is stored anywhere except the user's web browser and browsing session. Any personal data is erased when user logs out or otherwise stops using the service."]
         [:h4 "Consent to process personal data"]
         [:p
          "The user gives their consent to process any personal data from their Spotify account by logging into the service with their Spotify account.
