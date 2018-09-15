@@ -44,15 +44,13 @@
 (defn get-db []
   (d/db @connection))
 
-(defn has-tags? [db album-id]
-  (some->
-    (d/q '[:find (count ?tag) .
-           :in $ ?albumId
-           :where
-           [?album :album/id ?albumId]
-           [?album :album/tag ?tag]]
-         db album-id)
-    pos?))
+(defn get-existing-albums [db album-ids]
+  (d/q '[:find (distinct ?albumId) .
+         :in $ [?albumId ...]
+         :where
+         [_ :album/id ?albumId]]
+       db
+       album-ids))
 
 (defn get-new-tags-ids [db tx-data]
   (d/q '[:find [?e ...]
@@ -106,24 +104,18 @@
         new-tags (get-new-tags-ids (:db-after tx) (:tx-data tx))
         connections (connect-tags-and-genres (:db-after tx) new-tags)]
     (check-unconnected-tags! new-tags connections)
-    (d/transact @connection (for [[genre tag] connections]
-                              [:db/add genre :genre/tag tag]))))
+    (:db-after @(d/transact @connection (for [[genre tag] connections]
+                                          [:db/add genre :genre/tag tag])))))
 
-(defn get-genres [db album-ids]
-  (let [genre->album (into {} (d/q '[:find ?genre (distinct ?albumId)
-                                     :in $ [?albumId ...]
-                                     :where
-                                     [?album :album/id ?albumId]
-                                     (or-join [?tag ?album]
-                                              [?album :album/tag ?tag]
-                                              (and [?album :album/artist ?artist]
-                                                   [?artist :artist/tag ?tag]))
-                                     [?genre :genre/tag ?tag]]
-                                   db album-ids))
-        genres (d/q '[:find [(pull ?genre [:db/id :genre/title :genre/dbo_uri]) ...]
-                      :in $ [?genre ...]]
-                    db (keys genre->album))]
-    (for [{:keys [db/id genre/title]} genres]
-      {:id     id
-       :title  title
-       :albums (genre->album id)})))
+(defn get-album-genres [db album-ids]
+  (into {} (d/q '[:find ?albumId (distinct ?genreTitle)
+                  :in $ [?albumId ...]
+                  :where
+                  [?album :album/id ?albumId]
+                  (or-join [?tag ?album]
+                           [?album :album/tag ?tag]
+                           (and [?album :album/artist ?artist]
+                                [?artist :artist/tag ?tag]))
+                  [?genre :genre/tag ?tag]
+                  [?genre :genre/title ?genreTitle]]
+                db album-ids)))

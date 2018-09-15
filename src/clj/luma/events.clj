@@ -43,7 +43,7 @@
     [album-tags artist-tags]))
 
 (defn load-missing-tags [albums progress-ch]
-  (let [db (datomic/get-db)]
+  (let [album-exists? (datomic/get-existing-albums (datomic/get-db) (map :id albums))]
     (go-loop [[album & albums] albums
               tags {:albums  {}
                     :artists {}}
@@ -51,7 +51,7 @@
       (>! progress-ch i)
       (cond
         (nil? album) tags
-        (datomic/has-tags? db (:id album)) (recur albums tags (inc i))
+        (album-exists? (:id album)) (recur albums tags (inc i))
         :else (let [[album-tags artist-tags] (load-album-tags album)
                     new-tags (-> tags
                                (assoc-in [:albums (:id album)] {:tags    album-tags
@@ -75,13 +75,15 @@
   (ws/send! uid [::set-env {:spotify-client-id    (env :spotify-client-id)
                             :spotify-redirect-uri (str (env :baseurl) "/spotify-callback")}])
   (when-let [spotify-user (get-in ring-req [:session :spotify-user])]
-    (clojure.pprint/pprint spotify-user)
     (ws/send! uid [::set-spotify-id (:id spotify-user)])
-    (let [albums (spotify/get-user-albums (:access_token spotify-user))
+    (let [all-albums (spotify/get-user-albums (:access_token spotify-user))
           progress-ch (chan 10)]
-      (ws/send! uid [::albums albums])
+      (ws/send! uid [::albums all-albums])
       (go-loop [i (<! progress-ch)]
         (when i
           (ws/send! uid [::progress i])
           (recur (<! progress-ch))))
-      (go (ws/send! uid [::tags (<! (load-tags albums progress-ch))])))))
+      (go
+        (let [{:keys [albums artists]} (<! (load-missing-tags all-albums progress-ch))
+              db (datomic/save-albums! artists albums)]
+          (ws/send! uid [::tags (datomic/get-album-genres db (map :id all-albums))]))))))
