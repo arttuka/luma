@@ -1,6 +1,6 @@
 (ns luma.subs
   (:require [re-frame.core :as re-frame]
-            [clojure.set :refer [intersection]]
+            [clojure.set :refer [intersection union]]
             [clojure.string :as str]))
 
 (re-frame/reg-sub
@@ -34,9 +34,21 @@
     (:tags-to-albums db)))
 
 (re-frame/reg-sub
-  ::all-tags
+  ::tags
   (fn [db _]
     (:tags db)))
+
+(re-frame/reg-sub
+  ::subgenres
+  (fn [db _]
+    (:subgenres db)))
+
+(re-frame/reg-sub
+  ::all-tags
+  :<- [::tags]
+  :<- [::subgenres]
+  (fn [[tags subgenres] _]
+    (into tags (keys subgenres))))
 
 (re-frame/reg-sub
   ::selected-tags
@@ -44,13 +56,22 @@
     (:selected-tags db)))
 
 (re-frame/reg-sub
+  ::selected-tags-with-subgenres
+  :<- [::subgenres]
+  :<- [::selected-tags]
+  (fn [[subgenres selected-tags] _]
+    (into selected-tags (mapcat subgenres) selected-tags)))
+
+(re-frame/reg-sub
   ::filtered-albums
   :<- [::albums]
   :<- [::selected-tags]
+  :<- [::subgenres]
   :<- [::tags-to-albums]
-  (fn [[albums selected-tags tags-to-albums] [_]]
+  (fn [[albums selected-tags subgenres tags-to-albums] [_]]
     (if (seq selected-tags)
-      (->> (map tags-to-albums selected-tags)
+      (->> (for [tag selected-tags]
+             (transduce (map tags-to-albums) union (tags-to-albums tag) (subgenres tag)))
            (reduce intersection)
            (map albums))
       (vals albums))))

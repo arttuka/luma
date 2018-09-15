@@ -58,6 +58,11 @@
                 :tags-to-albums tags-to-albums))))
 
 (re-frame/reg-event-db
+  ::subgenres
+  (fn [db [_ subgenres]]
+    (assoc db :subgenres subgenres)))
+
+(re-frame/reg-event-db
   ::select-tag
   (fn [db [_ tag]]
     (if (contains? (:tags db) tag)

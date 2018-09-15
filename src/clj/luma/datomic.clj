@@ -108,7 +108,7 @@
                                           [:db/add genre :genre/tag tag])))))
 
 (defn get-album-genres [db album-ids]
-  (into {} (d/q '[:find ?albumId (distinct ?genreTitle)
+  (into {} (d/q '[:find ?albumId (distinct ?genre)
                   :in $ [?albumId ...]
                   :where
                   [?album :album/id ?albumId]
@@ -116,6 +116,24 @@
                            [?album :album/tag ?tag]
                            (and [?album :album/artist ?artist]
                                 [?artist :artist/tag ?tag]))
-                  [?genre :genre/tag ?tag]
-                  [?genre :genre/title ?genreTitle]]
+                  [?genre :genre/tag ?tag]]
                 db album-ids)))
+
+(defn get-genres [db genre-ids]
+  (into {} (d/q '[:find ?id ?title
+                  :in $ [?id ...]
+                  :where
+                  [?id :genre/title ?title]]
+                db genre-ids)))
+
+(defn get-subgenres [db genre-ids]
+  (into {} (d/q '[:find ?title (distinct ?subTitle)
+                  :in $ % [?sub ...]
+                  :where
+                  [?super :genre/title ?title]
+                  (supergenre ?super ?sub)
+                  [?sub :genre/title ?subTitle]]
+                db
+                '[[(supergenre ?parent ?child) (?parent :genre/subgenre ?child)]
+                  [(supergenre ?parent ?child) (?parent :genre/subgenre ?middle) (supergenre ?middle ?child)]]
+                genre-ids genre-ids)))
