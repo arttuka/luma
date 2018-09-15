@@ -2,6 +2,8 @@
   (:require [clojure.core.async :refer [go go-loop <! >! chan]]
             [config.core :refer [env]]
             [luma.db :as db]
+            [luma.datomic :as datomic]
+            [luma.util :refer [map-by]]
             [luma.websocket :as ws]
             [luma.integration.spotify :as spotify]
             [luma.integration.lastfm :as lastfm]))
@@ -35,6 +37,28 @@
       (db/get-tags artists title)
       (get-and-save-tags artists title))))
 
+(defn load-album-tags [album]
+  (let [album-tags (into #{} (mapcat #(lastfm/get-album-tags (:name %) (:title album)) (:artists album)))
+        artist-tags (map-by :id (comp lastfm/get-artist-tags :name) (:artists album))]
+    [album-tags artist-tags]))
+
+(defn load-missing-tags [albums progress-ch]
+  (let [db (datomic/get-db)]
+    (go-loop [[album & albums] albums
+              tags {:albums  {}
+                    :artists {}}
+              i 0]
+      (>! progress-ch i)
+      (cond
+        (nil? album) tags
+        (datomic/has-tags? db (:id album)) (recur albums tags (inc i))
+        :else (let [[album-tags artist-tags] (load-album-tags album)
+                    new-tags (-> tags
+                               (assoc-in [:albums (:id album)] {:tags    album-tags
+                                                                :artists (map :id (:artists album))})
+                               (update :artists into artist-tags))]
+                (recur albums new-tags (inc i)))))))
+
 (defn load-tags [albums progress-ch]
   (go-loop [[album & albums] albums
             album-tags (transient {})
@@ -48,9 +72,10 @@
 (defmethod ws/event-handler
   ::ws/connect
   [{:keys [uid ring-req]}]
-  (ws/send! uid [::set-env {:spotify-client-id (env :spotify-client-id)
+  (ws/send! uid [::set-env {:spotify-client-id    (env :spotify-client-id)
                             :spotify-redirect-uri (str (env :baseurl) "/spotify-callback")}])
   (when-let [spotify-user (get-in ring-req [:session :spotify-user])]
+    (clojure.pprint/pprint spotify-user)
     (ws/send! uid [::set-spotify-id (:id spotify-user)])
     (let [albums (spotify/get-user-albums (:access_token spotify-user))
           progress-ch (chan 10)]

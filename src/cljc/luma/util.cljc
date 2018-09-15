@@ -21,3 +21,6 @@
 
 (defn map-values [m f]
   (when m (into {} (map (juxt key (comp f val))) m)))
+
+(defn map-by [keyfn valfn coll]
+  (into {} (map (juxt keyfn valfn)) coll))

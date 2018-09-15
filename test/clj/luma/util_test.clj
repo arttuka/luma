@@ -48,3 +48,10 @@
   (testing "map-values"
     (is (= {:foo 1, :bar 2, :baz 3}
            (map-values {:foo 0, :bar 1, :baz 2} inc)))))
+
+(deftest map-by-test
+  (testing "map-by"
+    (is (= {0 2, 1 3, 2 4}
+           (map-by dec inc [1 2 3])))
+    (is (= {false 3, true 4}
+           (map-by even? identity [1 2 3 4])))))
