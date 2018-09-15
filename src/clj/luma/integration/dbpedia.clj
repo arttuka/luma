@@ -37,7 +37,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 SELECT * {
   {
-    SELECT ?id ?label ?name WHERE {
+    SELECT ?id ?label ?name (\"genre\" AS ?type) WHERE {
       ?id a dbo:Genre, dbo:MusicGenre ;
           rdfs:label ?label .
       FILTER(langMatches(lang(?label), \"EN\"))
@@ -47,13 +47,13 @@ SELECT * {
       }
     }
   } UNION {
-    SELECT ?id ?label ?name WHERE {
-      ?genre a dbo:Genre, dbo:MusicGenre .
-      ?id dbo:wikiPageRedirects ?genre ;
-          rdfs:label ?label .
+    SELECT ?id ?label ?name (\"redirect\" AS ?type) WHERE {
+      ?id a dbo:Genre, dbo:MusicGenre .
+      ?redirect dbo:wikiPageRedirects ?id ;
+                rdfs:label ?label .
       FILTER(langMatches(lang(?label), \"EN\"))
       OPTIONAL {
-        ?id foaf:name ?name .
+        ?redirect foaf:name ?name .
         FILTER(langMatches(lang(?name), \"EN\"))
       }
     }

@@ -8,11 +8,11 @@
   [(s/schema genre
      (s/fields
        [dbo_uri :uri :indexed :unique-identity]
-       [title :string :indexed :many]
+       [title :string :indexed]
+       [alt_title :string :indexed :many]
        [subgenre :ref :many]
        [fusiongenre :ref :many]
        [derivative :ref :many]
-       [same_as :ref :many]
        [tag :ref :many]))
 
    (s/schema artist
