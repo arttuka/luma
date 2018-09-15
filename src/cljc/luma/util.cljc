@@ -18,3 +18,6 @@
     (when (seq coll)
       (concat (f (first coll))
               (lazy-mapcat f (rest coll))))))
+
+(defn map-values [m f]
+  (when m (into {} (map (juxt key (comp f val))) m)))

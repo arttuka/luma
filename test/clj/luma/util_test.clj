@@ -43,3 +43,8 @@
         (is (zero? @hits))
         (is (= [1 1 1 1 1 1] (take 6 s)))
         (is (= 6 @hits))))))
+
+(deftest map-values-test
+  (testing "map-values"
+    (is (= {:foo 1, :bar 2, :baz 3}
+           (map-values {:foo 0, :bar 1, :baz 2} inc)))))
