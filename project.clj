@@ -28,7 +28,8 @@
                  [org.postgresql/postgresql "42.2.2"]
                  [hikari-cp "2.2.0"]
                  [clj-time "0.14.4"]
-                 [com.datomic/client-pro "0.8.20"]]
+                 [com.datomic/datomic-pro "0.9.5703" :exclusions [com.google.guava/guava]]
+                 [datomic-schema "1.3.0"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-figwheel "0.5.14"]

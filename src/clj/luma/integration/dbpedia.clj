@@ -1,11 +1,16 @@
 (ns luma.integration.dbpedia
   (:require [org.httpkit.client :as http]
             [cheshire.core :as json]
-            [luma.util :refer [map-values]]))
+            [luma.util :refer [map-values]])
+  (:import (java.net URI)))
+
+(def dbo {:musicSubgenre    (URI. "http://dbpedia.org/ontology/musicSubgenre")
+          :musicFusionGenre (URI. "http://dbpedia.org/ontology/musicFusionGenre")
+          :derivative       (URI. "http://dbpedia.org/ontology/derivative")})
 
 (defn ^:private format-sparql-value [{:keys [type datatype value]}]
   (case type
-    "uri" value
+    "uri" (URI. value)
     "literal" value
     "bnode" value
     "typed-literal" (case datatype
@@ -45,6 +50,7 @@ select ?s ?p ?o where {
   VALUES ?p { dbo:musicSubgenre dbo:musicFusionGenre dbo:derivative } .
   ?s ?p ?o ;
       a dbo:MusicGenre, dbo:Genre .
+  FILTER(?s != ?o)
 } ORDER BY ?s ?p ?o")
 
 (defn get-links []

@@ -40,10 +40,12 @@
 (defn stop! []
   (mount/stop))
 
-(defn start! []
+(defn start! [& states]
   (mount/in-cljc-mode)
-  (mount/start))
+  (apply mount/start states))
 
 (defn restart! []
   (stop!)
   (repl/refresh :after 'user/start!))
+
+
