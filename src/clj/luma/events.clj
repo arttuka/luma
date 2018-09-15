@@ -1,9 +1,8 @@
 (ns luma.events
   (:require [clojure.core.async :refer [go go-loop <! >! chan]]
             [config.core :refer [env]]
-            [luma.db :as db]
             [luma.datomic :as datomic]
-            [luma.util :refer [map-by]]
+            [luma.util :refer [map-by map-values]]
             [luma.websocket :as ws]
             [luma.integration.spotify :as spotify]
             [luma.integration.lastfm :as lastfm]))
@@ -16,26 +15,6 @@
   :chsk/uidport-close
   [_])
 
-(defn get-and-save-artist-tags [artist]
-  (let [tags (lastfm/get-artist-tags artist)]
-    (db/save-artist-tags artist tags)
-    tags))
-
-(defn get-and-save-album-tags [artist title]
-  (let [tags (lastfm/get-album-tags artist title)]
-    (db/save-album-tags artist title tags)
-    tags))
-
-(defn get-and-save-tags [artists title]
-  (let [album-tags (into #{} (mapcat #(get-and-save-album-tags % title) artists))
-        tags (into album-tags (mapcat get-and-save-artist-tags artists))]
-    tags))
-
-(defn get-album-tags [artists title]
-  (db/with-transaction
-    (if (db/has-tags? artists title)
-      (db/get-tags artists title)
-      (get-and-save-tags artists title))))
 
 (defn load-album-tags [album]
   (let [album-tags (into #{} (mapcat #(lastfm/get-album-tags (:name %) (:title album)) (:artists album)))
@@ -59,16 +38,6 @@
                                (update :artists into artist-tags))]
                 (recur albums new-tags (inc i)))))))
 
-(defn load-tags [albums progress-ch]
-  (go-loop [[album & albums] albums
-            album-tags (transient {})
-            i 0]
-    (if-not album
-      (persistent! album-tags)
-      (let [tags (get-album-tags (map :name (:artists album)) (:title album))]
-        (>! progress-ch i)
-        (recur albums (assoc! album-tags (:id album) tags) (inc i))))))
-
 (defmethod ws/event-handler
   ::ws/connect
   [{:keys [uid ring-req]}]
@@ -85,5 +54,10 @@
           (recur (<! progress-ch))))
       (go
         (let [{:keys [albums artists]} (<! (load-missing-tags all-albums progress-ch))
-              db (datomic/save-albums! artists albums)]
-          (ws/send! uid [::tags (datomic/get-album-genres db (map :id all-albums))]))))))
+              db (datomic/save-albums! artists albums)
+              album-genres (datomic/get-album-genres db (map :id all-albums))
+              genre-ids (into #{} (mapcat val) album-genres)
+              id->title (datomic/get-genres db genre-ids)
+              subgenres (datomic/get-subgenres db genre-ids)]
+          (ws/send! uid [::tags (map-values album-genres #(map id->title %))])
+          (ws/send! uid [::subgenres subgenres]))))))
