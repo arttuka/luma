@@ -22,22 +22,20 @@
       (assoc genre :alt-labels (alt-labels genre (id->redirects (:id genre)))))))
 
 (defn setup-db! []
-  (let [id (atom 0)
-        next-id #(swap! id dec)
-        genres (for [genre (process-genres (dbpedia/get-genres))]
-                 {:db/id           (d/tempid :db.part/user (next-id))
+  (let [genres (for [genre (process-genres (dbpedia/get-genres))]
+                 {:db/id           (:id genre)
                   :genre/dbo_uri   (:id genre)
                   :genre/title     (:label genre)
                   :genre/alt_title (:alt-labels genre)})
-        genre->id (map-by :genre/dbo_uri :db/id genres)
+        exists? (into #{} (map :genre/dbo_uri) genres)
         links (for [[s ls] (group-by :s (dbpedia/get-links))
-                    :when (contains? genre->id s)
+                    :when (exists? s)
                     :let [outgoing (apply merge-with concat (for [{:keys [p o]} ls]
                                                               {p [o]}))]]
-                {:db/id             (genre->id s)
-                 :genre/subgenre    (map genre->id (get outgoing (dbo :musicSubgenre)))
-                 :genre/fusiongenre (map genre->id (get outgoing (dbo :musicFusionGenre)))
-                 :genre/derivative  (map genre->id (get outgoing (dbo :derivative)))})]
+                {:db/id             s
+                 :genre/subgenre    (get outgoing (dbo :musicSubgenre))
+                 :genre/fusiongenre (get outgoing (dbo :musicFusionGenre))
+                 :genre/derivative  (get outgoing (dbo :derivative))})]
     (d/transact @connection (schema/generate-schema))
     (d/transact @connection (concat genres links))))
 
@@ -81,22 +79,18 @@
       (log/warnf "Some tags weren't connected: %s" (str/join ", " unconnected)))))
 
 (defn save-albums! [artists albums]
-  (let [id (atom 0)
-        next-id #(swap! id dec)
-        tag-entities (for [tag (distinct (concat (mapcat val artists)
+  (let [tag-entities (for [tag (distinct (concat (mapcat val artists)
                                                  (mapcat (comp :tags val) albums)))]
-                       {:db/id    (d/tempid :db.part/user (next-id))
+                       {:db/id    tag
                         :tag/name tag})
-        tag->id (map-by :tag/name :db/id tag-entities)
         artist-entities (for [[artist-id tags] artists]
-                          {:db/id      (d/tempid :db.part/user (next-id))
+                          {:db/id      artist-id
                            :artist/id  artist-id
-                           :artist/tag (map tag->id tags)})
-        artist->id (map-by :artist/id :db/id artist-entities)
+                           :artist/tag tags})
         album-entities (for [[album-id {:keys [artists tags]}] albums]
                          {:album/id     album-id
-                          :album/artist (map artist->id artists)
-                          :album/tag    (map tag->id tags)})
+                          :album/artist artists
+                          :album/tag    tags})
         tx @(d/transact @connection (concat
                                       tag-entities
                                       artist-entities
