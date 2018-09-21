@@ -66,6 +66,11 @@
     (:sort-asc db)))
 
 (re-frame/reg-sub
+  ::error
+  (fn [db]
+    (:error db)))
+
+(re-frame/reg-sub
   ::sorted-albums
   :<- [::filtered-albums]
   :<- [::sort-key]

@@ -3,12 +3,21 @@
             [clojure.set :refer [union]]
             [luma.db :as db]
             [luma.trie :refer [trie]]
-            [luma.websocket :as ws]))
+            [luma.websocket :as ws]
+            [taoensso.timbre :as log]))
 
 (re-frame/reg-fx
   ::ws/send
   (fn [event]
     (ws/send! event)))
+
+(re-frame/reg-fx
+  ::log
+  (fn [[level msg]]
+    (case level
+      :info (log/info msg)
+      :warn (log/warn msg)
+      :error (log/error msg))))
 
 (re-frame/reg-event-db
   ::initialize-db
@@ -78,6 +87,16 @@
   ::change-sort-dir
   (fn [db _]
     (update db :sort-asc not)))
+
+(re-frame/reg-event-db
+  ::error
+  (fn [db [_ error]]
+    (assoc db :error error)))
+
+(re-frame/reg-event-db
+  ::close-error
+  (fn [db _]
+    (dissoc db :error)))
 
 (re-frame/reg-event-fx
   ::ws/send

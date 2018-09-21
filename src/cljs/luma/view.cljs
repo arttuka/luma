@@ -9,7 +9,8 @@
             [oops.core :refer [oget]]
             [luma.components.autosuggest :refer [autosuggest]]
             [luma.events :as events]
-            [luma.subs :as subs]))
+            [luma.subs :as subs]
+            [luma.websocket :as ws]))
 
 (defn spotify-login []
   (let [uid (re-frame/subscribe [::subs/uid])
@@ -233,6 +234,16 @@
                           :color            :white}}
      "LUMA Ultimate Music Archive"]))
 
+(defn snackbar []
+  (let [error (re-frame/subscribe [::subs/error])]
+    (fn snackbar-render []
+      [ui/snackbar {:open                (boolean @error)
+                    :on-request-close    #(re-frame/dispatch [::events/close-error])
+                    :message             (or (:msg @error) "")
+                    :action              (when (:retry-event @error) "retry")
+                    :on-action-touch-tap #(do (re-frame/dispatch [::events/close-error])
+                                              (re-frame/dispatch [::ws/send [(:retry-event @error)]]))}])))
+
 (defn main-panel []
   [ui/mui-theme-provider
    {:mui-theme (get-mui-theme)}
@@ -240,4 +251,5 @@
     [header]
     [toolbar]
     [albums]
-    [terms-of-use]]])
+    [terms-of-use]
+    [snackbar]]])

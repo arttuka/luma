@@ -1,11 +1,12 @@
 (ns luma.events
   (:require [clojure.core.async :refer [go go-loop <! >! >!!] :as async]
             [config.core :refer [env]]
+            [taoensso.timbre :as log]
             [luma.db :as db]
             [luma.websocket :as ws]
             [luma.integration.spotify :as spotify]
             [luma.integration.lastfm :as lastfm]
-            [taoensso.timbre :as log]))
+            [luma.util :refer [go-ex <?]]))
 
 (defmethod ws/event-handler
   :chsk/uidport-open
@@ -33,25 +34,44 @@
 
 (defn load-tags [albums progress-ch]
   (db/with-transaction
-    (try
-      (let [album-ids (into #{} (map :id) albums)
-            artist-ids (into #{} (comp (mapcat :artists) (map :id)) albums)
-            existing-albums (db/get-albums db/*tx* album-ids)
-            existing-artists (db/get-artists db/*tx* artist-ids)
-            new-albums (remove (comp existing-albums :id) albums)
-            new-artists (sequence (comp (mapcat :artists) (remove (comp existing-artists :id)) (distinct)) albums)
-            total (+ (count new-albums) (count new-artists))
-            i (atom 0)
-            report-progress! #(>!! progress-ch (/ (swap! i inc) total))
-            album-tags (get-album-tags new-albums report-progress!)
-            artist-tags (get-artist-tags new-artists report-progress!)]
-        (db/save-tags! db/*tx* artist-tags album-tags)
-        (db/get-tags db/*tx* album-ids))
-      (catch Exception e
-        (log/error e "Error loading tags")
-        (async/close! progress-ch)
-        (db/rollback! db/*tx*)
-        nil))))
+    (let [album-ids (into #{} (map :id) albums)
+          artist-ids (into #{} (comp (mapcat :artists) (map :id)) albums)
+          existing-albums (db/get-albums db/*tx* album-ids)
+          existing-artists (db/get-artists db/*tx* artist-ids)
+          new-albums (remove (comp existing-albums :id) albums)
+          new-artists (sequence (comp (mapcat :artists) (remove (comp existing-artists :id)) (distinct)) albums)
+          total (+ (count new-albums) (count new-artists))
+          i (atom 0)
+          report-progress! #(>!! progress-ch (/ (swap! i inc) total))
+          album-tags (get-album-tags new-albums report-progress!)
+          artist-tags (get-artist-tags new-artists report-progress!)]
+      (db/save-tags! db/*tx* artist-tags album-tags)
+      (db/get-tags db/*tx* album-ids))))
+
+(defn send-albums [uid spotify-access-token]
+  (let [albums (spotify/get-user-albums spotify-access-token)
+        progress-ch (async/chan 10)
+        tags-ch (go-ex (load-tags albums progress-ch))]
+    (ws/send! uid [::albums albums])
+    (go-loop [i (<! progress-ch)]
+      (when i
+        (log/info "progress" i)
+        (ws/send! uid [::progress (int (* i 100))])
+        (recur (<! progress-ch))))
+    (go
+      (try
+        (ws/send! uid [::tags (<? tags-ch)])
+        (catch Exception e
+          (log/error e "Error while loading tags")
+          (async/close! progress-ch)
+          (ws/send! uid [::error {:msg         "Unable to load tags. Try reloading the page later."
+                                  :retry-event ::retry-load-tags}]))))))
+
+(defmethod ws/event-handler
+  ::retry-load-tags
+  [{:keys [uid ring-req]}]
+  (when-let [spotify-user (get-in ring-req [:session :spotify-user])]
+    (send-albums uid (:access_token spotify-user))))
 
 (defmethod ws/event-handler
   ::ws/connect
@@ -60,13 +80,4 @@
                             :spotify-redirect-uri (str (env :baseurl) "/spotify-callback")}])
   (when-let [spotify-user (get-in ring-req [:session :spotify-user])]
     (ws/send! uid [::set-spotify-id (:id spotify-user)])
-    (let [albums (spotify/get-user-albums (:access_token spotify-user))
-          progress-ch (async/chan 10)
-          tags-ch (go (load-tags albums progress-ch))]
-      (ws/send! uid [::albums albums])
-      (go-loop [i (<! progress-ch)]
-        (when i
-          (log/info "progress" i)
-          (ws/send! uid [::progress (int (* i 100))])
-          (recur (<! progress-ch))))
-      (go (ws/send! uid [::tags (<! tags-ch)])))))
+    (send-albums uid (:access_token spotify-user))))
