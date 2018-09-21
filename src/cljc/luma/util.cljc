@@ -1,20 +1,31 @@
-(ns luma.util)
+(ns luma.util
+  (:require [clojure.core.async :refer [<! go]]))
 
-(defmacro when-let+
-  "Like when-let, but allows multiple bindings and returns nil if any of the bindings is nil"
-  [bindings & body]
-  (if (seq bindings)
-    `(when-let [~@(take 2 bindings)]
-       (when-let+ ~(vec (drop 2 bindings)) ~@body))
-    `(do ~@body)))
-
-(defn grouping [group-keys sub-key coll]
-  (let [gp (group-by #(select-keys % group-keys) coll)]
-    (for [[k v] gp]
-      (assoc k sub-key (map #(apply dissoc % group-keys) v)))))
+(defn ^:private if-cljs [env then else]
+  (if (:ns env)
+    then
+    else))
 
 (defn lazy-mapcat [f coll]
   (lazy-seq
     (when (seq coll)
       (concat (f (first coll))
               (lazy-mapcat f (rest coll))))))
+
+(defmacro go-ex
+  "Like go, but catches and returns any exception"
+  [& body]
+  `(go (try
+         ~@body
+         (catch ~(if-cljs &env 'js/Error 'java.lang.Throwable) t#
+           t#))))
+
+(defn throw-if-error [e]
+  (if (instance? #?(:clj Throwable
+                    :cljs js/Error)
+                 e)
+    (throw e)
+    e))
+
+(defmacro <? [port]
+  `(throw-if-error (<! ~port)))
