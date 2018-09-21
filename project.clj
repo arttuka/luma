@@ -60,6 +60,7 @@
                                         [com.cemerick/piggieback "0.2.2"]
                                         [hawk "0.2.11"]
                                         [re-frisk "0.5.4"]
+                                        [day8.re-frame/test "0.1.5"]
                                         [org.clojure/tools.namespace "0.2.11"]]
 
                        :plugins        [[lein-figwheel "0.5.15"]

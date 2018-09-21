@@ -83,4 +83,4 @@
           sort-comp (if sort-asc
                       compare
                       (comp - compare))]
-      (sort-by sort-fn sort-comp albums))))
+      (sort-by (juxt sort-fn :id) sort-comp albums))))
