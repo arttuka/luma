@@ -3,4 +3,5 @@
 (def default-db
   {:selected-tags #{}
    :sort-key      :artist
-   :sort-asc      true})
+   :sort-asc      true
+   :progress      0})

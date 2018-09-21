@@ -41,7 +41,7 @@
                            :mode  (if (seq @albums)
                                     :determinate
                                     :indeterminate)
-                           :max   (count @albums)
+                           :max   100
                            :min   0
                            :value @progress}])))
 

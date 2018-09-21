@@ -1,5 +1,6 @@
 (ns luma.integration.lastfm
   (:require [config.core :refer [env]]
+            [clojure.string :as str]
             [org.httpkit.client :as http]
             [cheshire.core :as json]))
 
@@ -16,7 +17,7 @@
         (->>
           (:tag (:toptags json))
           (take 5)
-          (map :name)))
+          (map (comp str/lower-case :name))))
       (throw (ex-info "HTTP error" response)))))
 
 (defn get-artist-tags [artist]
@@ -31,5 +32,5 @@
         (->>
           (:tag (:toptags json))
           (take 5)
-          (map :name)))
+          (map (comp str/lower-case :name))))
       (throw (ex-info "HTTP error" response)))))
