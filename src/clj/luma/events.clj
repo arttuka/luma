@@ -55,7 +55,6 @@
     (ws/send! uid [::albums albums])
     (go-loop [i (<! progress-ch)]
       (when i
-        (log/info "progress" i)
         (ws/send! uid [::progress (int (* i 100))])
         (recur (<! progress-ch))))
     (go

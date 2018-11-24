@@ -70,11 +70,9 @@
 
 (defroutes routes
   (GET "/spotify-callback" [state code :as req]
-    (if (not= (UUID/fromString state) (get-in req [:session :uid] ::not-found))
-      {:status 400, :body "UID mismatch", :headers {"Content-Type" "text/plain"}}
-      (let [token (get-access-token code)
-            user-info (get-user-info (:access_token token))
-            session (assoc (:session req) :spotify-user (assoc token :id (:id user-info)))]
-        (->
-          (redirect "/")
-          (assoc :session session))))))
+    (let [token (get-access-token code)
+          user-info (get-user-info (:access_token token))
+          session (assoc (:session req) :spotify-user (assoc token :id (:id user-info)))]
+      (->
+        (redirect "/")
+        (assoc :session session)))))
