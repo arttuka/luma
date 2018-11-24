@@ -10,7 +10,7 @@ create table album_artist (
   album text not null references album(id),
   artist text not null references artist(id),
   primary key (album, artist)
-)
+);
 
 create table tag (
   tag text not null primary key

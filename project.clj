@@ -13,6 +13,7 @@
                  [cljsjs/react-autosuggest "9.3.4-0"]
                  [binaryage/oops "0.6.2"]
                  [garden "1.3.6"]
+                 [ns-tracker "0.3.1"]
                  [compojure "1.6.1" :exclusions [ring/ring-core commons-codec]]
                  [yogthos/config "1.1.1"]
                  [ring "1.7.0" :exclusions [ring/ring-codec commons-codec org.eclipse.jetty/jetty-http org.eclipse.jetty/jetty-io]]

@@ -8,11 +8,11 @@
             [hikari-cp.core :as hikari]))
 
 (def datasource-options {:adapter       "postgresql"
-                         :username      (env :postgresql-user)
-                         :password      (env :postgresql-password)
-                         :database-name (env :postgresql-database)
-                         :server-name   (env :postgresql-server)
-                         :port-number   (env :postgresql-port)})
+                         :username      (env :db-user)
+                         :password      (env :db-password)
+                         :database-name (env :db-name)
+                         :server-name   (env :db-host)
+                         :port-number   (env :db-port)})
 
 (defstate db
   :start (hikari/make-datasource datasource-options)
