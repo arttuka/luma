@@ -2,18 +2,12 @@
   (:require [clojure.string :as str]
             [ring.middleware.not-modified :refer [wrap-not-modified]]
             [clj-time.format :as f]
-            [clj-time.coerce :as c])
+            [clj-time.coerce :as c]
+            [luma.util :refer [->hex]])
   (:import (java.security MessageDigest)
            (java.io File)))
 
 (def rfc2616-formatter (f/formatter "EEE, dd MMM yyyy HH:mm:ss zzz"))
-
-(defn to-hex-string [#^bytes bytes]
-  (.toString (BigInteger. 1 bytes) 16))
-
-(defn sha1 [obj]
-  (let [bytes (.getBytes (with-out-str (pr obj)))]
-    (to-hex-string (.digest (MessageDigest/getInstance "SHA1") bytes))))
 
 (defn calculate-response-etag [{:strs [Last-Modified Content-Length]}]
   (when (and Last-Modified Content-Length)
@@ -22,10 +16,10 @@
 
 (defmulti calculate-etag class)
 
-(defmethod calculate-etag String [s]
-  (sha1 s))
+(defmethod calculate-etag String [^String s]
+  (->hex (.digest (MessageDigest/getInstance "SHA1") (.getBytes s))))
 
-(defmethod calculate-etag File [f]
+(defmethod calculate-etag File [^File f]
   (str (.lastModified f) \- (.length f)))
 
 (defn wrap-etag [handler {paths :paths :or {paths [#".*"]}}]

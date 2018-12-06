@@ -69,6 +69,32 @@
    [:&.logout
     {:background-color :black}]])
 
+(defstyles lastfm-login-button
+  [:.lastfm-button
+   {:background-color "#b90000"
+    :color            :white
+    :text-decoration  :none
+    :font-family      "Helvetica Neue, sans-serif"
+    :font-weight      :bold
+    :display          :inline-block
+    :height           "30px"
+    :width            "180px"
+    :text-align       :center
+    :line-height      "30px"
+    :border-radius    "15px"
+    :padding-right    "6px"
+    :float            :right}
+   [:img
+    {:height "22px"
+     :float  :right
+     :margin "4px"}]
+   [:div
+    {:display        :inline-block
+     :vertical-align :middle}]
+
+   [:&.logout
+    {:background-color :black}]])
+
 (defstyles toolbar
   [:#toolbar
    {:padding       "10px"
@@ -90,7 +116,8 @@
      :display    :flex
      :flex-wrap  :wrap
      :min-height "32px"}]]
-  spotify-login-button)
+  spotify-login-button
+  lastfm-login-button)
 
 (defstyles terms-of-use
   [:.terms-of-use
@@ -106,8 +133,8 @@
    [:.terms-of-use-dialog
     [:close-button
      {:position :absolute
-      :top "10px"
-      :right "10px"}]]])
+      :top      "10px"
+      :right    "10px"}]]])
 
 (defstyles header
   [:#header

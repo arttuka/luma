@@ -34,6 +34,24 @@
          [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
          "Login with Spotify"]))))
 
+(defn lastfm-login []
+  (let [lastfm-id (re-frame/subscribe [::subs/lastfm-id])
+        api-key (re-frame/subscribe [::subs/env :lastfm-api-key])
+        redirect-uri (re-frame/subscribe [::subs/env :lastfm-redirect-uri])]
+    (fn lastfm-login-render []
+      (if @lastfm-id
+        [:div.login-button-container
+         [:div.login.lastfm-button
+          [:img {:src "/images/Last.fm_Logo_White.png"}]
+          @lastfm-id]
+         [:a.logout.lastfm-button
+          {:href "/logout"}
+          [:img {:src "/images/Last.fm_Logo_White.png"}]
+          (str "Log out")]]
+        [:a.lastfm-button {:href (gstring/format "http://www.last.fm/api/auth/?api_key=%s&cb=%s"
+                                                @api-key @redirect-uri)}
+       "Login with" [:img {:src "/images/Last.fm_Logo_White.png"}]]))))
+
 (defn progress-bar []
   (let [progress (re-frame/subscribe [::subs/progress])
         albums (re-frame/subscribe [::subs/albums])]
@@ -105,12 +123,14 @@
       (if @spotify-id
         [ui/paper {:id :toolbar}
          [spotify-login]
+         [lastfm-login]
          [tag-filter]
          [sort-dropdown]
          [selected-tags]
          [:div {:style {:clear :both}}]]
         [ui/paper {:id :toolbar}
          [spotify-login]
+         [lastfm-login]
          [:div {:style {:clear :both}}]]))))
 
 (defn album [a]

@@ -40,6 +40,11 @@
     (assoc db :spotify-id spotify-id)))
 
 (re-frame/reg-event-db
+  ::set-lastfm-id
+  (fn [db [_ lastfm-id]]
+    (assoc db :lastfm-id lastfm-id)))
+
+(re-frame/reg-event-db
   ::albums
   (fn [db [_ albums]]
     (assoc db :albums (into {} (for [album albums]

@@ -4,7 +4,7 @@
                     [clojure.core.async :as async :refer [go <! >!]]
                     [luma.test-util :refer [test-async]]
     #?(:clj
-                    [luma.util :refer [lazy-mapcat go-ex <?]]
+                    [luma.util :refer [lazy-mapcat go-ex <? ->hex]]
        :cljs [luma.util :refer [lazy-mapcat] :refer-macros [go-ex <?]])))
 
 (deftest lazy-mapcat-test
@@ -56,3 +56,7 @@
             (doseq [v vals] (>! ch v))
             (async/close! ch)
             (doseq [v vals] (is (= v (<! ch))))))))))
+
+#?(:clj (deftest ->hex-test
+          (testing "->hex"
+            (is (= "deadbeef" (->hex (byte-array [222 173 190 239])))))))

@@ -3,11 +3,10 @@
             [taoensso.sente.packers.transit :as sente-transit]
             [taoensso.timbre :as log]
             [mount.core :refer [defstate]]
-    #?@(:clj  [
-            [taoensso.sente.server-adapters.http-kit :refer [get-sch-adapter]]
-            [compojure.core :refer [defroutes GET POST]]]
-        :cljs [[goog.string :as gs]
-               goog.date.UtcDateTime])
+            #?@(:clj  [[taoensso.sente.server-adapters.http-kit :refer [get-sch-adapter]]
+                       [compojure.core :refer [defroutes GET POST]]]
+                :cljs [[goog.string :as gs]
+                       goog.date.UtcDateTime])
             [cognitect.transit :as transit])
   #?(:clj (:import [org.joda.time])))
 

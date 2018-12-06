@@ -76,7 +76,11 @@
   ::ws/connect
   [{:keys [uid ring-req]}]
   (ws/send! uid [::set-env {:spotify-client-id    (env :spotify-client-id)
-                            :spotify-redirect-uri (str (env :baseurl) "/spotify-callback")}])
+                            :spotify-redirect-uri (str (env :baseurl) "/spotify-callback")
+                            :lastfm-api-key       (env :lastfm-api-key)
+                            :lastfm-redirect-uri  (str (env :baseurl) "/lastfm-callback")}])
   (when-let [spotify-user (get-in ring-req [:session :spotify-user])]
     (ws/send! uid [::set-spotify-id (:id spotify-user)])
-    (send-albums uid (:access_token spotify-user))))
+    (send-albums uid (:access_token spotify-user)))
+  (when-let [lastfm-user (get-in ring-req [:session :lastfm-user])]
+    (ws/send! uid [::set-lastfm-id (:name lastfm-user)])))

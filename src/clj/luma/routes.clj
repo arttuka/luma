@@ -3,6 +3,7 @@
             [compojure.route :refer [resources not-found]]
             [ring.util.response :refer [resource-response content-type redirect]]
             [luma.integration.spotify :as spotify]
+            [luma.integration.lastfm :as lastfm]
             [luma.websocket :as websocket])
   (:import (java.util UUID)))
 
@@ -19,6 +20,7 @@
       (redirect "/")
       (assoc :session {})))
   spotify/routes
+  lastfm/routes
   websocket/routes
   (resources "/")
   (not-found "Not Found"))

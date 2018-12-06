@@ -29,3 +29,7 @@
 
 (defmacro <? [port]
   `(throw-if-error (<! ~port)))
+
+#?(:clj
+   (defn ->hex [#^bytes bytes]
+     (.toString (BigInteger. 1 bytes) 16)))

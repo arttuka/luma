@@ -19,6 +19,11 @@
     (:spotify-id db)))
 
 (re-frame/reg-sub
+  ::lastfm-id
+  (fn [db _]
+    (:lastfm-id db)))
+
+(re-frame/reg-sub
   ::albums
   (fn [db _]
     (:albums db)))
