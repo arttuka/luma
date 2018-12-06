@@ -1,6 +1,6 @@
 (ns luma.routes
   (:require [compojure.core :refer [GET defroutes]]
-            [compojure.route :refer [resources]]
+            [compojure.route :refer [resources not-found]]
             [ring.util.response :refer [resource-response content-type redirect]]
             [luma.integration.spotify :as spotify]
             [luma.websocket :as websocket])
@@ -20,4 +20,5 @@
       (assoc :session {})))
   spotify/routes
   websocket/routes
-  (resources "/"))
+  (resources "/")
+  (not-found "Not Found"))

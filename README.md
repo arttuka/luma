@@ -6,7 +6,13 @@ A web service that presents the user a sortable and filterable view of their Spo
 
 Start a REPL, then run `(user/start!)` to run figwheel, garden and server with automatic reload of all resources.
 
-### Run tests:
+### Run Clojure tests:
+
+```
+lein test
+```
+
+### Run ClojureScript tests
 
 `karma` needs to be installed:
 ```
@@ -23,8 +29,6 @@ The above command assumes that you have [phantomjs](https://www.npmjs.com/packag
 ## Production Build
 
 ```
-lein clean
-lein uberjar
+docker build . -t arttuka/luma:latest
 ```
 
-That should compile the clojurescript code first, and then create the standalone jar.
