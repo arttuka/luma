@@ -2,7 +2,8 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [cljsjs.material-ui]
             [cljs-react-material-ui.reagent :as ui]
-            [cljsjs.react-autosuggest]))
+            [cljsjs.react-autosuggest]
+            [oops.core :refer [oget]]))
 
 (defn ^:private suggestion [suggestion opts]
   (reagent/as-element
@@ -10,7 +11,7 @@
 
 (defn ^:private suggestion-container [props]
   (reagent/as-element
-    [ui/paper (js->clj (.-containerProps props)) (.-children props)]))
+    [ui/paper (js->clj (oget props "containerProps")) (oget props "children")]))
 
 (defn ^:private input [props]
   (reagent/as-element
@@ -39,20 +40,20 @@
                                  (reset! value ""))
             input-props (merge (dissoc options :datasource :on-change)
                                {:on-change    (fn [event new-value]
-                                                (when (= "type" (.-method new-value))
-                                                  (reset! value (.-value (.-target event)))))
+                                                (when (= "type" (oget new-value "method"))
+                                                  (reset! value (oget event "target" "value"))))
                                 :on-key-press (fn [event]
-                                                (when (and (= 13 (.-charCode event))
+                                                (when (and (= 13 (oget event "charCode"))
                                                            (some #{@value} @suggestions))
                                                   (.preventDefault event)
                                                   (select-suggestion @value)))
                                 :value        @value})]
         [:> js/Autosuggest {:suggestions                    @suggestions
                             :on-suggestions-fetch-requested (fn [event]
-                                                              (reset! suggestions (datasource (.-value event))))
+                                                              (reset! suggestions (datasource (oget event "value"))))
                             :on-suggestions-clear-requested #(reset! suggestions [])
                             :on-suggestion-selected         (fn [_ suggestion]
-                                                              (select-suggestion (.-suggestion suggestion)))
+                                                              (select-suggestion (oget suggestion "suggestion")))
                             :get-suggestion-value           identity
                             :render-suggestions-container   suggestion-container
                             :render-suggestion              suggestion

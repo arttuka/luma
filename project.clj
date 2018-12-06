@@ -96,7 +96,9 @@
                         :jar          true
                         :compiler     {:main            luma.core
                                        :output-to       "resources/public/js/compiled/app.js"
-                                       :optimizations   :whitespace
+                                       :output-dir      "resources/public/js/compiled"
+                                       :source-map      "resources/public/js/compiled/app.js.map"
+                                       :optimizations   :advanced
                                        :closure-defines {goog.DEBUG false}
                                        :pretty-print    false}}
 
