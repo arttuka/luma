@@ -8,8 +8,8 @@
 
 (def rfc2616-formatter (f/formatter "EEE, dd MMM yyyy HH:mm:ss zzz"))
 
-(defn to-hex-string [bytes]
-  (str/join "" (map #(Integer/toHexString (bit-and % 0xff)) bytes)))
+(defn to-hex-string [#^bytes bytes]
+  (.toString (BigInteger. 1 bytes) 16))
 
 (defn sha1 [obj]
   (let [bytes (.getBytes (with-out-str (pr obj)))]

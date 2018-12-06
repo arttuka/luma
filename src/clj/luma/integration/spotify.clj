@@ -1,6 +1,6 @@
 (ns luma.integration.spotify
   (:require [compojure.core :refer [GET defroutes]]
-            [ring.util.response :refer [response redirect]]
+            [ring.util.response :refer [redirect]]
             [cheshire.core :as json]
             [org.httpkit.client :as http]
             [config.core :refer [env]]
@@ -31,7 +31,7 @@
                                             :client_secret (env :spotify-client-secret)}})
         body (json/parse-string (:body response) true)]
     (-> body
-        (assoc :expiration (time/plus (time/now) (time/seconds (:expires_in body))))
+        (assoc :expiration (time/plus (time/now) (time/seconds (:expires_in body 3600))))
         (select-keys [:access_token :refresh_token :expiration]))))
 
 (defn ^:private get-user-info [access-token]

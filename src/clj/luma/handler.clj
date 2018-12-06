@@ -17,13 +17,16 @@
         wrap-refresh-spotify
         (wrap-defaults (-> site-defaults
                            (assoc-in [:session :cookie-attrs :max-age] 2592000)
+                           (assoc-in [:session :cookie-attrs :same-site] :lax)
                            (assoc-in [:session :store] (memory-store dev-session-store)))))))
 
 (defn wrap-prod-middleware [handler]
   (-> handler
       wrap-refresh-spotify
-      (wrap-defaults (assoc-in site-defaults [:session :cookie-attrs :max-age] 2592000))
-      (wrap-etag {:paths [#".*\.(css|png|js)$" #"/"]})))
+      (wrap-defaults (-> site-defaults
+                         (assoc-in [:session :cookie-attrs :max-age] 2592000)
+                         (assoc-in [:session :cookie-attrs :same-site] :lax)))
+      (wrap-etag {:paths [#".*\.(css|png|js)$"]})))
 
 (def handler (if (env :dev)
                (wrap-dev-middleware #'routes)
