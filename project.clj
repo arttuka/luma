@@ -59,9 +59,12 @@
                                          [ring/ring-devel "1.7.1" :exclusions []]]
 
                         :plugins        [[lein-doo "0.1.8" :exclusions [org.clojure/tools.reader]]
-                                         [lein-pdo "0.1.1"]]
+                                         [lein-pdo "0.1.1"]
+                                         [jonase/eastwood "0.3.3"]]
                         :source-paths   ["dev" "test/clj" "test/cljc"]
-                        :resource-paths ["dev-resources"]}
+                        :resource-paths ["dev-resources"]
+                        :eastwood       {:namespaces   [:source-paths]
+                                         :config-files ["dev-resources/eastwood.clj"]}}
              :provided {:dependencies [[org.clojure/clojurescript "1.10.439" :exclusions [org.clojure/tools.reader]]
                                        [com.google.errorprone/error_prone_annotations "2.1.3"]
                                        [com.google.code.findbugs/jsr305 "3.0.2"]
