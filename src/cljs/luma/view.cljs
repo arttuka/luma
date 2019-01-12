@@ -51,7 +51,7 @@
           (str "Log out")]]
         [:a.lastfm-button {:href (gstring/format "http://www.last.fm/api/auth/?api_key=%s&cb=%s"
                                                  @api-key @redirect-uri)}
-         "Login with" [:img {:src "/images/Last.fm_Logo_White.png"}]]))))
+         "Login" [:img {:src "/images/Last.fm_Logo_White.png"}]]))))
 
 (defn progress-bar []
   (let [progress (re-frame/subscribe [::subs/progress])

@@ -18,6 +18,9 @@
      [:.album-playcount
       [:.bold
        {:font-weight :bold}]]
+     [:.album-image
+      {:width  "320px"
+       :height "320px"}]
      [:.title
       {:font-size     "24px"
        :font-weight   :bold
