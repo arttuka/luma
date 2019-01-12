@@ -84,7 +84,8 @@
     (let [sort-fn (case sort-key
                     :artist (comp str/lower-case :name first :artists)
                     :album (comp str/lower-case :title)
-                    :added (comp str :added))
+                    :added (comp str :added)
+                    :playcount :playcount)
           sort-comp (if sort-asc
                       compare
                       (comp - compare))]

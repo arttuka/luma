@@ -94,7 +94,8 @@
                      :hint-text            "Tag"}]])))
 
 (defn sort-dropdown []
-  (let [sort-key (re-frame/subscribe [::subs/sort-key])
+  (let [lastfm-id (re-frame/subscribe [::subs/lastfm-id])
+        sort-key (re-frame/subscribe [::subs/sort-key])
         sort-asc (re-frame/subscribe [::subs/sort-asc])
         value (atom @sort-key)
         palette (oget (get-mui-theme) "palette")]
@@ -110,7 +111,10 @@
         [ui/menu-item {:value        :album
                        :primary-text "Album title"}]
         [ui/menu-item {:value        :added
-                       :primary-text "Added at"}]]
+                       :primary-text "Added at"}]
+        (when @lastfm-id
+          [ui/menu-item {:value        :playcount
+                         :primary-text "Scrobbles"}])]
        [ui/icon-button {:on-click #(re-frame/dispatch [::events/change-sort-dir])
                         :style    {:position :absolute
                                    :top      "24px"}}
