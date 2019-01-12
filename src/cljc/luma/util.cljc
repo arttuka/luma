@@ -1,5 +1,5 @@
 (ns luma.util
-  (:require [clojure.core.async :refer [<! go]]))
+  (:require [clojure.core.async :as async :refer [>! <! go go-loop chan dropping-buffer timeout]]))
 
 (defn ^:private if-cljs [env then else]
   (if (:ns env)
@@ -21,7 +21,7 @@
            t#))))
 
 (defn throw-if-error [e]
-  (if (instance? #?(:clj Throwable
+  (if (instance? #?(:clj  Throwable
                     :cljs js/Error)
                  e)
     (throw e)
@@ -33,3 +33,15 @@
 #?(:clj
    (defn ->hex [#^bytes bytes]
      (.toString (BigInteger. 1 bytes) 16)))
+
+#?(:clj
+   (defn throttle [f calls-per-second]
+     (let [c (chan (dropping-buffer calls-per-second))
+           ms (/ 1000 calls-per-second)]
+       (go-loop []
+         (>! c ::allowed)
+         (<! (timeout ms))
+         (recur))
+       (fn [& args]
+         (async/<!! c)
+         (apply f args)))))

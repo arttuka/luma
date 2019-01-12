@@ -5,7 +5,7 @@
             [clojure.string :as str]
             [org.httpkit.client :as http]
             [cheshire.core :as json]
-            [luma.util :refer [->hex]])
+            [luma.util :refer [->hex throttle]])
   (:import (java.security MessageDigest)))
 
 (defn md5 [^String s]
@@ -23,9 +23,9 @@
         pad (apply str (repeat (- 32 (count md5-str)) "0"))]
     (str pad md5-str)))
 
-(defn lastfm-request
+(defn lastfm-request*
   ([method params]
-   (lastfm-request method params false))
+   (lastfm-request* method params false))
   ([method params sign?]
    (let [query-params (merge {:method  (name method)
                               :api_key (env :lastfm-api-key)
@@ -39,6 +39,8 @@
      (if (= 200 (:status response))
        (json/parse-string (:body response) true)
        (throw (ex-info "HTTP error" response))))))
+
+(def lastfm-request (throttle lastfm-request* 5))
 
 (defn get-album-tags [artist album]
   (->> (lastfm-request :album.gettoptags {:artist artist
