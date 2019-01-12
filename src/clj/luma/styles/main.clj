@@ -57,16 +57,20 @@
     :font-weight      :bold
     :display          :inline-block
     :height           "30px"
-    :width            "180px"
+    :min-width        "180px"
+    :width            :fit-content
     :text-align       :center
     :line-height      "30px"
     :border-radius    "15px"
     :padding-right    "6px"
-    :float            :right}
+    :padding-left     "33px"
+    :float            :right
+    :position         :relative}
    [:img
-    {:height "24px"
-     :float  :left
-     :margin "3px"}]
+    {:height   "24px"
+     :position :absolute
+     :left     "3px"
+     :top      "3px"}]
    [:div
     {:display        :inline-block
      :vertical-align :middle}]
@@ -83,16 +87,22 @@
     :font-weight      :bold
     :display          :inline-block
     :height           "30px"
-    :width            "180px"
+    :min-width        "180px"
+    :width            :fit-content
     :text-align       :center
     :line-height      "30px"
     :border-radius    "15px"
+    :padding-left     "86px"
     :padding-right    "6px"
-    :float            :right}
+    :margin-right     "6px"
+    :float            :right
+    :white-space      :nowrap
+    :position         :relative}
    [:img
-    {:height "22px"
-     :float  :right
-     :margin "4px"}]
+    {:height   "22px"
+     :position :absolute
+     :left     "6px"
+     :top      "4px"}]
    [:div
     {:display        :inline-block
      :vertical-align :middle}]
