@@ -9,6 +9,7 @@
                  [ring/ring-defaults "0.3.2"]
                  [ring/ring-json "0.4.0" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [http-kit "2.3.0"]
+                 [hiccup "1.0.5"]
                  [mount "0.1.15"]
                  [com.taoensso/sente "1.13.1"]
                  [com.taoensso/timbre "4.10.0"]
@@ -19,20 +20,20 @@
                  [hikari-cp "2.6.0"]
                  [clj-time "0.15.1"]]
 
-  :plugins [[lein-cljsbuild "1.1.5"]
-            [lein-figwheel "0.5.18"]
+  :plugins [[lein-ancient "0.6.15"]
+            [lein-asset-minifier "0.4.5"]
+            [lein-cljfmt "0.6.3"]
             [lein-garden "0.3.0" :exclusions [org.apache.commons/commons-compress]]
-            [lein-environ "1.1.0" :exclusions [org.clojure/clojure]]]
+            [jonase/eastwood "0.3.4"]]
 
   :min-lein-version "2.5.3"
 
-  :source-paths ["src/clj" "src/cljc"]
+  :source-paths ["src/clj" "src/cljc" "src/cljs"]
+  :test-paths []
 
-  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"
-                                    "test/js"
-                                    "resources/public/css"]
-
-  :figwheel {:css-dirs ["resources/public/css"]}
+  :clean-targets ^{:protect false} ["resources/public/js"
+                                    "target"
+                                    "resources/public/css/screen.css"]
 
   :garden {:builds [{:id           "screen"
                      :source-paths ["src/clj"]
@@ -42,32 +43,26 @@
 
   :cljfmt {:indents {async [[:inner 0]]}}
 
-  :aliases {"dev"   ["do" "clean"
-                     ["pdo" ["figwheel" "dev"]
-                      ["garden" "auto"]]]
-            "build" ["do" "clean"
-                     ["cljsbuild" "once" "min"]
-                     ["garden" "once"]]}
+  :aliases {"fig"      ["trampoline" "run" "-m" "figwheel.main"]
+            "fig:test" ["run" "-m" "figwheel.main" "-co" "test.cljs.edn" "-m" luma.figwheel-test-runner]
+            "fig:min"  ["run" "-m" "figwheel.main" "-bo" "prod"]}
 
-  :profiles {:dev      {:env            {:dev true}
-                        :dependencies   [[binaryage/devtools "0.9.10"]
-                                         [figwheel-sidecar "0.5.18" :exclusions [org.clojure/tools.nrepl args4j]]
-                                         [com.cemerick/piggieback "0.2.2"]
+  :profiles {:dev      {:dependencies   [[binaryage/devtools "0.9.10"]
+                                         [com.bhauman/rebel-readline-cljs "0.1.4" :exclusions [org.clojure/clojurescript]]
+                                         [cider/piggieback "0.3.10" :exclusions [org.clojure/clojurescript]]
                                          [hawk "0.2.11"]
                                          [re-frisk "0.5.4" :exclusions [args4j]]
                                          [day8.re-frame/test "0.1.5"]
                                          [org.clojure/tools.namespace "0.2.11"]
                                          [garden "1.3.6"]
                                          [ring/ring-devel "1.7.1" :exclusions []]]
-
-                        :plugins        [[lein-doo "0.1.8" :exclusions [org.clojure/tools.reader]]
-                                         [lein-pdo "0.1.1"]
-                                         [jonase/eastwood "0.3.3"]]
-                        :source-paths   ["dev" "test/clj" "test/cljc"]
-                        :resource-paths ["dev-resources"]
-                        :eastwood       {:namespaces   [:source-paths]
+                        :source-paths   ["dev"]
+                        :test-paths     ["test/clj" "test/cljc" "test/cljs"]
+                        :resource-paths ["dev-resources" "target"]
+                        :eastwood       {:namespaces   [:source-paths :test-paths]
                                          :config-files ["dev-resources/eastwood.clj"]}}
              :provided {:dependencies [[org.clojure/clojurescript "1.10.439" :exclusions [org.clojure/tools.reader]]
+                                       [com.bhauman/figwheel-main "0.2.0" :exclusions [org.clojure/clojurescript]]
                                        [com.google.errorprone/error_prone_annotations "2.3.2"]
                                        [com.google.code.findbugs/jsr305 "3.0.2"]
                                        [reagent "0.8.1"]
@@ -80,40 +75,16 @@
                                        [garden "1.3.6"]
                                        [com.cognitect/transit-cljs "0.8.256"]
                                        [com.andrewmcveigh/cljs-time "0.5.2"]]}
-             :uberjar  {:prep-tasks ["compile"
-                                     ["cljsbuild" "once" "min"]
-                                     ["garden" "once"]]
-                        :main       luma.main}}
+             :uberjar  {:prep-tasks         ["compile"
+                                             "fig:min"
+                                             ["garden" "once"]
+                                             ["minify-assets"]]
+                        :minify-assets      [[:css {:source "resources/public/css/screen.css"
+                                                    :target "resources/public/css/screen.min.css"}]]
+                        :uberjar-exclusions [#"public/js/compiled"
+                                             #"public/css/screen.css"]
+                        :main               luma.main
+                        :uberjar-name "luma.jar"}}
 
-  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
-
-  :cljsbuild {:builds [{:id           "dev"
-                        :source-paths ["src/cljs" "src/cljc"]
-                        :figwheel     {:on-jsload "luma.core/mount-root"}
-                        :compiler     {:main                 luma.core
-                                       :output-to            "resources/public/js/compiled/app.js"
-                                       :asset-path           "js/compiled/out"
-                                       :source-map-timestamp true
-                                       :preloads             [devtools.preload
-                                                              re-frisk.preload]
-                                       :external-config      {:devtools/config {:features-to-install :all}}
-                                       :optimizations        :none}}
-
-                       {:id           "min"
-                        :source-paths ["src/cljs" "src/cljc"]
-                        :jar          true
-                        :compiler     {:main            luma.core
-                                       :output-to       "resources/public/js/compiled/app.js"
-                                       :output-dir      "resources/public/js/compiled"
-                                       :optimizations   :advanced
-                                       :closure-defines {goog.DEBUG false}
-                                       :pretty-print    false}}
-
-                       {:id           "test"
-                        :source-paths ["src/cljs" "src/cljc" "test/cljs" "test/cljc"]
-                        :compiler     {:main          luma.runner
-                                       :output-to     "resources/public/js/compiled/test.js"
-                                       :output-dir    "resources/public/js/compiled/test/out"
-                                       :optimizations :none}}]}
-  :aot [luma.main]
-  :uberjar-name "luma.jar")
+  :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
+  :aot [luma.main])

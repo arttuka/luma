@@ -1,0 +1,3 @@
+^{:watch-dirs ["src/cljs" "src/cljc" "test/cljs" "test/cljc"]
+  :launch-js  "/usr/bin/chromium-browser"}
+{:main luma.figwheel-test-runner}

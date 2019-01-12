@@ -1,4 +1,4 @@
-(ns luma.core
+(ns ^:figwheel-hooks luma.core
   (:require [reagent.core :as reagent]
             [re-frame.core :as re-frame]
             [mount.core :as mount]
@@ -7,13 +7,12 @@
             [luma.config :as config]
             [luma.websocket :as ws]))
 
-
 (defn dev-setup []
   (when config/debug?
     (enable-console-print!)
     (println "dev mode")))
 
-(defn mount-root []
+(defn ^:after-load mount-root []
   (re-frame/clear-subscription-cache!)
   (reagent/render [view/main-panel]
                   (.getElementById js/document "app")))

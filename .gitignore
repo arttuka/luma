@@ -4,6 +4,5 @@ config.edn
 /*.log
 /target
 /*-init.clj
-/resources/public/js/compiled
-/resources/public/css/screen.css
-out
+/resources/public/js
+/resources/public/css

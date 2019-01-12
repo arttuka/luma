@@ -1,12 +1,15 @@
 (ns user
   (:require [mount.core :as mount :refer [defstate]]
-            [figwheel-sidecar.repl-api :as figwheel]
+            [figwheel.main.api :as figwheel]
             [hawk.core :as hawk]
             [clojure.tools.namespace.repl :as repl]
             [clojure.string :as str]
             [clojure.java.io :as io]
+            [taoensso.timbre :as timbre]
             [luma.styles.main :as main-css]
             luma.main))
+
+(timbre/swap-config! (fn [config] (assoc config :ns-whitelist ["luma.*"])))
 
 (defn compile-garden-css! []
   (require 'luma.styles.main :reload)
@@ -15,12 +18,8 @@
     (spit f main-css/css)))
 
 (defstate figwheel
-  :start (figwheel/start-figwheel!)
-  :stop (figwheel/stop-figwheel!))
-
-(defstate figwheel-autobuilder
-  :start (figwheel/start-autobuild "dev")
-  :stop (figwheel/stop-autobuild "dev"))
+  :start (figwheel/start {:mode :serve} "dev")
+  :stop (figwheel/stop "dev"))
 
 (defstate garden-watcher
   :start (do
@@ -35,7 +34,7 @@
   :stop (hawk/stop! @garden-watcher))
 
 (defn cljs-repl []
-  (figwheel/cljs-repl))
+  (figwheel/cljs-repl "dev"))
 
 (defn stop! []
   (mount/stop))
