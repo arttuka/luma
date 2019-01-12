@@ -79,3 +79,21 @@
                       qs qs)
         args (concat albums albums)]
     (into {} tags-xf (jdbc/query tx (into [query] args)))))
+
+(defn get-playcounts [tx username]
+  (let [query "SELECT album, playcount, updated
+                 FROM album_playcount
+                 WHERE username = ?"
+        results (jdbc/query tx [query username])]
+    (into {} (for [{:keys [album playcount updated]} results]
+               [album {:playcount playcount
+                       :updated   updated}]))))
+
+(defn save-playcounts! [tx username playcounts]
+  (jdbc/execute! tx ["INSERT INTO lastfm_user(username) VALUES (?) ON CONFLICT DO NOTHING" username])
+  (doseq [{:keys [album playcount]} playcounts]
+    (jdbc/execute! tx ["INSERT INTO album_playcount (username, album, playcount)
+                        VALUES (?, ?, ?)
+                        ON CONFLICT (username, album) DO UPDATE
+                        SET playcount = ?, updated = now()"
+                       username album playcount playcount])))

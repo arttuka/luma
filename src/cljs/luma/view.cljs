@@ -3,6 +3,7 @@
             [cljs-react-material-ui.core :refer [get-mui-theme]]
             [cljs-react-material-ui.reagent :as ui]
             [cljs-react-material-ui.icons :as icons]
+            [clojure.string :as str]
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :as re-frame]
             [goog.string :as gstring]
@@ -49,8 +50,8 @@
           [:img {:src "/images/Last.fm_Logo_White.png"}]
           (str "Log out")]]
         [:a.lastfm-button {:href (gstring/format "http://www.last.fm/api/auth/?api_key=%s&cb=%s"
-                                                @api-key @redirect-uri)}
-       "Login with" [:img {:src "/images/Last.fm_Logo_White.png"}]]))))
+                                                 @api-key @redirect-uri)}
+         "Login with" [:img {:src "/images/Last.fm_Logo_White.png"}]]))))
 
 (defn progress-bar []
   (let [progress (re-frame/subscribe [::subs/progress])
@@ -133,28 +134,52 @@
          [lastfm-login]
          [:div {:style {:clear :both}}]]))))
 
+(defn lastfm-url [album]
+  (str "https://www.last.fm/music/"
+       (str/replace (:name (first (:artists album))) \space \+)
+       "/"
+       (str/replace (:title album) \space \+)))
+
+(defn album-name [album]
+  (str (:title album) " by " (:name (first (:artists album)))))
+
 (defn album [a]
   (let [depth (atom 1)]
     (fn album-render [a]
-      [:a.album
-       {:href (:uri a)}
-       [ui/card {:class         :album-card
-                 :on-mouse-over #(reset! depth 5)
-                 :on-mouse-out  #(reset! depth 1)
-                 :z-depth       @depth}
-        [ui/card-media
-         [:img.cover {:src (:image a)}]]
-        [ui/card-title
-         [:div.title (:title a)]
-         [:div.artists
-          (for [artist (:artists a)]
-            ^{:key (str (:id a) (:artist_id artist))}
-            [:div.artist (:name artist)])]]
-        [ui/card-text
-
-         [:div.tags
-          (for [tag (interpose " · " (:tags a))]
-            tag)]]]])))
+      [:div.album
+       (when-let [playcount (:playcount a)]
+         [ui/chip {:class             :album-playcount
+                   :background-color  "#b90000"
+                   :label-color       "white"
+                   :style             {:position  :absolute
+                                       :top       5
+                                       :right     5
+                                       :width     :fit-content
+                                       :min-width nil
+                                       :cursor    :pointer}
+                   :container-element :a
+                   :href              (lastfm-url a)
+                   :title             (str "Find " (album-name a) " on last.fm")}
+          [:span.bold playcount] " scrobbles"])
+       [:a.album
+        {:href (:uri a)
+         :title (str "Open " (album-name a) " in Spotify")}
+        [ui/card {:class         :album-card
+                  :on-mouse-over #(reset! depth 5)
+                  :on-mouse-out  #(reset! depth 1)
+                  :z-depth       @depth}
+         [ui/card-media {:class :album-image}
+          [:img.cover {:src (:image a)}]]
+         [ui/card-title
+          [:div.title (:title a)]
+          [:div.artists
+           (for [artist (:artists a)]
+             ^{:key (str (:id a) (:artist_id artist))}
+             [:div.artist (:name artist)])]]
+         [ui/card-text
+          [:div.tags
+           (for [tag (interpose " · " (:tags a))]
+             tag)]]]]])))
 
 (defn albums []
   (let [has-data? (re-frame/subscribe [::subs/albums])

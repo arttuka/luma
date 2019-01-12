@@ -9,16 +9,21 @@
     :justify-content :space-evenly
     :min-height      "1000px"}
    [:a
-    {:text-decoration :none
-     :margin-bottom   "40px"}]
-   [:.album-card
-    {:width "320px"}
-    [:.title
-     {:font-size     "24px"
-      :font-weight   :bold
-      :margin-bottom "5px"}]
-    [:.artist
-     {:font-size "16px"}]]])
+    {:text-decoration :none}]
+   [:.album
+    {:margin-bottom "40px"
+     :position      :relative}
+    [:.album-card
+     {:width "320px"}
+     [:.album-playcount
+      [:.bold
+       {:font-weight :bold}]]
+     [:.title
+      {:font-size     "24px"
+       :font-weight   :bold
+       :margin-bottom "5px"}]
+     [:.artist
+      {:font-size "16px"}]]]])
 
 (defstyles spotify-login-button
   [:.login-button-container

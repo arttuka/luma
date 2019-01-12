@@ -107,3 +107,16 @@
   ::ws/send
   (fn [_ [_ event]]
     {::ws/send event}))
+
+(defn ^:private add-playcounts-to-albums [albums playcounts]
+  (reduce (fn [m [id playcount]]
+            (if (contains? m id)
+              (assoc-in m [id :playcount] playcount)
+              m))
+          albums
+          playcounts))
+
+(re-frame/reg-event-db
+  ::playcounts
+  (fn [db [_ playcounts]]
+    (update db :albums add-playcounts-to-albums playcounts)))

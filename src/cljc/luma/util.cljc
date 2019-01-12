@@ -1,5 +1,8 @@
 (ns luma.util
-  (:require [clojure.core.async :as async :refer [>! <! go go-loop chan dropping-buffer timeout]]))
+  (:require [clojure.core.async :as async :refer [>! <! go go-loop chan dropping-buffer timeout]]
+            [#?(:clj  clj-time.core
+                :cljs cljs-time.core)
+             :as time]))
 
 (defn ^:private if-cljs [env then else]
   (if (:ns env)
@@ -48,3 +51,6 @@
 
 (defn map-values [m f]
   (into {} (map (juxt key (comp f val))) m))
+
+(defn older-than-1-month? [date]
+  (time/before? date (time/minus (time/now) (time/months 1))))

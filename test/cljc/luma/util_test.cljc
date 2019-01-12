@@ -2,9 +2,12 @@
   (:require #?(:clj  [clojure.test :refer :all]
                :cljs [cljs.test :refer-macros [deftest testing is]])
             [clojure.core.async :as async :refer [go <! >!]]
+            [#?(:clj  clj-time.core
+                :cljs cljs-time.core)
+             :as time]
             [luma.test-util :refer [test-async]]
-            #?(:clj  [luma.util :refer [lazy-mapcat map-values go-ex <? ->hex]]
-               :cljs [luma.util :refer [lazy-mapcat map-values] :refer-macros [go-ex <?]])))
+            #?(:clj  [luma.util :refer [lazy-mapcat map-values older-than-1-month? go-ex <? ->hex]]
+               :cljs [luma.util :refer [lazy-mapcat map-values older-than-1-month?] :refer-macros [go-ex <?]])))
 
 (deftest lazy-mapcat-test
   (testing "lazy-mapcat"
@@ -64,3 +67,8 @@
   (testing "map-values"
     (is (= {:foo 2, :bar 3}
            (map-values {:foo 1, :bar 2} inc)))))
+
+(deftest older-than-1-month-test
+  (testing "older-than-1-month?"
+    (is (not (older-than-1-month? (time/minus (time/now) (time/days 27)))))
+    (is (older-than-1-month? (time/minus (time/now) (time/days 32))))))
