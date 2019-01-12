@@ -1,11 +1,10 @@
 (ns luma.util-test
-  (:require #?(:clj [clojure.test :refer :all]
+  (:require #?(:clj  [clojure.test :refer :all]
                :cljs [cljs.test :refer-macros [deftest testing is]])
-                    [clojure.core.async :as async :refer [go <! >!]]
-                    [luma.test-util :refer [test-async]]
-    #?(:clj
-                    [luma.util :refer [lazy-mapcat go-ex <? ->hex]]
-       :cljs [luma.util :refer [lazy-mapcat] :refer-macros [go-ex <?]])))
+            [clojure.core.async :as async :refer [go <! >!]]
+            [luma.test-util :refer [test-async]]
+            #?(:clj  [luma.util :refer [lazy-mapcat map-values go-ex <? ->hex]]
+               :cljs [luma.util :refer [lazy-mapcat map-values] :refer-macros [go-ex <?]])))
 
 (deftest lazy-mapcat-test
   (testing "lazy-mapcat"
@@ -60,3 +59,8 @@
 #?(:clj (deftest ->hex-test
           (testing "->hex"
             (is (= "deadbeef" (->hex (byte-array [222 173 190 239])))))))
+
+(deftest map-values-test
+  (testing "map-values"
+    (is (= {:foo 2, :bar 3}
+           (map-values {:foo 1, :bar 2} inc)))))

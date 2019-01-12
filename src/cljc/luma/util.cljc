@@ -45,3 +45,6 @@
        (fn [& args]
          (async/<!! c)
          (apply f args)))))
+
+(defn map-values [m f]
+  (into {} (map (juxt key (comp f val))) m))
