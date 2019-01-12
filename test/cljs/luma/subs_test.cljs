@@ -34,29 +34,29 @@
 (deftest filtered-albums-test
   (testing "filtered albums subscription"
     (run-test-sync
-      (init-db)
-      (let [sub (re-frame/subscribe [::subs/filtered-albums])
-            albums #(into #{} (map :id @sub))]
-        (is (= #{"album-1" "album-2" "album-3"} (albums)))
-        (re-frame/dispatch [::events/select-tag "tag-3"])
-        (is (= #{"album-1" "album-2"} (albums)))
-        (re-frame/dispatch [::events/select-tag "tag-2"])
-        (is (= #{"album-2"} (albums)))
-        (re-frame/dispatch [::events/unselect-tag "tag-3"])
-        (is (= #{"album-2" "album-3"} (albums)))))))
+     (init-db)
+     (let [sub (re-frame/subscribe [::subs/filtered-albums])
+           albums #(into #{} (map :id @sub))]
+       (is (= #{"album-1" "album-2" "album-3"} (albums)))
+       (re-frame/dispatch [::events/select-tag "tag-3"])
+       (is (= #{"album-1" "album-2"} (albums)))
+       (re-frame/dispatch [::events/select-tag "tag-2"])
+       (is (= #{"album-2"} (albums)))
+       (re-frame/dispatch [::events/unselect-tag "tag-3"])
+       (is (= #{"album-2" "album-3"} (albums)))))))
 
 (deftest sorted-albums-test
   (testing "sorted albums subscription"
     (run-test-sync
-      (init-db)
-      (let [sub (re-frame/subscribe [::subs/sorted-albums])
-            albums #(map :id @sub)]
-        (is (= ["album-1" "album-2" "album-3"] (albums)))
-        (re-frame/dispatch [::events/sort-albums :added])
-        (is (= ["album-2" "album-3" "album-1"] (albums)))
-        (re-frame/dispatch [::events/change-sort-dir])
-        (is (= ["album-1" "album-3" "album-2"] (albums)))
-        (re-frame/dispatch [::events/sort-albums :album])
-        (is (= ["album-3" "album-2" "album-1"] (albums)))
-        (re-frame/dispatch [::events/select-tag "tag-3"])
-        (is (= ["album-2" "album-1"] (albums)))))))
+     (init-db)
+     (let [sub (re-frame/subscribe [::subs/sorted-albums])
+           albums #(map :id @sub)]
+       (is (= ["album-1" "album-2" "album-3"] (albums)))
+       (re-frame/dispatch [::events/sort-albums :added])
+       (is (= ["album-2" "album-3" "album-1"] (albums)))
+       (re-frame/dispatch [::events/change-sort-dir])
+       (is (= ["album-1" "album-3" "album-2"] (albums)))
+       (re-frame/dispatch [::events/sort-albums :album])
+       (is (= ["album-3" "album-2" "album-1"] (albums)))
+       (re-frame/dispatch [::events/select-tag "tag-3"])
+       (is (= ["album-2" "album-1"] (albums)))))))

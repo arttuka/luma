@@ -72,5 +72,5 @@
           user-info (get-user-info (:access_token token))
           session (assoc (:session req) :spotify-user (assoc token :id (:id user-info)))]
       (->
-        (redirect "/")
-        (assoc :session session)))))
+       (redirect "/")
+       (assoc :session session)))))

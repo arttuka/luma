@@ -29,13 +29,13 @@
       (let [ch (async/chan 1)
             result-ch (go-ex (<! ch))]
         (test-async
-          (go
-            (>! ch ::test)
-            (is (= ::test (<! result-ch)))))))
+         (go
+           (>! ch ::test)
+           (is (= ::test (<! result-ch)))))))
     (testing "catches and returns throwables"
       (let [result-ch (go-ex (throw ex))]
         (test-async
-          (go (is (= ex (<! result-ch)))))))))
+         (go (is (= ex (<! result-ch)))))))))
 
 (deftest <?-test
   (testing "<?"
@@ -47,17 +47,17 @@
                             (catch #?(:clj Exception :cljs js/Error) _
                               ::exception)))]
         (test-async
-          (go
-            (>! ch ex)
-            (is (= ::exception (<! result-ch)))))))
+         (go
+           (>! ch ex)
+           (is (= ::exception (<! result-ch)))))))
     (testing "lets other values through"
       (let [ch (async/chan 10)
             vals [1 false ::test "test"]]
         (test-async
-          (go
-            (doseq [v vals] (>! ch v))
-            (async/close! ch)
-            (doseq [v vals] (is (= v (<! ch))))))))))
+         (go
+           (doseq [v vals] (>! ch v))
+           (async/close! ch)
+           (doseq [v vals] (is (= v (<! ch))))))))))
 
 #?(:clj (deftest ->hex-test
           (testing "->hex"

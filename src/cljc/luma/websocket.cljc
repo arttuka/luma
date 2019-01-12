@@ -3,10 +3,10 @@
             [taoensso.sente.packers.transit :as sente-transit]
             [taoensso.timbre :as log]
             [mount.core :refer [defstate]]
-            #?@(:clj  [[taoensso.sente.server-adapters.http-kit :refer [get-sch-adapter]]
-                       [compojure.core :refer [defroutes GET POST]]]
-                :cljs [[goog.string :as gs]
-                       goog.date.UtcDateTime])
+            #?(:clj [taoensso.sente.server-adapters.http-kit :refer [get-sch-adapter]])
+            #?(:clj [compojure.core :refer [defroutes GET POST]])
+            #?(:cljs [goog.string :as gs])
+            #?(:cljs goog.date.UtcDateTime)
             [cognitect.transit :as transit])
   #?(:clj (:import [org.joda.time])))
 
@@ -33,9 +33,9 @@
 
 (def packer (sente-transit/->TransitPacker :json
                                            {:handlers {DateTime (transit/write-handler
-                                                                  (constantly "datetime")
-                                                                  write-date-time
-                                                                  write-date-time)}}
+                                                                 (constantly "datetime")
+                                                                 write-date-time
+                                                                 write-date-time)}}
                                            {:handlers {"datetime" read-date-time}}))
 
 (def path "/chsk")
@@ -81,14 +81,12 @@
   :start (start-router)
   :stop (stop-router @router))
 
-
 #?(:clj
    (defn send! [uid event]
      ((:send! @router) uid event))
    :cljs
    (defn send! [event]
      ((:send! @router) event)))
-
 
 #?(:clj (defroutes routes
           (GET path request ((:ajax-get-or-ws-handshake-fn @router) request))

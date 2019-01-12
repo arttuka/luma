@@ -166,7 +166,7 @@
                    :title             (str "Find " (album-name a) " on last.fm")}
           [:span.bold playcount] " scrobbles"])
        [:a.album
-        {:href (:uri a)
+        {:href  (:uri a)
          :title (str "Open " (album-name a) " in Spotify")}
         [ui/card {:class         :album-card
                   :on-mouse-over #(reset! depth 5)

@@ -11,9 +11,9 @@
 
 (defn lazy-mapcat [f coll]
   (lazy-seq
-    (when (seq coll)
-      (concat (f (first coll))
-              (lazy-mapcat f (rest coll))))))
+   (when (seq coll)
+     (concat (f (first coll))
+             (lazy-mapcat f (rest coll))))))
 
 (defmacro go-ex
   "Like go, but catches and returns any exception"

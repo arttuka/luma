@@ -1,5 +1,5 @@
 (ns luma.trie-test
-  (:require #?(:clj [clojure.test :refer :all]
+  (:require #?(:clj  [clojure.test :refer :all]
                :cljs [cljs.test :refer-macros [deftest testing is]])
             [luma.trie :refer [trie search #?(:cljs Trie)]])
   #?(:clj (:import (luma.trie Trie))))

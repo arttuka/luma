@@ -4,6 +4,6 @@
 
 (defn test-async
   [ch]
-  #?(:clj (async/<!! ch)
+  #?(:clj  (async/<!! ch)
      :cljs (async done
              (async/take! ch (fn [_] (done))))))

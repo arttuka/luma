@@ -11,14 +11,14 @@
   (GET "/" req
     (let [session (:session req)
           response (->
-                     (resource-response "index.html" {:root "public"})
-                     (content-type "text/html"))
+                    (resource-response "index.html" {:root "public"})
+                    (content-type "text/html"))
           uid (or (:uid session) (UUID/randomUUID))]
       (assoc response :session (assoc session :uid uid))))
   (GET "/logout" []
     (->
-      (redirect "/")
-      (assoc :session {})))
+     (redirect "/")
+     (assoc :session {})))
   spotify/routes
   lastfm/routes
   websocket/routes

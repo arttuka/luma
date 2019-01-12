@@ -27,8 +27,8 @@
   (cond
     (nil? c) (dissoc trie :end-of-word)
     (contains? children c) (-> trie
-                             (update-in [:children c] trie-disj cs)
-                             (clean-trie c))
+                               (update-in [:children c] trie-disj cs)
+                               (clean-trie c))
     :else trie))
 
 (defn ^:private trie-conj [trie [c & cs]]

@@ -40,6 +40,8 @@
                      :compiler     {:output-to     "resources/public/css/screen.css"
                                     :pretty-print? true}}]}
 
+  :cljfmt {:indents {async [[:inner 0]]}}
+
   :aliases {"dev"   ["do" "clean"
                      ["pdo" ["figwheel" "dev"]
                       ["garden" "auto"]]]

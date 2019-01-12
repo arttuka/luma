@@ -7,15 +7,15 @@
 
 (defn ^:private suggestion [suggestion opts]
   (reagent/as-element
-    [ui/menu-item {:primary-text suggestion}]))
+   [ui/menu-item {:primary-text suggestion}]))
 
 (defn ^:private suggestion-container [props]
   (reagent/as-element
-    [ui/paper (js->clj (oget props "containerProps")) (oget props "children")]))
+   [ui/paper (js->clj (oget props "containerProps")) (oget props "children")]))
 
 (defn ^:private input [props]
   (reagent/as-element
-    [ui/text-field (js->clj props)]))
+   [ui/text-field (js->clj props)]))
 
 (def ^:private styles
   {:container                  {:flex-grow 1
