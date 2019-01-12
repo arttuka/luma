@@ -7,8 +7,7 @@
             #?(:clj [compojure.core :refer [defroutes GET POST]])
             #?(:cljs [goog.string :as gs])
             #?(:cljs goog.date.UtcDateTime)
-            [cognitect.transit :as transit])
-  #?(:clj (:import [org.joda.time])))
+            [cognitect.transit :as transit]))
 
 (def DateTime #?(:clj org.joda.time.DateTime, :cljs goog.date.UtcDateTime))
 

@@ -1,5 +1,5 @@
 (defproject luma "0.1.0-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.9.0"]
+  :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/core.async "0.4.490"]
                  [org.clojure/tools.logging "0.4.1"]
                  [org.clojure/tools.reader "1.3.2"]
@@ -20,7 +20,7 @@
                  [clj-time "0.15.1"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
-            [lein-figwheel "0.5.15"]
+            [lein-figwheel "0.5.18"]
             [lein-garden "0.3.0" :exclusions [org.apache.commons/commons-compress]]
             [lein-environ "1.1.0" :exclusions [org.clojure/clojure]]]
 
@@ -51,7 +51,7 @@
 
   :profiles {:dev      {:env            {:dev true}
                         :dependencies   [[binaryage/devtools "0.9.10"]
-                                         [figwheel-sidecar "0.5.17" :exclusions [org.clojure/tools.nrepl args4j]]
+                                         [figwheel-sidecar "0.5.18" :exclusions [org.clojure/tools.nrepl args4j]]
                                          [com.cemerick/piggieback "0.2.2"]
                                          [hawk "0.2.11"]
                                          [re-frisk "0.5.4" :exclusions [args4j]]
@@ -68,17 +68,18 @@
                         :eastwood       {:namespaces   [:source-paths]
                                          :config-files ["dev-resources/eastwood.clj"]}}
              :provided {:dependencies [[org.clojure/clojurescript "1.10.439" :exclusions [org.clojure/tools.reader]]
-                                       [com.google.errorprone/error_prone_annotations "2.1.3"]
+                                       [com.google.errorprone/error_prone_annotations "2.3.2"]
                                        [com.google.code.findbugs/jsr305 "3.0.2"]
                                        [reagent "0.8.1"]
                                        [re-frame "0.10.6" :exclusions [org.clojure/tools.logging args4j]]
                                        [cljs-react-material-ui "0.2.50" :exclusions [args4j]]
                                        [cljsjs/react "16.6.0-0"]
                                        [cljsjs/react-dom "16.6.0-0"]
-                                       [cljsjs/react-autosuggest "9.3.4-0"]
-                                       [binaryage/oops "0.6.3"]
+                                       [cljsjs/react-autosuggest "9.4.3-0"]
+                                       [binaryage/oops "0.6.4"]
                                        [garden "1.3.6"]
-                                       [com.cognitect/transit-cljs "0.8.256"]]}
+                                       [com.cognitect/transit-cljs "0.8.256"]
+                                       [com.andrewmcveigh/cljs-time "0.5.2"]]}
              :uberjar  {:prep-tasks ["compile"
                                      ["cljsbuild" "once" "min"]
                                      ["garden" "once"]]
