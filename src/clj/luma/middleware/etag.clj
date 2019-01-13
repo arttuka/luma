@@ -27,6 +27,6 @@
     (let [{:keys [status body headers] :as response} (handler request)]
       (if (and (#{200 201 204} status) body (some #(re-matches % (:uri request)) paths))
         (-> response
-            (assoc-in [:headers "cache-control"] "max-age=3600, must-revalidate")
+            (assoc-in [:headers "cache-control"] "max-age=604800, must-revalidate")
             (assoc-in [:headers "etag"] (or (calculate-response-etag headers) (calculate-etag body))))
         response))))
