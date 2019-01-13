@@ -14,17 +14,7 @@ lein test
 
 ### Run ClojureScript tests
 
-`karma` needs to be installed:
-```
-npm install -g karma karma-cli karma-cljs-test karma-junit-reporter karma-chrome-launcher
-```
-
-Then you can run tests:
-```
-lein doo chrome-headless test
-```
-
-The above command assumes that you have [phantomjs](https://www.npmjs.com/package/phantomjs) installed. However, please note that [doo](https://github.com/bensu/doo) can be configured to run cljs.test in many other JS environments (chrome, ie, safari, opera, slimer, node, rhino, or nashorn).
+When you start figwheel in the REPL, it opens an interactive test runner in a browser.
 
 ## Production Build
 
