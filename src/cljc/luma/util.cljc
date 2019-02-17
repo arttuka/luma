@@ -49,8 +49,13 @@
          (async/<!! c)
          (apply f args)))))
 
-(defn map-values [m f]
-  (into {} (map (juxt key (comp f val))) m))
+(defn map-values
+  [m f]
+  (persistent!
+   (reduce-kv (fn [acc k v]
+                (assoc! acc k (f v)))
+              (transient {})
+              m)))
 
 (defn older-than-1-month? [date]
   (time/before? date (time/minus (time/now) (time/months 1))))

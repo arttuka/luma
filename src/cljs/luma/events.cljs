@@ -3,21 +3,12 @@
             [clojure.set :refer [union]]
             [luma.db :as db]
             [luma.trie :refer [trie]]
-            [luma.websocket :as ws]
-            [taoensso.timbre :as log]))
+            [luma.websocket :as ws]))
 
 (re-frame/reg-fx
  ::ws/send
  (fn [event]
    (ws/send! event)))
-
-(re-frame/reg-fx
- ::log
- (fn [[level msg]]
-   (case level
-     :info (log/info msg)
-     :warn (log/warn msg)
-     :error (log/error msg))))
 
 (re-frame/reg-event-db
  ::initialize-db

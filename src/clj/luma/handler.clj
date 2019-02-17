@@ -26,7 +26,8 @@
       (wrap-defaults (-> site-defaults
                          (assoc-in [:session :cookie-attrs :max-age] 2592000)
                          (assoc-in [:session :cookie-attrs :same-site] :lax)))
-      (wrap-etag {:paths [#".*\.(css|png|js)$"]})))
+      (wrap-etag {:paths [#".*\.(css|png|js)$"]})
+      wrap-not-modified))
 
 (def handler (if (env :dev)
                (wrap-dev-middleware #'routes)

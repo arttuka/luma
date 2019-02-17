@@ -7,7 +7,11 @@
 
 (defn ^:private suggestion [suggestion opts]
   (reagent/as-element
-   [ui/menu-item {:primary-text suggestion}]))
+   [ui/menu-item {:primary-text (reagent/as-element
+                                 [:div {:style {:white-space   :nowrap
+                                                :text-overflow :ellipsis
+                                                :overflow      :hidden}}
+                                  suggestion])}]))
 
 (defn ^:private suggestion-container [props]
   (reagent/as-element
@@ -20,7 +24,7 @@
 (def ^:private styles
   {:container                  {:flex-grow 1
                                 :position  "relative"
-                                :width     200}
+                                :width     256}
    :suggestions-container-open {:position "absolute"
                                 :z-index  10
                                 :left     0

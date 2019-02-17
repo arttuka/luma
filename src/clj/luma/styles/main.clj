@@ -109,7 +109,6 @@
    [:div
     {:display        :inline-block
      :vertical-align :middle}]
-
    [:&.logout
     {:background-color :black}]])
 
@@ -147,12 +146,7 @@
      :color           :black}]
    [:img
     {:height         "1em"
-     :vertical-align :baseline}]
-   [:.terms-of-use-dialog
-    [:close-button
-     {:position :absolute
-      :top      "10px"
-      :right    "10px"}]]])
+     :vertical-align :baseline}]])
 
 (defstyles header
   [:#header

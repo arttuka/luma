@@ -1,7 +1,5 @@
 (ns luma.middleware.etag
-  (:require [clojure.string :as str]
-            [ring.middleware.not-modified :refer [wrap-not-modified]]
-            [clj-time.format :as f]
+  (:require [clj-time.format :as f]
             [clj-time.coerce :as c]
             [luma.util :refer [->hex]])
   (:import (java.security MessageDigest)
