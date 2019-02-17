@@ -1,56 +1,55 @@
 (ns luma.trie
   (:require [clojure.string :as str]
-            [luma.util :refer [lazy-mapcat]])
+            [luma.util :refer [lazy-mapcat]]
+            #?(:cljs [cljs.core :refer [IWithMeta IMeta IFn ISeqable IEquiv IEmptyableCollection
+                                        ICollection ICounted ISet ILookup]]))
   #?(:clj
-     (:import (clojure.lang IFn ILookup IPersistentSet))))
+     (:import (clojure.lang IObj IMeta IFn ILookup IPersistentSet))))
 
 (defprotocol ITrie
   (search [trie s] "Find all strings that start with s"))
 
 (declare empty-trie)
 
-(defn ^:private trie-lookup [{:keys [end-of-word children]} [c & cs]]
+(defn ^:private trie-lookup [{::keys [end-of-word] :as trie} [c & cs]]
   (if c
-    (when (contains? children c)
-      (recur (get children c) cs))
+    (when (contains? trie c)
+      (recur (get trie c) cs))
     end-of-word))
 
-(defn ^:private clean-trie [{:keys [children] :as trie} c]
-  (if (empty? (get children c))
-    (let [trie (update trie :children dissoc c)]
-      (if (empty? (:children trie))
-        (dissoc trie :children)
-        trie))
+(defn ^:private clean-trie [trie c]
+  (if (empty? (get trie c))
+    (dissoc trie c)
     trie))
 
-(defn ^:private trie-disj [{:keys [children] :as trie} [c & cs]]
+(defn ^:private trie-disj [trie [c & cs]]
   (cond
-    (nil? c) (dissoc trie :end-of-word)
-    (contains? children c) (-> trie
-                               (update-in [:children c] trie-disj cs)
-                               (clean-trie c))
+    (nil? c) (dissoc trie ::end-of-word)
+    (contains? trie c) (-> trie
+                           (update c trie-disj cs)
+                           (clean-trie c))
     :else trie))
 
 (defn ^:private trie-conj [trie [c & cs]]
   (if c
-    (update-in trie [:children c] trie-conj cs)
-    (assoc trie :end-of-word true)))
+    (update trie c trie-conj cs)
+    (assoc trie ::end-of-word true)))
 
-(defn ^:private trie-seq [{:keys [end-of-word children]} prefix]
-  (let [ks (sort (keys children))
-        subseq (lazy-mapcat #(trie-seq (get children %) (str prefix %)) ks)]
+(defn ^:private trie-seq [{::keys [end-of-word] :as trie} prefix]
+  (let [ks (sort (remove #{::end-of-word} (keys trie)))
+        subseq (lazy-mapcat #(trie-seq (get trie %) (str prefix %)) ks)]
     (if end-of-word
       (cons prefix subseq)
-      subseq)))
+      (seq subseq))))
 
-(defn ^:private trie-search [{:keys [children] :as trie} prefix [c & cs]]
+(defn ^:private trie-search [trie prefix [c & cs]]
   (cond
     (nil? c) (trie-seq trie prefix)
-    (contains? children c) (recur (get children c) (str prefix c) cs)
-    :else []))
+    (contains? trie c) (recur (get trie c) (str prefix c) cs)
+    :else ()))
 
 #?(:clj
-   (deftype Trie [trie]
+   (deftype Trie [_meta trie]
      ILookup
      (valAt [this k]
        (.valAt this k nil))
@@ -59,7 +58,7 @@
 
      IPersistentSet
      (disjoin [_ key]
-       (Trie. (trie-disj trie key)))
+       (Trie. _meta (trie-disj trie key)))
      (contains [_ key]
        (boolean (trie-lookup trie key)))
      (get [this key]
@@ -67,7 +66,7 @@
      (count [this]
        (count (seq this)))
      (cons [_ o]
-       (Trie. (trie-conj trie o)))
+       (Trie. _meta (trie-conj trie o)))
      (empty [_]
        empty-trie)
      (equiv [this o]
@@ -81,37 +80,45 @@
 
      IFn
      (invoke [_ s]
-       (trie-search trie "" s)))
+       (trie-search trie "" s))
+
+     IMeta
+     (meta [_]
+       _meta)
+
+     IObj
+     (withMeta [_ new-meta]
+       (Trie. new-meta trie)))
 
    :cljs
-   (deftype Trie [trie]
-     cljs.core/ILookup
+   (deftype Trie [_meta trie]
+     ILookup
      (-lookup [this k]
        (-lookup this k nil))
      (-lookup [_ k not-found]
        (if (trie-lookup trie k) k not-found))
 
-     cljs.core/ISet
+     ISet
      (-disjoin [_ key]
-       (Trie. (trie-disj trie key)))
+       (Trie. _meta (trie-disj trie key)))
 
-     cljs.core/ICounted
+     ICounted
      (-count [this]
        (count (seq this)))
 
-     cljs.core/ICollection
+     ICollection
      (-conj [_ o]
-       (Trie. (trie-conj trie o)))
+       (Trie. _meta (trie-conj trie o)))
 
-     cljs.core/IEmptyableCollection
+     IEmptyableCollection
      (-empty [_]
        empty-trie)
 
-     cljs.core/IEquiv
+     IEquiv
      (-equiv [this o]
        (= (seq this) (seq o)))
 
-     cljs.core/ISeqable
+     ISeqable
      (-seq [_]
        (trie-seq trie ""))
 
@@ -119,11 +126,19 @@
      (search [_ s]
        (trie-search trie "" s))
 
-     cljs.core/IFn
+     IFn
      (-invoke [_ s]
-       (trie-search trie "" s))))
+       (trie-search trie "" s))
 
-(def ^:private empty-trie (Trie. {}))
+     IMeta
+     (-meta [_]
+       _meta)
+
+     IWithMeta
+     (-with-meta [_ new-meta]
+       (Trie. new-meta trie))))
+
+(def ^:private empty-trie (Trie. nil {}))
 
 (defn trie
   ([]

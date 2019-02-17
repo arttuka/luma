@@ -63,7 +63,9 @@
             (is (not= t (conj other-trie "foobloo" "trollface"))))))
       (testing "seq"
         (testing "returns contained strings in alphabetical order"
-          (is (= words (seq t))))))))
+          (is (= words (seq t))))
+        (testing "returns nil for empty trie"
+          (is (nil? (seq (trie)))))))))
 
 (deftest itrie-test
   (testing "Trie implements luma.trie.ITrie"
@@ -96,3 +98,25 @@
       (let [new-trie (disj t "foo")]
         (is (= ["bar" "foobar" "foobloo"] (seq new-trie)))
         (is (= words (seq t)))))))
+
+(deftest meta-test
+  (let [words ["bar" "foo" "foobar" "foobloo"]
+        t (trie words)]
+    (testing "metadata can be attached"
+      (is (= {:foo true}
+             (meta (with-meta t {:foo true})))))
+    (testing "attaching metadata doesn't affect contains"
+      (is (= words
+             (seq (with-meta t {:foo true})))))
+    (testing "conj preserves metadata"
+      (is (= {:foo true}
+             (-> t
+                 (with-meta {:foo true})
+                 (conj "foob")
+                 (meta)))))
+    (testing "disj preserves metadata"
+      (is (= {:foo true}
+             (-> t
+                 (with-meta {:foo true})
+                 (disj "foo")
+                 (meta)))))))
