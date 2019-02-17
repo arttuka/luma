@@ -3,6 +3,7 @@
             [clojure.set :refer [union]]
             [luma.db :as db]
             [luma.trie :refer [trie]]
+            [luma.util :refer [mobile?]]
             [luma.websocket :as ws]))
 
 (re-frame/reg-fx
@@ -14,6 +15,11 @@
  ::initialize-db
  (fn [_ _]
    db/default-db))
+
+(re-frame/reg-event-db
+ ::window-resized
+ (fn [db _]
+   (assoc db :mobile? (mobile?))))
 
 (re-frame/reg-event-db
  ::set-env

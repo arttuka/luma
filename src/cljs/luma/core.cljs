@@ -12,6 +12,10 @@
     (enable-console-print!)
     (println "dev mode")))
 
+(defn listen-resize []
+  (.addEventListener js/window "resize"
+                     (fn [_] (re-frame/dispatch [::events/window-resized]))))
+
 (defn ^:after-load mount-root []
   (re-frame/clear-subscription-cache!)
   (reagent/render [view/main-panel]
@@ -20,6 +24,7 @@
 (defn ^:export init []
   (re-frame/dispatch-sync [::events/initialize-db])
   (dev-setup)
+  (listen-resize)
   (mount/start)
   (mount-root))
 

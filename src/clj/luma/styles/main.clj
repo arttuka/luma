@@ -1,125 +1,116 @@
 (ns luma.styles.main
   (:require [garden.def :refer [defstyles]]
-            [garden.core :as garden]))
+            [garden.core :as garden]
+            [garden.stylesheet :refer [at-import]]
+            [luma.util :refer [when-desktop when-mobile]]))
 
 (defstyles album-list
   [:#albums
    {:display         :flex
     :flex-wrap       :wrap
-    :justify-content :space-evenly
-    :min-height      "1000px"}
-   [:a
-    {:text-decoration :none}]
-   [:.album
-    {:margin-bottom "40px"
-     :position      :relative}
-    [:.album-card
-     {:width "320px"}
-     [:.album-playcount
-      [:.bold
-       {:font-weight :bold}]]
-     [:.album-image
-      {:width  "320px"
-       :height "320px"}]
-     [:.title
-      {:font-size     "24px"
-       :font-weight   :bold
-       :margin-bottom "5px"}]
-     [:.artist
-      {:font-size "16px"}]]]])
+    :justify-content :space-around
+    :min-height      "1000px"
+    :padding         "8px 16px"}
+   [:.album-card
+    {:position :relative
+     :margin   "8px"}
+    [:.album-playcount
+     [:.bold
+      {:font-weight :bold}]]
+    [:.title
+     {:font-size     "24px"
+      :font-weight   :bold
+      :margin-bottom "5px"}]
+    [:.artist
+     {:font-size "16px"}]]
+   (when-mobile
+    (let [width "calc(100vw - 32px)"]
+      [:.album-card
+       {:width width}
+       [:.album-image
+        {:width  width
+         :height width}]]))
+   (when-desktop
+    (let [width "320px"]
+      [:.album-card
+       {:width width}
+       [:.album-image
+        {:width  width
+         :height width}]]))])
 
-(defstyles spotify-login-button
+(defstyles login-button
   [:.login-button-container
    {:position    :relative
     :float       :right
-    :width       "180px"
+    :width       "200px"
     :height      "30px"
     :perspective "1000px"
     :cursor      :pointer}
-   [:.login :.logout
-    {:transform-style     :preserve-3d
-     :transition          "all 0.5s linear"
-     :backface-visibility :hidden
-     :position            :absolute
-     :overflow            :hidden
-     :top                 0
-     :right               0
-     :cursor              :pointer}]
-   [:.logout
-    {:transform "rotateX(180deg)"}]
+   [:.login-button
+    {:color                       :white
+     :font-family                 "Helvetica Neue, sans-serif"
+     :display                     :inline-block
+     :font-weight                 :bold
+     :white-space                 :nowrap
+     :height                      "30px"
+     :line-height                 "30px"
+     :min-width                   "200px"
+     :border-radius               "15px"
+     :width                       :fit-content
+     :text-align                  :center
+     :float                       :right
+     :transform-style             :preserve-3d
+     :transition                  "all 0.5s linear"
+     :backface-visibility         :hidden
+     :-webkit-backface-visibility :hidden
+     :position                    :absolute
+     :overflow                    :hidden
+     :top                         0
+     :right                       0
+     :cursor                      :pointer}
+    [:img
+     {:position :absolute}]
+    [:&.logout
+     {:background-color :black
+      :transform        "rotateX(180deg)"}]]
    [:&:hover
     [:.login
      {:transform "rotateX(180deg)"}]
     [:.logout
-     {:transform "rotateX(360deg)"}]]]
-  [:.spotify-button
-   {:background-color "#1db954"
-    :color            :white
-    :text-decoration  :none
-    :font-family      "Helvetica Neue, sans-serif"
-    :font-weight      :bold
-    :display          :inline-block
-    :height           "30px"
-    :min-width        "180px"
-    :width            :fit-content
-    :text-align       :center
-    :line-height      "30px"
-    :border-radius    "15px"
-    :padding-right    "6px"
-    :padding-left     "33px"
-    :float            :right
-    :position         :relative}
-   [:img
-    {:height   "24px"
-     :position :absolute
-     :left     "3px"
-     :top      "3px"}]
-   [:div
-    {:display        :inline-block
-     :vertical-align :middle}]
+     {:transform "rotateX(360deg)"}]]])
 
-   [:&.logout
-    {:background-color :black}]])
+(defstyles spotify-login-button
+  [:.spotify
+   {:margin-left   "16px"
+    :margin-bottom "16px"}
+   [:.login-button
+    {:background-color "#1db954"
+     :padding-right    "6px"
+     :padding-left     "33px"}
+    [:img
+     {:height "24px"
+      :left   "3px"
+      :top    "3px"}]]])
 
 (defstyles lastfm-login-button
-  [:.lastfm-button
-   {:background-color "#b90000"
-    :color            :white
-    :text-decoration  :none
-    :font-family      "Helvetica Neue, sans-serif"
-    :font-weight      :bold
-    :display          :inline-block
-    :height           "30px"
-    :min-width        "180px"
-    :width            :fit-content
-    :text-align       :center
-    :line-height      "30px"
-    :border-radius    "15px"
-    :padding-left     "86px"
-    :padding-right    "6px"
-    :margin-right     "6px"
-    :float            :right
-    :white-space      :nowrap
-    :position         :relative}
-   [:img
-    {:height   "22px"
-     :position :absolute
-     :left     "6px"
-     :top      "4px"}]
-   [:div
-    {:display        :inline-block
-     :vertical-align :middle}]
-   [:&.logout
-    {:background-color :black}]])
+  [:.lastfm
+   [:.login-button
+    {:background-color "#b90000"
+     :padding-left     "86px"
+     :padding-right    "6px"}
+    [:img
+     {:height "22px"
+      :left   "6px"
+      :top    "4px"}]]])
 
 (defstyles toolbar
   [:#toolbar
-   {:padding       "10px"
-    :margin-bottom "20px"}
+   {:padding "16px 16px 0"}
    [:.progress-bar-container
-    {:float  :left
-     :width  "256px"
-     :height "32px"}]
+    {:float         :left
+     :width         "256px"
+     :height        "32px"
+     :margin-bottom "16px"}]
    [:.tag-filter
     {:float        :left
      :width        "256px"
@@ -132,9 +123,10 @@
      :clear      :left
      :display    :flex
      :flex-wrap  :wrap
-     :min-height "32px"}]]
-  spotify-login-button
-  lastfm-login-button)
+     :min-height "48px"}]
+   login-button
+   spotify-login-button
+   lastfm-login-button])
 
 (defstyles terms-of-use
   [:.terms-of-use
@@ -142,8 +134,7 @@
     :text-align :center
     :color      "#666666"}
    [:a
-    {:text-decoration :none
-     :color           :black}]
+    {:color :black}]
    [:img
     {:height         "1em"
      :vertical-align :baseline}]])
@@ -154,9 +145,11 @@
     :font-size "24px"}])
 
 (defstyles screen
+  (at-import "https://fonts.googleapis.com/css?family=Roboto:300,400,500")
   [:body {:font-family "Roboto, sans-serif"
           :margin      0}]
   [:* {:box-sizing :border-box}]
+  [:a {:text-decoration :none}]
   album-list
   toolbar
   header

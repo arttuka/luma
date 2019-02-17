@@ -21,7 +21,7 @@
   (reagent/as-element
    [ui/text-field (js->clj props)]))
 
-(def ^:private styles
+(def ^:private default-styles
   {:container                  {:flex-grow 1
                                 :position  "relative"
                                 :width     256}
@@ -35,14 +35,14 @@
                                 :list-style-type "none"}
    :suggestion-highlighted     {:background-color "rgba(0, 0, 0, 0.1)"}})
 
-(defn autosuggest [{:keys [datasource on-change] :as options}]
+(defn autosuggest [options]
   (let [suggestions (atom [])
         value (atom "")]
-    (fn autosuggest-render [{:keys [datasource on-change] :as options}]
+    (fn autosuggest-render [{:keys [datasource on-change styles] :as options}]
       (let [select-suggestion #(do
                                  (on-change %)
                                  (reset! value ""))
-            input-props (merge (dissoc options :datasource :on-change)
+            input-props (merge (dissoc options :datasource :on-change :styles)
                                {:on-change    (fn [event new-value]
                                                 (when (= "type" (oget new-value "method"))
                                                   (reset! value (oget event "target" "value"))))
@@ -63,4 +63,4 @@
                             :render-suggestion              suggestion
                             :render-input-component         input
                             :input-props                    input-props
-                            :theme                          styles}]))))
+                            :theme                          (merge default-styles styles)}]))))

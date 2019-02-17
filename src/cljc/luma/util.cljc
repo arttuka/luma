@@ -1,5 +1,8 @@
 (ns luma.util
   (:require [clojure.core.async :as async :refer [>! <! go go-loop chan dropping-buffer timeout]]
+            #?(:clj [garden.stylesheet :refer [at-media]])
+            #?(:clj [garden.units :refer [px percent]])
+            #?(:cljs [oops.core :refer [oget]])
             [#?(:clj  clj-time.core
                 :cljs cljs-time.core)
              :as time]))
@@ -59,3 +62,14 @@
 
 (defn older-than-1-month? [date]
   (time/before? date (time/minus (time/now) (time/months 1))))
+
+(def mobile-max-width 400)
+
+#?(:clj (defn when-mobile [& styles]
+          (apply at-media {:max-width (px mobile-max-width)} styles)))
+
+#?(:clj (defn when-desktop [& styles]
+          (apply at-media {:min-width (px (inc mobile-max-width))} styles)))
+
+#?(:cljs (defn mobile? []
+           (<= (oget js/window "innerWidth") mobile-max-width)))

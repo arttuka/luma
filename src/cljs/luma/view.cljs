@@ -22,18 +22,20 @@
         scopes "user-library-read"]
     (fn spotify-login-render []
       (if @spotify-id
-        [:div.login-button-container
-         [:div.login.spotify-button
+        [:div.login-button-container.spotify
+         [:div.login-button.login
           [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
           @spotify-id]
-         [:a.logout.spotify-button
+         [:a.login-button.logout
           {:href "/logout"}
           [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
           (str "Log out")]]
-        [:a.spotify-button {:href (gstring/format "https://accounts.spotify.com/authorize?client_id=%s&response_type=%s&state=%s&scope=%s&redirect_uri=%s"
-                                                  @client-id response-type @uid scopes @redirect-uri)}
-         [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
-         "Login with Spotify"]))))
+        [:div.login-button-container.spotify
+         [:a.login-button
+          {:href (gstring/format "https://accounts.spotify.com/authorize?client_id=%s&response_type=%s&state=%s&scope=%s&redirect_uri=%s"
+                                 @client-id response-type @uid scopes @redirect-uri)}
+          [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
+          "Login with Spotify"]]))))
 
 (defn lastfm-login []
   (let [lastfm-id (re-frame/subscribe [::subs/lastfm-id])
@@ -41,17 +43,19 @@
         redirect-uri (re-frame/subscribe [::subs/env :lastfm-redirect-uri])]
     (fn lastfm-login-render []
       (if @lastfm-id
-        [:div.login-button-container
-         [:div.login.lastfm-button
+        [:div.login-button-container.lastfm
+         [:div.login-button.login
           [:img {:src "/images/Last.fm_Logo_White.png"}]
           @lastfm-id]
-         [:a.logout.lastfm-button
+         [:a.login-button.logout
           {:href "/logout"}
           [:img {:src "/images/Last.fm_Logo_White.png"}]
           (str "Log out")]]
-        [:a.lastfm-button {:href (gstring/format "http://www.last.fm/api/auth/?api_key=%s&cb=%s"
-                                                 @api-key @redirect-uri)}
-         "Login" [:img {:src "/images/Last.fm_Logo_White.png"}]]))))
+        [:div.login-button-container.lastfm
+         [:a.login-button
+          {:href (gstring/format "http://www.last.fm/api/auth/?api_key=%s&cb=%s"
+                                 @api-key @redirect-uri)}
+          "Login" [:img {:src "/images/Last.fm_Logo_White.png"}]]]))))
 
 (defn progress-bar []
   (let [progress (re-frame/subscribe [::subs/progress])
@@ -75,7 +79,8 @@
            ^{:key (str "selected-tag-" tag)}
            [ui/chip
             {:class             :selected-tag
-             :style             {:margin-right "5px"}
+             :style             {:margin-right  "16px"
+                                 :margin-bottom "16px"}
              :on-request-delete #(re-frame/dispatch [::events/unselect-tag tag])}
             tag])
          [:div.progress-bar-container
@@ -83,7 +88,8 @@
           [progress-bar]])])))
 
 (defn tag-filter []
-  (let [all-tags (re-frame/subscribe [::subs/all-tags])]
+  (let [all-tags (re-frame/subscribe [::subs/all-tags])
+        mobile? (re-frame/subscribe [::subs/mobile?])]
     (fn tag-filter-render []
       [:div.tag-filter
        [autosuggest {:disabled             (not @all-tags)
@@ -91,12 +97,15 @@
                      :on-change            #(re-frame/dispatch [::events/select-tag %])
                      :floating-label-text  "Filter by"
                      :floating-label-fixed true
-                     :hint-text            "Tag"}]])))
+                     :hint-text            "Tag"
+                     :styles               (when @mobile? {:container {:width "calc(100vw - 68px)"}
+                                                           :input     {:width "calc(100vw - 68px)"}})}]])))
 
 (defn sort-dropdown []
   (let [lastfm-id (re-frame/subscribe [::subs/lastfm-id])
         sort-key (re-frame/subscribe [::subs/sort-key])
         sort-asc (re-frame/subscribe [::subs/sort-asc])
+        mobile? (re-frame/subscribe [::subs/mobile?])
         value (atom @sort-key)
         palette (oget (get-mui-theme) "palette")]
     (fn sort-dropdown-render []
@@ -105,7 +114,8 @@
                          :value               @value
                          :on-change           (fn [_ _ new-value]
                                                 (reset! value new-value)
-                                                (re-frame/dispatch [::events/sort-albums (keyword new-value)]))}
+                                                (re-frame/dispatch [::events/sort-albums (keyword new-value)]))
+                         :style               (when @mobile? {:width "calc(100vw - 68px"})}
         [ui/menu-item {:value        :artist
                        :primary-text "Artist"}]
         [ui/menu-item {:value        :album
@@ -150,7 +160,10 @@
 (defn album [a]
   (let [depth (atom 1)]
     (fn album-render [a]
-      [:div.album
+      [ui/card {:class         :album-card
+                :on-mouse-over #(reset! depth 5)
+                :on-mouse-out  #(reset! depth 1)
+                :z-depth       @depth}
        (when-let [playcount (:playcount a)]
          [ui/chip {:class             :album-playcount
                    :background-color  "#b90000"
@@ -168,22 +181,20 @@
        [:a.album
         {:href  (:uri a)
          :title (str "Open " (album-name a) " in Spotify")}
-        [ui/card {:class         :album-card
-                  :on-mouse-over #(reset! depth 5)
-                  :on-mouse-out  #(reset! depth 1)
-                  :z-depth       @depth}
-         [ui/card-media {:class :album-image}
-          [:img.cover {:src (:image a)}]]
-         [ui/card-title
-          [:div.title (:title a)]
-          [:div.artists
-           (for [artist (:artists a)]
-             ^{:key (str (:id a) (:artist_id artist))}
-             [:div.artist (:name artist)])]]
-         [ui/card-text
-          [:div.tags
-           (for [tag (interpose " · " (:tags a))]
-             tag)]]]]])))
+
+        [ui/card-media {:class :album-image}
+         [:img.cover {:src (:image a)}]]
+        [ui/card-title {:title          (:title a)
+                        :title-style    {:white-space   :nowrap
+                                         :text-overflow :ellipsis
+                                         :overflow      :hidden}
+                        :subtitle       (interpose " · " (map :name (:artists a)))
+                        :subtitle-style {:font-size     "16px"
+                                         :white-space   :nowrap
+                                         :text-overflow :ellipsis
+                                         :overflow      :hidden}}]
+        [ui/card-text {:style {:padding-top 0}}
+         (interpose " · " (:tags a))]]])))
 
 (defn albums []
   (let [has-data? (re-frame/subscribe [::subs/albums])
@@ -197,17 +208,18 @@
              (for [a @data]
                ^{:key (:id a)}
                [album a])
-             [:p "You haven't saved any albums to your Spotify music library."])
+             [:p.no-matches "No matching albums found in your library."])
            [ui/circular-progress {:style     {:margin-top "20px"}
                                   :size      100
                                   :thickness 5}])
-         [ui/paper {:class-name :intro
-                    :style      {:width   "600px"
-                                 :padding "10px"
-                                 :height  "220px"}}
+         [ui/paper {:style {:width      "600px"
+                            :padding    "10px"
+                            :margin-top "8px"
+                            :height     "100%"}}
           [:h2 "LUMA Ultimate Music Archive"]
           [:p "Welcome to LUMA, a music archive that helps you sort your Spotify Music Library."]
           [:p "To begin, login with your Spotify account. Loading the tags for your albums will take some time on the first login."]
+          [:p "You can also login with your Last.fm account to see play counts for the albums. Loading the playcounts will take a lot of time on the first login."]
           [:p "By logging in, you allow LUMA to use and process data about your Spotify account. For more information, see terms of use."]])])))
 
 (defn terms-of-use []

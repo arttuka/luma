@@ -15,8 +15,7 @@
                     [:title "LUMA Ultimate Music Archive"]
                     [:meta {:name    "viewport"
                             :content "width=device-width, initial-scale=1"}]
-                    (include-css "https://fonts.googleapis.com/css?family=Roboto:300,400,500"
-                                 (if (env :dev)
+                    (include-css (if (env :dev)
                                    "/css/screen.css"
                                    "/css/screen.min.css"))]
                    [:body
