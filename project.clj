@@ -10,21 +10,20 @@
                  [ring/ring-json "0.4.0" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [http-kit "2.3.0"]
                  [hiccup "1.0.5"]
-                 [mount "0.1.15"]
+                 [mount "0.1.16"]
                  [com.taoensso/sente "1.13.1"]
                  [com.taoensso/timbre "4.10.0"]
-                 [com.fzakaria/slf4j-timbre "0.3.12"]
                  [com.cognitect/transit-clj "0.8.313"]
                  [org.clojure/java.jdbc "0.7.8"]
                  [org.postgresql/postgresql "42.2.5"]
-                 [hikari-cp "2.6.0"]
+                 [hikari-cp "2.7.0"]
                  [clj-time "0.15.1"]]
 
   :plugins [[lein-ancient "0.6.15"]
             [lein-asset-minifier "0.4.5"]
-            [lein-cljfmt "0.6.3"]
+            [lein-cljfmt "0.6.4"]
             [lein-garden "0.3.0" :exclusions [org.apache.commons/commons-compress]]
-            [jonase/eastwood "0.3.4"]]
+            [jonase/eastwood "0.3.5"]]
 
   :min-lein-version "2.5.3"
 
@@ -32,13 +31,12 @@
   :test-paths []
 
   :clean-targets ^{:protect false} ["resources/public/js"
-                                    "target"
-                                    "resources/public/css/screen.css"]
+                                    "target"]
 
   :garden {:builds [{:id           "screen"
-                     :source-paths ["src/clj"]
+                     :source-paths ["src/clj" "src/cljc"]
                      :stylesheet   luma.styles.main/screen
-                     :compiler     {:output-to     "resources/public/css/screen.css"
+                     :compiler     {:output-to     "target/public/css/screen.css"
                                     :pretty-print? true}}]}
 
   :cljfmt {:indents {async [[:inner 0]]}}
@@ -55,21 +53,21 @@
                                          [day8.re-frame/test "0.1.5"]
                                          [org.clojure/tools.namespace "0.2.11"]
                                          [garden "1.3.6"]
-                                         [ring/ring-devel "1.7.1" :exclusions []]]
+                                         [ring/ring-devel "1.7.1"]]
                         :source-paths   ["dev"]
                         :test-paths     ["test/clj" "test/cljc" "test/cljs"]
                         :resource-paths ["dev-resources" "target"]
                         :eastwood       {:namespaces   [:source-paths :test-paths]
                                          :config-files ["dev-resources/eastwood.clj"]}}
-             :provided {:dependencies [[org.clojure/clojurescript "1.10.439" :exclusions [org.clojure/tools.reader]]
+             :provided {:dependencies [[org.clojure/clojurescript "1.10.516" :exclusions [org.clojure/tools.reader]]
                                        [com.bhauman/figwheel-main "0.2.0" :exclusions [org.clojure/clojurescript]]
                                        [com.google.errorprone/error_prone_annotations "2.3.2"]
                                        [com.google.code.findbugs/jsr305 "3.0.2"]
                                        [reagent "0.8.1"]
                                        [re-frame "0.10.6" :exclusions [org.clojure/tools.logging args4j]]
                                        [cljs-react-material-ui "0.2.50" :exclusions [args4j]]
-                                       [cljsjs/react "16.6.0-0"]
-                                       [cljsjs/react-dom "16.6.0-0"]
+                                       [cljsjs/react "16.8.1-0"]
+                                       [cljsjs/react-dom "16.8.1-0"]
                                        [cljsjs/react-autosuggest "9.4.3-0"]
                                        [binaryage/oops "0.6.4"]
                                        [garden "1.3.6"]
@@ -79,12 +77,11 @@
                                              "fig:min"
                                              ["garden" "once"]
                                              ["minify-assets"]]
-                        :minify-assets      [[:css {:source "resources/public/css/screen.css"
+                        :minify-assets      [[:css {:source "target/public/css/screen.css"
                                                     :target "resources/public/css/screen.min.css"}]]
-                        :uberjar-exclusions [#"public/js/compiled"
-                                             #"public/css/screen.css"]
+                        :uberjar-exclusions [#"public/js/compiled"]
                         :main               luma.main
-                        :uberjar-name "luma.jar"}}
+                        :uberjar-name       "luma.jar"}}
 
   :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
   :aot [luma.main])

@@ -13,7 +13,10 @@ RUN lein
 WORKDIR /app
 COPY project.clj .
 RUN lein deps
-COPY . .
+COPY ./src ./src
+COPY ./test ./test
+COPY ./resources ./resources
+COPY ./*.cljs.edn ./
 RUN lein test
 RUN lein fig:test
 RUN lein do clean, uberjar

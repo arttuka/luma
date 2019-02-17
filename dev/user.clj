@@ -13,7 +13,7 @@
 
 (defn compile-garden-css! []
   (require 'luma.styles.main :reload)
-  (let [f (io/file "./resources/public/css/screen.css")]
+  (let [f (io/file "./target/public/css/screen.css")]
     (io/make-parents f)
     (spit f main-css/css)))
 
@@ -22,15 +22,13 @@
   :stop (figwheel/stop "dev"))
 
 (defstate garden-watcher
-  :start (do
-           (compile-garden-css!)
-           (hawk/watch! [{:paths   ["src/clj/luma/styles"]
-                          :handler (fn [ctx e]
-                                     (when (and (= :modify (:kind e))
-                                                (str/ends-with? (.getAbsolutePath (:file e)) ".clj"))
-                                       (print "Garden CSS change recognized, recompiling ... ")
-                                       (compile-garden-css!))
-                                     ctx)}]))
+  :start (hawk/watch! [{:paths   ["src/clj/luma/styles"]
+                        :handler (fn [ctx e]
+                                   (when (and (= :modify (:kind e))
+                                              (str/ends-with? (.getAbsolutePath (:file e)) ".clj"))
+                                     (print "Garden CSS change recognized, recompiling ... ")
+                                     (compile-garden-css!))
+                                   ctx)}])
   :stop (hawk/stop! @garden-watcher))
 
 (defn cljs-repl []
@@ -40,6 +38,7 @@
   (mount/stop))
 
 (defn start! []
+  (compile-garden-css!)
   (mount/in-cljc-mode)
   (mount/start))
 

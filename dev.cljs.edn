@@ -1,5 +1,5 @@
 ^{:watch-dirs   ["src/cljs" "src/cljc" "test/cljs" "test/cljc"]
-  :css-dirs     ["resources/public/css"]
+  :css-dirs     ["target/public/css"]
   :auto-testing true
   :open-url     "http://[[server-hostname]]:[[server-port]]/figwheel-extra-main/auto-testing"}
 {:main       luma.core
