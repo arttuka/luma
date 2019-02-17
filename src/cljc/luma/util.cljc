@@ -60,6 +60,10 @@
               (transient {})
               m)))
 
+(defn map-by
+  [f coll]
+  (into {} (map (juxt f identity)) coll))
+
 (defn older-than-1-month? [date]
   (time/before? date (time/minus (time/now) (time/months 1))))
 

@@ -3,7 +3,7 @@
             [clojure.set :refer [union]]
             [luma.db :as db]
             [luma.trie :refer [trie]]
-            [luma.util :refer [mobile?]]
+            [luma.util :refer [mobile? map-by]]
             [luma.websocket :as ws]))
 
 (re-frame/reg-fx
@@ -41,22 +41,30 @@
  (fn [db [_ lastfm-id]]
    (assoc db :lastfm-id lastfm-id)))
 
+(defn ^:private add-to-albums [key albums vals]
+  (reduce (fn [m [id val]]
+            (if (contains? m id)
+              (assoc-in m [id key] val)
+              m))
+          albums
+          vals))
+
+(def ^:private add-tags-to-albums (partial add-to-albums :tags))
+(def ^:private add-playcounts-to-albums (partial add-to-albums :playcount))
+
 (re-frame/reg-event-db
  ::albums
  (fn [db [_ albums]]
-   (assoc db :albums (into {} (for [album albums]
-                                [(:id album) album])))))
+   (let [{:keys [playcounts albums-to-tags]} db
+         albums (-> (map-by :id albums)
+                    (add-tags-to-albums albums-to-tags)
+                    (add-playcounts-to-albums playcounts))]
+     (assoc db :albums albums))))
 
 (re-frame/reg-event-db
  ::progress
  (fn [db [_ progress]]
    (assoc db :progress progress)))
-
-(defn ^:private add-tags-to-albums [albums tags]
-  (reduce (fn [albums [id tags]]
-            (assoc-in albums [id :tags] (sort tags)))
-          albums
-          tags))
 
 (re-frame/reg-event-db
  ::tags
@@ -64,9 +72,11 @@
    (let [tags-to-albums (apply merge-with union (for [[id album-tags] tags
                                                       tag album-tags]
                                                   {tag #{id}}))]
-     (merge db {:albums         (add-tags-to-albums (:albums db) tags)
-                :tags           (into (trie) (mapcat val) tags)
-                :tags-to-albums tags-to-albums}))))
+     (assoc db
+            :albums (add-tags-to-albums (:albums db) tags)
+            :tags (into (trie) (mapcat val) tags)
+            :albums-to-tags tags
+            :tags-to-albums tags-to-albums))))
 
 (re-frame/reg-event-db
  ::select-tag
@@ -105,15 +115,9 @@
  (fn [_ [_ event]]
    {::ws/send event}))
 
-(defn ^:private add-playcounts-to-albums [albums playcounts]
-  (reduce (fn [m [id playcount]]
-            (if (contains? m id)
-              (assoc-in m [id :playcount] playcount)
-              m))
-          albums
-          playcounts))
-
 (re-frame/reg-event-db
  ::playcounts
  (fn [db [_ playcounts]]
-   (update db :albums add-playcounts-to-albums playcounts)))
+   (-> db
+       (update :albums add-playcounts-to-albums playcounts)
+       (assoc :playcounts playcounts))))

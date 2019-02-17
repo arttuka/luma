@@ -6,8 +6,8 @@
                 :cljs cljs-time.core)
              :as time]
             [luma.test-util :refer [test-async]]
-            #?(:clj  [luma.util :refer [lazy-mapcat map-values older-than-1-month? go-ex <? ->hex]]
-               :cljs [luma.util :refer [lazy-mapcat map-values older-than-1-month?] :refer-macros [go-ex <?]])))
+            #?(:clj  [luma.util :refer :all]
+               :cljs [luma.util :refer [lazy-mapcat map-values map-by older-than-1-month?] :refer-macros [go-ex <?]])))
 
 (deftest lazy-mapcat-test
   (testing "lazy-mapcat"
@@ -67,6 +67,15 @@
   (testing "map-values"
     (is (= {:foo 2, :bar 3}
            (map-values {:foo 1, :bar 2} inc)))))
+
+(deftest map-by-test
+  (testing "map-by"
+    (testing "creates a map with (f item) as key and item as val"
+      (is (= {2 1, 3 2, 4 3, 5 4}
+             (map-by inc [1 2 3 4]))))
+    (testing "uses the last item with the same key"
+      (is (= {false 3, true 4}
+             (map-by even? [1 2 3 4]))))))
 
 (deftest older-than-1-month-test
   (testing "older-than-1-month?"
