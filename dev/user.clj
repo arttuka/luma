@@ -9,7 +9,7 @@
             [luma.styles.main :as main-css]
             luma.main))
 
-(timbre/swap-config! (fn [config] (assoc config :ns-whitelist ["luma.*"])))
+(timbre/swap-config! (fn [config] (assoc config :ns-whitelist ["user" "luma.*"])))
 
 (defn compile-garden-css! []
   (require 'luma.styles.main :reload)
@@ -26,7 +26,7 @@
                         :handler (fn [ctx e]
                                    (when (and (= :modify (:kind e))
                                               (str/ends-with? (.getAbsolutePath (:file e)) ".clj"))
-                                     (print "Garden CSS change recognized, recompiling ... ")
+                                     (timbre/debug "Garden CSS change recognized, recompiling ... ")
                                      (compile-garden-css!))
                                    ctx)}])
   :stop (hawk/stop! @garden-watcher))

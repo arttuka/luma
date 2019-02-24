@@ -77,12 +77,17 @@
     [:.login
      {:transform "rotateX(180deg)"}]
     [:.logout
-     {:transform "rotateX(360deg)"}]]])
+     {:transform "rotateX(360deg)"}]]
+   (when-desktop
+    [:&
+     {:margin-top "32px"}])
+   (when-mobile
+    [:&
+     {:margin-top "16px"}])])
 
 (defstyles spotify-login-button
   [:.spotify
-   {:margin-left   "16px"
-    :margin-bottom "16px"}
+   {:margin-left   "16px"}
    [:.login-button
     {:background-color "#1db954"
      :padding-right    "6px"
@@ -105,7 +110,7 @@
 
 (defstyles toolbar
   [:#toolbar
-   {:padding "16px 16px 0"}
+   {:padding "0 16px"}
    [:.progress-bar-container
     {:float         :left
      :width         "256px"
@@ -128,6 +133,42 @@
    spotify-login-button
    lastfm-login-button])
 
+(defstyles last-fm-erase-button
+  [:.erase-data
+   {:display     :inline-block
+    :width       "240px"
+    :height      "24px"
+    :perspective "1000px"
+    :cursor      :pointer
+    :position    :relative}
+   [:.button
+    {:display                     :inline-block
+     :width                       "240px"
+     :height                      "24px"
+     :line-height                 "22px"
+     :text-align                  :center
+     :border-radius               "12px"
+     :border                      "1px solid #cccccc"
+     :transform-style             :preserve-3d
+     :transition                  "all 0.5s linear"
+     :backface-visibility         :hidden
+     :-webkit-backface-visibility :hidden
+     :position                    :absolute
+     :top                         0
+     :right                       0}
+    [:&.back
+     {:background-color "#fdb8c0"
+      :transform        "rotateX(180deg)"}]
+    [:&.done
+     {:background-color "#acf2bd"}]]
+   [:&.disabled
+    {:cursor :default}]
+   [:&.confirm
+    [:.front
+     {:transform "rotateX(180deg)"}]
+    [:.back
+     {:transform "rotateX(360deg)"}]]])
+
 (defstyles terms-of-use
   [:.terms-of-use
    {:font-size  "20px"
@@ -137,7 +178,9 @@
     {:color :black}]
    [:img
     {:height         "1em"
-     :vertical-align :baseline}]])
+     :vertical-align :baseline}]]
+  [:.terms-of-use-dialog
+   last-fm-erase-button])
 
 (defstyles header
   [:#header

@@ -89,3 +89,7 @@
                         ON CONFLICT (username, album) DO UPDATE
                         SET playcount = ?, updated = now()"
                          username album playcount playcount])))
+
+(defn erase-lastfm-data! [username]
+  (jdbc/delete! *tx* :album_playcount ["username = ?" username])
+  (jdbc/delete! *tx* :lastfm_user ["username = ?" username]))

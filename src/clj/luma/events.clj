@@ -103,3 +103,10 @@
       (let [albums (get-and-send-albums uid (:access_token spotify-user))]
         (when (and lastfm-user albums)
           (send-playcounts uid (:name lastfm-user) albums))))))
+
+(defmethod ws/event-handler
+  ::erase-lastfm-data
+  [{:keys [ring-req]}]
+  (when-let [lastfm-user (get-in ring-req [:session :lastfm-user])]
+    (db/with-transaction
+      (db/erase-lastfm-data! (:name lastfm-user)))))

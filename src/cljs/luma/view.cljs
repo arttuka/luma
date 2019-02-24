@@ -195,31 +195,60 @@
         [ui/card-text {:style {:padding-top 0}}
          (interpose " · " (:tags a))]]])))
 
+(defn welcome-screen []
+  [ui/paper {:style {:width      "600px"
+                     :padding    "10px"
+                     :margin-top "8px"
+                     :height     "100%"}}
+   [:h2 "LUMA Ultimate Music Archive"]
+   [:p "Welcome to LUMA, a music archive that helps you sort your Spotify Music Library."]
+   [:p "To begin, login with your Spotify account. Loading the tags for your albums will take some time on the first login."]
+   [:p "You can also login with your Last.fm account to see play counts for the albums. Loading the playcounts will take a lot of time on the first login."]
+   [:p "By logging in, you allow LUMA to use and process data about your Spotify account. For more information, see terms of use."]])
+
 (defn albums []
-  (let [has-data? (re-frame/subscribe [::subs/albums])
-        data (re-frame/subscribe [::subs/sorted-albums])
+  (let [has-albums? (re-frame/subscribe [::subs/albums])
+        filtered-albums (re-frame/subscribe [::subs/sorted-albums])
         spotify-id (re-frame/subscribe [::subs/spotify-id])]
     (fn albums-render []
       [:div#albums
-       (if @spotify-id
-         (if @has-data?
-           (if (seq @data)
-             (for [a @data]
-               ^{:key (:id a)}
-               [album a])
-             [:p.no-matches "No matching albums found in your library."])
-           [ui/circular-progress {:style     {:margin-top "20px"}
-                                  :size      100
-                                  :thickness 5}])
-         [ui/paper {:style {:width      "600px"
-                            :padding    "10px"
-                            :margin-top "8px"
-                            :height     "100%"}}
-          [:h2 "LUMA Ultimate Music Archive"]
-          [:p "Welcome to LUMA, a music archive that helps you sort your Spotify Music Library."]
-          [:p "To begin, login with your Spotify account. Loading the tags for your albums will take some time on the first login."]
-          [:p "You can also login with your Last.fm account to see play counts for the albums. Loading the playcounts will take a lot of time on the first login."]
-          [:p "By logging in, you allow LUMA to use and process data about your Spotify account. For more information, see terms of use."]])])))
+       (cond
+         (not @spotify-id) [welcome-screen]
+         (not @has-albums?) [ui/circular-progress {:style     {:margin-top "20px"}
+                                                   :size      100
+                                                   :thickness 5}]
+         (seq @filtered-albums) (for [a @filtered-albums]
+                                  ^{:key (:id a)}
+                                  [album a])
+         :else [:p.no-matches "No matching albums found in your library."])])))
+
+(defn erase-lastfm-data []
+  (let [confirm (atom false)
+        done (atom false)
+        lastfm-id (re-frame/subscribe [::subs/lastfm-id])]
+    (fn erase-last-fm-data-render []
+      [:div.erase-data
+       {:class    (cond
+                    @confirm :confirm
+                    (not @lastfm-id) :disabled)
+        :on-click (fn []
+                    (when @lastfm-id
+                      (if @confirm
+                        (do
+                          (re-frame/dispatch [::ws/send [::events/erase-lastfm-data]])
+                          (reset! done true)
+                          (js/setTimeout #(set! (.-location js/window) "/logout") 3000))
+                        (do
+                          (reset! confirm true)
+                          (js/setTimeout #(reset! confirm false) 5000)))))}
+       [:div.button.front
+        {:class (when @done :done)}
+        (cond
+          @done "Last.fm data erased!"
+          @lastfm-id "Erase my Last.fm data"
+          :else "Not logged in with Last.fm")]
+       [:div.button.back
+        "Really erase my Last.fm data"]])))
 
 (defn terms-of-use []
   (let [dialog-open (atom false)]
@@ -262,28 +291,35 @@
 
         [:h4 "Controller of data"]
         [:p
-         "LUMA Ultimate Music Archive, representative Arttu Kaipiainen "
+         "LUMA Ultimate Music Archive, representative Arttu Kaipiainen ("
          [:a {:href "mailto:admin@luma.dy.fi"}
-          "admin@luma.dy.fi"]]
+          "admin@luma.dy.fi"]
+         ")"]
         [:h4 "Purpose of processing personal data"]
         [:p
          "Augmenting and displaying data from user's Spotify music library."]
         [:h4 "Personal data processed"]
         [:p
-         "User's Spotify ID and saved albums in their Spotify music library."]
+         "User's Spotify ID and saved albums in their Spotify music library. User's Last.fm ID and playcount data."]
         [:h4 "Storage of personal data"]
         [:p
-         "No personal data is stored anywhere except the user's web browser and browsing session. Any personal data is erased when user logs out or otherwise stops using the service."]
+         "Personal data from Spotify is not stored anywhere except the user's web browser and browsing session."
+         "Personal data from Last.fm is stored in the service."]
         [:h4 "Consent to process personal data"]
         [:p
          "The user gives their consent to process any personal data from their Spotify account by logging into the service with their Spotify account.
           The user may withdraw this consent at any time by logging out of the service."]
+        [:p
+         "The user gives their consent to process any personal data from their Last.fm account by logging into the service with their Last.fm account.
+          The user may withdraw this consent at any time by using the button under the heading \"Right to be forgotten\"."]
         [:h4 "Right to obtain personal data"]
         [:p
-         "All personal data being processed is visible on the front page of the service. No personal data is stored otherwise by the service."]
+         "All personal data being processed is visible on the front page of the service. No other personal data is stored by the service."]
         [:h4 "Right to be forgotten"]
         [:p
-         "Any personal data is erased when user logs out or otherwise stops using the service."]
+         "Personal data from Spotify is erased when the user logs out or otherwise stops using the service.
+          Personal data from Last.fm can be erased using this button:"]
+        [erase-lastfm-data]
         [:h4 "Processing of sensitive personal data"]
         [:p
          "The service doesn't process any sensitive personal data."]]])))
