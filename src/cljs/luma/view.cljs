@@ -145,7 +145,6 @@
          [:div {:style {:clear :both}}]]
         [ui/paper {:id :toolbar}
          [spotify-login]
-         [lastfm-login]
          [:div {:style {:clear :both}}]]))))
 
 (defn lastfm-url [album]
