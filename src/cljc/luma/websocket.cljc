@@ -3,7 +3,7 @@
             [taoensso.sente.packers.transit :as sente-transit]
             [taoensso.timbre :as log]
             [mount.core :refer [defstate]]
-            #?(:clj [taoensso.sente.server-adapters.http-kit :refer [get-sch-adapter]])
+            #?(:clj [taoensso.sente.server-adapters.aleph :refer [get-sch-adapter]])
             #?(:clj [compojure.core :refer [defroutes GET POST]])
             #?(:cljs [goog.string :as gs])
             #?(:cljs [oops.core :refer [oget]])

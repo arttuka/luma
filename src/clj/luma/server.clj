@@ -1,10 +1,10 @@
 (ns luma.server
   (:require [config.core :refer [env]]
-            [org.httpkit.server :as http]
+            [aleph.http :as http]
             [mount.core :refer [defstate]]
             [luma.handler :refer [handler]]
             luma.events))
 
 (defstate server
-  :start (http/run-server handler {:port (or (env :server-port) 8080)})
-  :stop (@server))
+  :start (http/start-server handler {:port (or (env :server-port) 8080)})
+  :stop (.close @server))

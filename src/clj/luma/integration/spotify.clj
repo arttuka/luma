@@ -2,7 +2,8 @@
   (:require [compojure.core :refer [GET defroutes]]
             [ring.util.response :refer [redirect]]
             [cheshire.core :as json]
-            [org.httpkit.client :as http]
+            [aleph.http :as http]
+            [byte-streams :as bs]
             [config.core :refer [env]]
             [luma.integration.oauth2 :as oauth2]
             [clj-time.core :as time]
@@ -15,7 +16,9 @@
                                             :refresh_token refresh-token
                                             :client_id     (env :spotify-client-id)
                                             :client_secret (env :spotify-client-secret)}})
-        body (json/parse-string (:body response) true)]
+        body (-> (:body response)
+                 bs/to-string
+                 (json/parse-string true))]
     (-> body
         (assoc :expiration (time/plus (time/now) (time/seconds (:expires_in body))))
         (select-keys [:access_token :expiration]))))
@@ -29,7 +32,9 @@
                                             :redirect_uri  redirect-uri
                                             :client_id     (env :spotify-client-id)
                                             :client_secret (env :spotify-client-secret)}})
-        body (json/parse-string (:body response) true)]
+        body (-> (:body response)
+                 bs/to-string
+                 (json/parse-string true))]
     (-> body
         (assoc :expiration (time/plus (time/now) (time/seconds (:expires_in body 3600))))
         (select-keys [:access_token :refresh_token :expiration]))))

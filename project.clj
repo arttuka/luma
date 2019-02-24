@@ -8,7 +8,8 @@
                  [ring/ring-core "1.7.1"]
                  [ring/ring-defaults "0.3.2"]
                  [ring/ring-json "0.4.0" :exclusions [com.fasterxml.jackson.core/jackson-core]]
-                 [http-kit "2.4.0-alpha2"]
+                 [aleph "0.4.6"]
+                 [byte-streams "0.2.4"]
                  [hiccup "1.0.5"]
                  [mount "0.1.16"]
                  [com.taoensso/sente "1.14.0-RC2"]
@@ -47,7 +48,7 @@
 
   :profiles {:dev      {:dependencies   [[binaryage/devtools "0.9.10"]
                                          [com.bhauman/rebel-readline-cljs "0.1.4" :exclusions [org.clojure/clojurescript]]
-                                         [cider/piggieback "0.3.10" :exclusions [org.clojure/clojurescript]]
+                                         [cider/piggieback "0.4.0" :exclusions [org.clojure/clojurescript]]
                                          [hawk "0.2.11"]
                                          [re-frisk "0.5.4" :exclusions [org.clojure/clojurescript]]
                                          [day8.re-frame/test "0.1.5"]

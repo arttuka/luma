@@ -3,7 +3,8 @@
             [ring.util.response :refer [redirect]]
             [config.core :refer [env]]
             [clojure.string :as str]
-            [org.httpkit.client :as http]
+            [aleph.http :as http]
+            [byte-streams :as bs]
             [cheshire.core :as json]
             [luma.util :refer [->hex throttle]])
   (:import (java.security MessageDigest)))
@@ -34,10 +35,11 @@
          query-params (if sign?
                         (assoc query-params :api_sig (signature query-params))
                         query-params)
-         response @(http/get "http://ws.audioscrobbler.com/2.0/" {:query-params query-params
-                                                                  :as           :text})]
+         response @(http/get "http://ws.audioscrobbler.com/2.0/" {:query-params query-params})]
      (if (= 200 (:status response))
-       (json/parse-string (:body response) true)
+       (-> (:body response)
+           bs/to-string
+           (json/parse-string true))
        (throw (ex-info "HTTP error" response))))))
 
 (def lastfm-request (throttle lastfm-request* 5))
