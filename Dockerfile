@@ -1,11 +1,11 @@
-FROM openjdk:8-alpine AS builder
+FROM openjdk:11-slim AS builder
 ENV LEIN_ROOT true
-RUN apk --no-cache add curl bash chromium
+RUN apt-get update && apt-get install -y curl chromium
 RUN \
     # Create chromium wrapper with required flags
-    mv /usr/bin/chromium-browser /usr/bin/chromium-browser-origin && \
+    mv /usr/bin/chromium /usr/bin/chromium-origin && \
     echo $'#!/usr/bin/env sh\n\
-    chromium-browser-origin --no-sandbox --headless --disable-gpu --repl $@' > /usr/bin/chromium-browser && \
+    chromium-origin --no-sandbox --headless --disable-gpu --repl $@' > /usr/bin/chromium-browser && \
     chmod +x /usr/bin/chromium-browser
 
 RUN curl -Lo /usr/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein && chmod +x /usr/bin/lein
@@ -21,7 +21,7 @@ RUN lein test
 RUN lein fig:test
 RUN lein do clean, uberjar
 
-FROM openjdk:8-alpine
+FROM openjdk:11-jre-slim
 WORKDIR /app
 COPY --from=builder /app/target/luma.jar .
 CMD ["java", "-jar", "luma.jar"]

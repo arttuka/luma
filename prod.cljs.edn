@@ -1,5 +1,6 @@
 ^{:watch-dirs ["src/cljs" "src/cljc"]}
-{:main          luma.core
- :output-to     "resources/public/js/prod-main.js"
- :output-dir    "resources/public/js/compiled"
- :optimizations :advanced}
+{:main            luma.core
+ :output-to       "resources/public/js/prod-main.js"
+ :output-dir      "resources/public/js/compiled"
+ :optimizations   :advanced
+ :closure-defines {goog.DEBUG false}}

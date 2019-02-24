@@ -6,6 +6,7 @@
             #?(:clj [taoensso.sente.server-adapters.http-kit :refer [get-sch-adapter]])
             #?(:clj [compojure.core :refer [defroutes GET POST]])
             #?(:cljs [goog.string :as gs])
+            #?(:cljs [oops.core :refer [oget]])
             #?(:cljs goog.date.UtcDateTime)
             [cognitect.transit :as transit]))
 
@@ -42,14 +43,15 @@
 (defn- init-ws []
   #?(:clj
      (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn connected-uids]}
-           (sente/make-channel-socket! (get-sch-adapter) {:packer packer})]
+           (sente/make-channel-socket-server! (get-sch-adapter) {:packer packer})]
        {:receive                     ch-recv
         :send!                       send-fn
         :connected-uids              connected-uids
         :ajax-post-fn                ajax-post-fn
         :ajax-get-or-ws-handshake-fn ajax-get-or-ws-handshake-fn})
      :cljs
-     (let [{:keys [ch-recv send-fn chsk state]} (sente/make-channel-socket! path {:packer packer
+     (let [{:keys [ch-recv send-fn chsk state]}
+           (sente/make-channel-socket-client! path (oget js/window "csrf_token") {:packer packer
                                                                                   :type   :auto})]
        {:receive ch-recv
         :send!   send-fn
