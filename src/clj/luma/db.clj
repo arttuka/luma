@@ -25,47 +25,44 @@
      (binding [*tx* tx#]
        ~@body)))
 
-(defn rollback! [tx]
-  (jdbc/db-set-rollback-only! tx))
-
-(defn ^:private get-ids [tx table key ids]
+(defn ^:private get-ids [table key ids]
   (into #{}
         (comp (map key) (filter ids))
-        (jdbc/query tx [(str "SELECT " (name key) " FROM " (name table))])))
+        (jdbc/query *tx* [(str "SELECT " (name key) " FROM " (name table))])))
 
-(defn get-albums [tx ids]
-  (get-ids tx :album :id ids))
+(defn get-albums [ids]
+  (get-ids :album :id ids))
 
-(defn get-artists [tx ids]
-  (get-ids tx :artist :id ids))
+(defn get-artists [ids]
+  (get-ids :artist :id ids))
 
-(defn get-existing-tags [tx tags]
-  (get-ids tx :tag :tag tags))
+(defn get-existing-tags [tags]
+  (get-ids :tag :tag tags))
 
-(defn get-new-tags [tx tags]
-  (difference tags (get-existing-tags tx tags)))
+(defn get-new-tags [tags]
+  (difference tags (get-existing-tags tags)))
 
-(defn save-tags! [tx artists albums]
+(defn save-tags! [artists albums]
   (let [tags (into #{} (mapcat :tags) (concat artists albums))
-        new-tags (get-new-tags tx tags)]
-    (jdbc/insert-multi! tx :artist (for [{id :id} artists] {:id id}))
-    (jdbc/insert-multi! tx :album (for [{id :id} albums] {:id id}))
-    (jdbc/insert-multi! tx :album_artist (for [{:keys [id artists]} albums
-                                               artist artists]
-                                           {:album id, :artist artist}))
-    (jdbc/insert-multi! tx :tag (for [tag new-tags] {:tag tag}))
-    (jdbc/insert-multi! tx :album_tag (for [{:keys [id tags]} albums
-                                            tag tags]
-                                        {:album id, :tag tag}))
-    (jdbc/insert-multi! tx :artist_tag (for [{:keys [id tags]} artists
-                                             tag tags]
-                                         {:artist id, :tag tag}))))
+        new-tags (get-new-tags tags)]
+    (jdbc/insert-multi! *tx* :artist (for [{id :id} artists] {:id id}))
+    (jdbc/insert-multi! *tx* :album (for [{id :id} albums] {:id id}))
+    (jdbc/insert-multi! *tx* :album_artist (for [{:keys [id artists]} albums
+                                                 artist artists]
+                                             {:album id, :artist artist}))
+    (jdbc/insert-multi! *tx* :tag (for [tag new-tags] {:tag tag}))
+    (jdbc/insert-multi! *tx* :album_tag (for [{:keys [id tags]} albums
+                                              tag tags]
+                                          {:album id, :tag tag}))
+    (jdbc/insert-multi! *tx* :artist_tag (for [{:keys [id tags]} artists
+                                               tag tags]
+                                           {:artist id, :tag tag}))))
 
 (def tags-xf (comp (map (juxt :album :tag))
                    (partition-by first)
                    (map (fn [tags] [(ffirst tags) (map second tags)]))))
 
-(defn get-tags [tx albums]
+(defn get-tags [albums]
   (let [qs (str/join "," (repeat (count albums) \?))
         query (format "SELECT album, tag
                          FROM album_tag
@@ -78,22 +75,22 @@
                          ORDER BY album, tag"
                       qs qs)
         args (concat albums albums)]
-    (into {} tags-xf (jdbc/query tx (into [query] args)))))
+    (into {} tags-xf (jdbc/query *tx* (into [query] args)))))
 
-(defn get-playcounts [tx username]
+(defn get-playcounts [username]
   (let [query "SELECT album, playcount, updated
                  FROM album_playcount
                  WHERE username = ?"
-        results (jdbc/query tx [query username])]
+        results (jdbc/query *tx* [query username])]
     (into {} (for [{:keys [album playcount updated]} results]
                [album {:playcount playcount
                        :updated   updated}]))))
 
-(defn save-playcounts! [tx username playcounts]
-  (jdbc/execute! tx ["INSERT INTO lastfm_user(username) VALUES (?) ON CONFLICT DO NOTHING" username])
+(defn save-playcounts! [username playcounts]
+  (jdbc/execute! *tx* ["INSERT INTO lastfm_user(username) VALUES (?) ON CONFLICT DO NOTHING" username])
   (doseq [{:keys [album playcount]} playcounts]
-    (jdbc/execute! tx ["INSERT INTO album_playcount (username, album, playcount)
+    (jdbc/execute! *tx* ["INSERT INTO album_playcount (username, album, playcount)
                         VALUES (?, ?, ?)
                         ON CONFLICT (username, album) DO UPDATE
                         SET playcount = ?, updated = now()"
-                       username album playcount playcount])))
+                         username album playcount playcount])))

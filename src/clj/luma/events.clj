@@ -36,8 +36,8 @@
   (db/with-transaction
     (let [album-ids (into #{} (map :id) albums)
           artist-ids (into #{} (comp (mapcat :artists) (map :id)) albums)
-          existing-albums (db/get-albums db/*tx* album-ids)
-          existing-artists (db/get-artists db/*tx* artist-ids)
+          existing-albums (db/get-albums album-ids)
+          existing-artists (db/get-artists artist-ids)
           new-albums (remove (comp existing-albums :id) albums)
           new-artists (sequence (comp (mapcat :artists) (remove (comp existing-artists :id)) (distinct)) albums)
           total (+ (count new-albums) (count new-artists))
@@ -45,8 +45,8 @@
           report-progress! #(>!! progress-ch (/ (swap! i inc) total))
           album-tags (get-album-tags new-albums report-progress!)
           artist-tags (get-artist-tags new-artists report-progress!)]
-      (db/save-tags! db/*tx* artist-tags album-tags)
-      (db/get-tags db/*tx* album-ids))))
+      (db/save-tags! artist-tags album-tags)
+      (db/get-tags album-ids))))
 
 (defn send-albums [uid spotify-access-token]
   (let [albums (spotify/get-user-albums spotify-access-token)
@@ -70,7 +70,7 @@
 (defn send-playcounts [uid username albums]
   (try
     (let [existing-playcounts (db/with-transaction
-                                (db/get-playcounts db/*tx* username))]
+                                (db/get-playcounts username))]
       (ws/send! uid [::playcounts (map-values existing-playcounts :playcount)])
       (doseq [album albums
               :let [{:keys [updated]} (get existing-playcounts (:id album))]
@@ -79,8 +79,8 @@
               :let [playcount (lastfm/get-album-playcount username (:name (first (:artists album))) (:title album))]]
         (ws/send! uid [::playcounts {(:id album) playcount}])
         (db/with-transaction
-          (db/save-playcounts! db/*tx* username [{:album     (:id album)
-                                                  :playcount playcount}]))))
+          (db/save-playcounts! username [{:album     (:id album)
+                                          :playcount playcount}]))))
     (catch Exception e
       (log/error e "Error while loading playcounts"))))
 
