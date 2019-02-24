@@ -7,7 +7,7 @@
              :as time]
             [luma.test-util :refer [test-async]]
             #?(:clj  [luma.util :refer :all]
-               :cljs [luma.util :refer [lazy-mapcat map-values map-by older-than-1-month?] :refer-macros [go-ex <?]])))
+               :cljs [luma.util :refer [lazy-mapcat map-values map-by group-by-kv older-than-1-month?] :refer-macros [go-ex <?]])))
 
 (deftest lazy-mapcat-test
   (testing "lazy-mapcat"
@@ -75,7 +75,16 @@
              (map-by inc [1 2 3 4]))))
     (testing "uses the last item with the same key"
       (is (= {false 3, true 4}
-             (map-by even? [1 2 3 4]))))))
+             (map-by even? [1 2 3 4]))))
+    (testing "maps the value with optional valfn"
+      (is (= {2 0, 3 1, 4 2, 5 3}
+             (map-by inc dec [1 2 3 4]))))))
+
+(deftest group-by-kv-test
+  (testing "group-by-kv"
+    (is (= {true (range 1 1000 2)
+            false (range 2 1001 2)}
+           (group-by-kv even? inc (range 1000))))))
 
 (deftest older-than-1-month-test
   (testing "older-than-1-month?"

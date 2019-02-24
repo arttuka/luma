@@ -5,7 +5,8 @@
             [clojure.string :as str]
             clj-time.jdbc
             [config.core :refer [env]]
-            [hikari-cp.core :as hikari]))
+            [hikari-cp.core :as hikari]
+            [luma.util :refer [group-by-kv map-by]]))
 
 (def datasource-options {:adapter       "postgresql"
                          :username      (env :db-user)
@@ -58,10 +59,6 @@
                                                tag tags]
                                            {:artist id, :tag tag}))))
 
-(def tags-xf (comp (map (juxt :album :tag))
-                   (partition-by first)
-                   (map (fn [tags] [(ffirst tags) (map second tags)]))))
-
 (defn get-tags [albums]
   (let [qs (str/join "," (repeat (count albums) \?))
         query (format "SELECT album, tag
@@ -75,16 +72,14 @@
                          ORDER BY album, tag"
                       qs qs)
         args (concat albums albums)]
-    (into {} tags-xf (jdbc/query *tx* (into [query] args)))))
+    (group-by-kv :album :tag (jdbc/query *tx* (into [query] args)))))
 
 (defn get-playcounts [username]
   (let [query "SELECT album, playcount, updated
                  FROM album_playcount
                  WHERE username = ?"
         results (jdbc/query *tx* [query username])]
-    (into {} (for [{:keys [album playcount updated]} results]
-               [album {:playcount playcount
-                       :updated   updated}]))))
+    (map-by :album #(dissoc % :album) results)))
 
 (defn save-playcounts! [username playcounts]
   (jdbc/execute! *tx* ["INSERT INTO lastfm_user(username) VALUES (?) ON CONFLICT DO NOTHING" username])

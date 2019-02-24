@@ -61,11 +61,22 @@
               m)))
 
 (defn map-by
-  [f coll]
-  (into {} (map (juxt f identity)) coll))
+  ([keyfn coll]
+   (map-by keyfn identity coll))
+  ([keyfn valfn coll]
+   (into {} (map (juxt keyfn valfn)) coll)))
 
 (defn older-than-1-month? [date]
   (time/before? date (time/minus (time/now) (time/months 1))))
+
+(defn group-by-kv [keyfn valfn coll]
+  (persistent!
+   (reduce (fn [acc x]
+             (let [k (keyfn x)
+                   v (valfn x)]
+               (assoc! acc k (conj (get acc k []) v))))
+           (transient {})
+           coll)))
 
 (def mobile-max-width 400)
 
