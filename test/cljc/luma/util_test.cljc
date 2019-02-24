@@ -1,11 +1,14 @@
 (ns luma.util-test
   (:require #?(:clj  [clojure.test :refer :all]
                :cljs [cljs.test :refer-macros [deftest testing is]])
+            #?(:clj  [clojure.core.async :refer [go <! timeout]]
+               :cljs [clojure.core.async :refer [<! timeout] :refer-macros [go]])
             [#?(:clj  clj-time.core
                 :cljs cljs-time.core)
              :as time]
             #?(:clj  [luma.util :refer :all]
-               :cljs [luma.util :refer [lazy-mapcat map-values map-by group-by-kv older-than-1-month?] :refer-macros [go-ex <?]])))
+               :cljs [luma.util :refer [lazy-mapcat map-values map-by group-by-kv older-than-1-month? debounce]])
+            [luma.test-util :refer [test-async]]))
 
 (deftest lazy-mapcat-test
   (testing "lazy-mapcat"
@@ -41,7 +44,7 @@
 
 (deftest group-by-kv-test
   (testing "group-by-kv"
-    (is (= {true (range 1 1000 2)
+    (is (= {true  (range 1 1000 2)
             false (range 2 1001 2)}
            (group-by-kv even? inc (range 1000))))))
 
@@ -49,3 +52,45 @@
   (testing "older-than-1-month?"
     (is (not (older-than-1-month? (time/minus (time/now) (time/days 27)))))
     (is (older-than-1-month? (time/minus (time/now) (time/days 32))))))
+
+(deftest debounce-test
+  (testing "debounce"
+    (testing "waits until timeout"
+      (let [a (atom false)
+            f (debounce #(reset! a true) 50)]
+        (test-async
+         (go
+           (f)
+           (is (not @a) "should not call f yet")
+           (<! (timeout 100))
+           (is @a "f should have been called")))))
+    (testing "only lets the last call through"
+      (let [a (atom [])
+            f (debounce #(swap! a conj %) 50)]
+        (test-async
+         (go
+           (f 1)
+           (f 2)
+           (f 3)
+           (<! (timeout 100))
+           (is (= [3] @a))))))
+    (testing "still works after first timeout"
+      (let [a (atom [])
+            f (debounce #(swap! a conj %) 50)]
+        (test-async
+         (go
+           (f 1)
+           (<! (timeout 100))
+           (f 2)
+           (f 3)
+           (<! (timeout 100))
+           (is (= [1 3] @a))))))
+    (testing "works for any number of arguments"
+      (let [a (atom nil)
+            f (debounce #(reset! a (+ %1 %2 %3)) 50)]
+        (test-async
+         (go
+           (f 1 2 3)
+           (f 4 5 6)
+           (<! (timeout 100))
+           (is (= 15 @a))))))))

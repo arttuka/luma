@@ -1,5 +1,6 @@
 (ns luma.util
-  (:require #?(:clj [clojure.core.async :refer [>! <! <!! go-loop chan dropping-buffer timeout]])
+  (:require #?(:clj  [clojure.core.async :refer [>! <! <!! alts! put! go go-loop chan dropping-buffer sliding-buffer timeout]]
+               :cljs [clojure.core.async :refer [<! alts! put! chan sliding-buffer timeout] :refer-macros [go]])
             #?(:clj [garden.stylesheet :refer [at-media]])
             #?(:clj [garden.units :refer [px percent]])
             #?(:cljs [oops.core :refer [oget]])
@@ -54,6 +55,19 @@
                (assoc! acc k (conj (get acc k []) v))))
            (transient {})
            coll)))
+
+(defn debounce [f ms]
+  (let [c (chan (sliding-buffer 1))]
+    (go
+      (loop [args (<! c)]
+        (let [[val port] (alts! [c (timeout ms)])]
+          (when (not= port c)
+            (apply f args))
+          (recur (if (= port c)
+                   val
+                   (<! c))))))
+    (fn [& args]
+      (put! c (or args [])))))
 
 (def mobile-max-width 400)
 

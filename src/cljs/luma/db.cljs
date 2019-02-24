@@ -5,5 +5,6 @@
   {:selected-tags #{}
    :sort-key      :artist
    :sort-asc      true
+   :text-search   ""
    :progress      0
    :mobile?       (mobile?)})

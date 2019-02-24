@@ -91,6 +91,11 @@
    (update db :selected-tags disj tag)))
 
 (re-frame/reg-event-db
+ ::set-text-search
+ (fn [db [_ value]]
+   (assoc db :text-search value)))
+
+(re-frame/reg-event-db
  ::sort-albums
  (fn [db [_ sort-key]]
    (assoc db :sort-key sort-key)))

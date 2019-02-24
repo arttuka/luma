@@ -54,16 +54,29 @@
    (:selected-tags db)))
 
 (re-frame/reg-sub
+ ::text-search
+ (fn [db _]
+   (:text-search db)))
+
+(defn ^:private contains-string? [album s]
+  (or (str/index-of (str/lower-case (:title album)) s)
+      (some #(str/index-of (str/lower-case (:name %)) s) (:artists album))))
+
+(re-frame/reg-sub
  ::filtered-albums
  :<- [::albums]
- :<- [::selected-tags]
  :<- [::tags-to-albums]
- (fn [[albums selected-tags tags-to-albums] [_]]
-   (if (seq selected-tags)
-     (->> (map tags-to-albums selected-tags)
-          (reduce intersection)
-          (map albums))
-     (vals albums))))
+ :<- [::selected-tags]
+ :<- [::text-search]
+ (fn [[albums tags-to-albums selected-tags text] [_]]
+   (let [albums-from-tags (if (seq selected-tags)
+                            (->> (map tags-to-albums selected-tags)
+                                 (reduce intersection)
+                                 (map albums))
+                            (vals albums))]
+     (if (str/blank? text)
+       albums-from-tags
+       (filter #(contains-string? % (str/lower-case text)) albums-from-tags)))))
 
 (re-frame/reg-sub
  ::sort-key

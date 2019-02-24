@@ -11,6 +11,7 @@
             [luma.components.autosuggest :refer [autosuggest]]
             [luma.events :as events]
             [luma.subs :as subs]
+            [luma.util :refer [debounce]]
             [luma.websocket :as ws]))
 
 (defn spotify-login []
@@ -22,16 +23,16 @@
         scopes "user-library-read"]
     (fn spotify-login-render []
       (if @spotify-id
-        [:div.login-button-container.spotify
-         [:div.login-button.login
+        [:div.login-button-container.spotify.enabled
+         [:div.login-button.front
           [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
           @spotify-id]
-         [:a.login-button.logout
+         [:a.login-button.back
           {:href "/logout"}
           [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
           (str "Log out")]]
         [:div.login-button-container.spotify
-         [:a.login-button
+         [:a.login-button.front
           {:href (gstring/format "https://accounts.spotify.com/authorize?client_id=%s&response_type=%s&state=%s&scope=%s&redirect_uri=%s"
                                  @client-id response-type @uid scopes @redirect-uri)}
           [:img {:src "/images/Spotify_Icon_RGB_White.png"}]
@@ -43,16 +44,16 @@
         redirect-uri (re-frame/subscribe [::subs/env :lastfm-redirect-uri])]
     (fn lastfm-login-render []
       (if @lastfm-id
-        [:div.login-button-container.lastfm
-         [:div.login-button.login
+        [:div.login-button-container.lastfm.enabled
+         [:div.login-button.front
           [:img {:src "/images/Last.fm_Logo_White.png"}]
           @lastfm-id]
-         [:a.login-button.logout
+         [:a.login-button.back
           {:href "/logout"}
           [:img {:src "/images/Last.fm_Logo_White.png"}]
           (str "Log out")]]
         [:div.login-button-container.lastfm
-         [:a.login-button
+         [:a.login-button.front
           {:href (gstring/format "http://www.last.fm/api/auth/?api_key=%s&cb=%s"
                                  @api-key @redirect-uri)}
           "Login" [:img {:src "/images/Last.fm_Logo_White.png"}]]]))))
@@ -95,11 +96,11 @@
        [autosuggest {:disabled             (not @all-tags)
                      :datasource           @all-tags
                      :on-change            #(re-frame/dispatch [::events/select-tag %])
-                     :floating-label-text  "Filter by"
+                     :floating-label-text  "Tag search"
                      :floating-label-fixed true
                      :hint-text            "Tag"
-                     :styles               (when @mobile? {:container {:width "calc(100vw - 68px)"}
-                                                           :input     {:width "calc(100vw - 68px)"}})}]])))
+                     :styles               (when @mobile? {:container {:width "calc(100vw - 80px)"}
+                                                           :input     {:width "calc(100vw - 80px)"}})}]])))
 
 (defn sort-dropdown []
   (let [lastfm-id (re-frame/subscribe [::subs/lastfm-id])
@@ -115,7 +116,7 @@
                          :on-change           (fn [_ _ new-value]
                                                 (reset! value new-value)
                                                 (re-frame/dispatch [::events/sort-albums (keyword new-value)]))
-                         :style               (when @mobile? {:width "calc(100vw - 68px"})}
+                         :style               (when @mobile? {:width "calc(100vw - 80px)"})}
         [ui/menu-item {:value        :artist
                        :primary-text "Artist"}]
         [ui/menu-item {:value        :album
@@ -132,18 +133,52 @@
                                           (oget palette "primary1Color")
                                           (oget palette "accent1Color"))}]]])))
 
+(defn text-search []
+  (let [db-value (re-frame/subscribe [::subs/text-search])
+        mobile? (re-frame/subscribe [::subs/mobile?])
+        value (atom @db-value)
+        delayed-dispatch (debounce (fn [v] (re-frame/dispatch [::events/set-text-search v]))
+                                   250)]
+    (fn text-search-render []
+      [:div.text-search
+       [ui/text-field
+        {:floating-label-text  "Free text search"
+         :floating-label-fixed true
+         :hint-text            "Title or artist"
+         :value                @value
+         :on-change            (fn [e]
+                                 (let [v (oget e "target" "value")]
+                                   (reset! value v)
+                                   (delayed-dispatch v)))
+         :style                (when @mobile? {:width "calc(100vw - 80px)"})}]
+       (when-not (str/blank? @db-value)
+         [ui/icon-button
+          {:style    {:position :absolute
+                      :top      "24px"}
+           :on-click (fn []
+                       (reset! value "")
+                       (re-frame/dispatch [::events/set-text-search ""]))}
+          [icons/navigation-cancel
+           {:class-name  :clear-icon
+            :color       "rgba(0, 0, 0, 0.28)"
+            :hover-color "rgba(0, 0, 0, 0.4)"}]])])))
+
 (defn toolbar []
   (let [spotify-id (re-frame/subscribe [::subs/spotify-id])]
     (fn toolbar-render []
       (if @spotify-id
-        [ui/paper {:id :toolbar}
+        [ui/paper
+         {:id :toolbar}
          [spotify-login]
          [lastfm-login]
          [tag-filter]
+         [text-search]
          [sort-dropdown]
          [selected-tags]
          [:div {:style {:clear :both}}]]
-        [ui/paper {:id :toolbar}
+        [ui/paper
+         {:id    :toolbar
+          :class :empty}
          [spotify-login]
          [:div {:style {:clear :both}}]]))))
 
@@ -196,15 +231,15 @@
          (interpose " · " (:tags a))]]])))
 
 (defn welcome-screen []
-  [ui/paper {:style {:width      "600px"
+  [ui/paper {:style {:max-width  "600px"
                      :padding    "10px"
-                     :margin-top "8px"
+                     :margin-top "16px"
                      :height     "100%"}}
    [:h2 "LUMA Ultimate Music Archive"]
    [:p "Welcome to LUMA, a music archive that helps you sort your Spotify Music Library."]
    [:p "To begin, login with your Spotify account. Loading the tags for your albums will take some time on the first login."]
    [:p "You can also login with your Last.fm account to see play counts for the albums. Loading the playcounts will take a lot of time on the first login."]
-   [:p "By logging in, you allow LUMA to use and process data about your Spotify account. For more information, see terms of use."]])
+   [:p "By logging in, you allow LUMA to use and process data about your Spotify and Last.fm accounts. For more information, see terms of use."]])
 
 (defn albums []
   (let [has-albums? (re-frame/subscribe [::subs/albums])
@@ -214,7 +249,8 @@
       [:div#albums
        (cond
          (not @spotify-id) [welcome-screen]
-         (not @has-albums?) [ui/circular-progress {:style     {:margin-top "20px"}
+         (not @has-albums?) [ui/circular-progress {:style     {:margin  "48px auto 0"
+                                                               :display :block}
                                                    :size      100
                                                    :thickness 5}]
          (seq @filtered-albums) (for [a @filtered-albums]
@@ -286,7 +322,8 @@
                    :auto-scroll-body-content true
                    :actions                  [(reagent/as-element [ui/flat-button {:label    "Close"
                                                                                    :primary  true
-                                                                                   :on-click #(reset! dialog-open false)}])]}
+                                                                                   :on-click #(reset! dialog-open false)}])]
+                   :content-style            {:width "90%"}}
         [:p "Terms of use of LUMA Ultimate Music Archive (\"service\") as required by European Union General Data Protection Regulation (EU 2016/679) and Finnish Personal Data Act (FI 523/1999)"]
 
         [:h4 "Controller of data"]
@@ -346,6 +383,7 @@
    [:div
     [header]
     [toolbar]
-    [albums]
+    [:div#content
+     [albums]]
     [terms-of-use]
     [snackbar]]])
