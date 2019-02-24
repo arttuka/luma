@@ -1,5 +1,5 @@
 (ns luma.util
-  (:require [clojure.core.async :as async :refer [>! <! go go-loop chan dropping-buffer timeout]]
+  (:require #?(:clj [clojure.core.async :refer [>! <! <!! go-loop chan dropping-buffer timeout]])
             #?(:clj [garden.stylesheet :refer [at-media]])
             #?(:clj [garden.units :refer [px percent]])
             #?(:cljs [oops.core :refer [oget]])
@@ -7,34 +7,11 @@
                 :cljs cljs-time.core)
              :as time]))
 
-(defn ^:private if-cljs [env then else]
-  (if (:ns env)
-    then
-    else))
-
 (defn lazy-mapcat [f coll]
   (lazy-seq
    (when (seq coll)
      (concat (f (first coll))
              (lazy-mapcat f (rest coll))))))
-
-(defmacro go-ex
-  "Like go, but catches and returns any exception"
-  [& body]
-  `(go (try
-         ~@body
-         (catch ~(if-cljs &env 'js/Error 'java.lang.Throwable) t#
-           t#))))
-
-(defn throw-if-error [e]
-  (if (instance? #?(:clj  Throwable
-                    :cljs js/Error)
-                 e)
-    (throw e)
-    e))
-
-(defmacro <? [port]
-  `(throw-if-error (<! ~port)))
 
 #?(:clj
    (defn ->hex [#^bytes bytes]
@@ -49,7 +26,7 @@
          (<! (timeout ms))
          (recur))
        (fn [& args]
-         (async/<!! c)
+         (<!! c)
          (apply f args)))))
 
 (defn map-values
