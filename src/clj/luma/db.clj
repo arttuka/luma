@@ -15,7 +15,7 @@
                          :server-name   (env :db-host)
                          :port-number   (env :db-port)})
 
-(defstate db
+(defstate ^{:on-reload :noop} db
   :start (hikari/make-datasource datasource-options)
   :stop (hikari/close-datasource @db))
 

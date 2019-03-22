@@ -8,20 +8,20 @@
             #?(:cljs [goog.string :as gs])
             #?(:cljs [oops.core :refer [oget]])
             #?(:cljs goog.date.UtcDateTime)
-            [cognitect.transit :as transit]))
-
-(def DateTime #?(:clj org.joda.time.DateTime, :cljs goog.date.UtcDateTime))
+            [cognitect.transit :as transit])
+  (:import #?(:clj  (org.joda.time DateTime DateTimeZone)
+              :cljs (goog.date UtcDateTime))))
 
 (defn read-date-time
   "Read RFC3339 string to DateTime."
   [s]
-  #?(:clj  (org.joda.time.DateTime/parse s)
-     :cljs (goog.date.UtcDateTime.fromIsoString s)))
+  #?(:clj  (DateTime/parse s)
+     :cljs (UtcDateTime.fromIsoString s)))
 
 (defn write-date-time
   "Represent DateTime in RFC3339 format string."
   [d]
-  #?(:clj  (.toString (.withZone ^org.joda.time.DateTime d (org.joda.time.DateTimeZone/forID "UTC")))
+  #?(:clj  (.toString (.withZone ^DateTime d (DateTimeZone/forID "UTC")))
      :cljs (str (.getUTCFullYear d)
                 "-" (gs/padNumber (inc (.getUTCMonth d)) 2)
                 "-" (gs/padNumber (.getUTCDate d) 2)
@@ -32,10 +32,11 @@
                 "Z")))
 
 (def packer (sente-transit/->TransitPacker :json
-                                           {:handlers {DateTime (transit/write-handler
-                                                                 (constantly "datetime")
-                                                                 write-date-time
-                                                                 write-date-time)}}
+                                           {:handlers {#?(:clj DateTime, :cljs UtcDateTime)
+                                                       (transit/write-handler
+                                                        (constantly "datetime")
+                                                        write-date-time
+                                                        write-date-time)}}
                                            {:handlers {"datetime" read-date-time}}))
 
 (def path "/chsk")
@@ -78,7 +79,7 @@
   #?(:cljs (sente/chsk-disconnect! (:chsk r)))
   ((:router r)))
 
-(defstate router
+(defstate ^{:on-reload :noop} router
   :start (start-router)
   :stop (stop-router @router))
 

@@ -5,6 +5,6 @@
             [luma.handler :refer [handler]]
             luma.events))
 
-(defstate server
+(defstate ^{:on-reload :noop} server
   :start (http/start-server handler {:port (or (env :server-port) 8080)})
   :stop (.close @server))
