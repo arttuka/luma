@@ -1,0 +1,12 @@
+/dev
+/dev-resources
+/target
+.project
+*.log
+*.iml
+/.lein-*
+/.nrepl-port
+.rebel_readline_history
+.classpath
+.DS_Store
+.git
