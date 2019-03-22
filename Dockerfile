@@ -13,13 +13,16 @@ RUN lein
 WORKDIR /app
 COPY project.clj .
 RUN lein deps
+COPY ./scripts ./scripts
 COPY ./src ./src
 COPY ./test ./test
 COPY ./resources ./resources
 COPY ./*.cljs.edn ./
 RUN lein test
 RUN lein fig:test
-RUN lein do clean, uberjar
+RUN lein with-profile provided do clean, garden once, minify-assets, fig:min
+RUN ./scripts/tag-assets.sh
+RUN lein uberjar
 
 FROM openjdk:11-jre-slim
 WORKDIR /app

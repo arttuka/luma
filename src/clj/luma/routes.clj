@@ -3,7 +3,7 @@
             [compojure.core :refer [GET defroutes]]
             [compojure.route :refer [resources not-found]]
             [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
-            [ring.util.response :refer [response content-type redirect]]
+            [ring.util.response :refer [content-type header redirect response]]
             [hiccup.page :refer [include-js include-css html5]]
             [luma.integration.spotify :as spotify]
             [luma.integration.lastfm :as lastfm]
@@ -19,16 +19,17 @@
                        :content "width=device-width, initial-scale=1"}]
                (include-css (if (env :dev)
                               "/css/screen.css"
-                              "/css/screen.min.css"))]
+                              (env :main-css)))]
               [:body
                [:div#app]
                [:script (str "var csrf_token = '" *anti-forgery-token* "';")]
                (include-js (if (env :dev)
                              "/js/dev-main.js"
-                             "/js/prod-main.js"))
+                             (env :main-js)))
                [:script "luma.core.init();"]])]
     (-> (response html)
-        (content-type "text/html"))))
+        (content-type "text/html")
+        (header "Cache-Control" "no-cache"))))
 
 (defroutes routes
   (GET "/" req

@@ -31,14 +31,15 @@
   :source-paths ["src/clj" "src/cljc" "src/cljs"]
   :test-paths []
 
-  :clean-targets ^{:protect false} ["resources/public/js"
-                                    "target"]
+  :clean-targets ^{:protect false} ["target"]
 
   :garden {:builds [{:id           "screen"
                      :source-paths ["src/clj" "src/cljc"]
                      :stylesheet   luma.styles.main/screen
                      :compiler     {:output-to     "target/public/css/screen.css"
                                     :pretty-print? true}}]}
+  :minify-assets [[:css {:source "target/public/css/screen.css"
+                         :target "target/public/css/screen.min.css"}]]
 
   :cljfmt {:indents {async [[:inner 0]]}}
 
@@ -75,16 +76,9 @@
                                        [garden "1.3.6"]
                                        [com.cognitect/transit-cljs "0.8.256"]
                                        [com.andrewmcveigh/cljs-time "0.5.2"]]}
-             :uberjar  {:dependencies       [[com.fzakaria/slf4j-timbre "0.3.12"]]
-                        :prep-tasks         ["compile"
-                                             "fig:min"
-                                             ["garden" "once"]
-                                             ["minify-assets"]]
-                        :minify-assets      [[:css {:source "target/public/css/screen.css"
-                                                    :target "resources/public/css/screen.min.css"}]]
-                        :uberjar-exclusions [#"public/js/compiled"]
-                        :main               luma.main
-                        :uberjar-name       "luma.jar"}}
+             :uberjar  {:dependencies [[com.fzakaria/slf4j-timbre "0.3.12"]]
+                        :main         luma.main
+                        :uberjar-name "luma.jar"}}
 
   :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
   :aot [luma.main])

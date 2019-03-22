@@ -13,4 +13,9 @@
 (defn -main []
   (timbre/merge-config! timbre-config)
   (mount/in-cljc-mode)
-  (mount/start))
+  (try
+    (mount/start)
+    (catch Throwable t
+      (timbre/error t "Error while starting server")
+      (mount/stop)
+      (System/exit 1))))
