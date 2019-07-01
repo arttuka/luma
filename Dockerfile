@@ -1,15 +1,13 @@
-FROM openjdk:11-slim AS builder
+FROM adoptopenjdk/openjdk12-openj9:alpine AS builder
 ENV LEIN_ROOT true
-RUN apt-get update && apt-get install -y curl chromium
-RUN \
+RUN apk --no-cache add bash curl chromium \
     # Create chromium wrapper with required flags
-    mv /usr/bin/chromium /usr/bin/chromium-origin && \
-    echo $'#!/usr/bin/env sh\n\
-    chromium-origin --no-sandbox --headless --disable-gpu --repl $@' > /usr/bin/chromium-browser && \
-    chmod +x /usr/bin/chromium-browser
-
-RUN curl -Lo /usr/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein && chmod +x /usr/bin/lein
-RUN lein
+    && mv /usr/bin/chromium-browser /usr/bin/chromium-browser-origin \
+    && echo $'#!/usr/bin/env sh\n\
+      chromium-browser-origin --no-sandbox --headless --disable-gpu --repl $@' > /usr/bin/chromium-browser \
+    && chmod +x /usr/bin/chromium-browser \
+    && curl -Lo /usr/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein \
+    && chmod +x /usr/bin/lein
 WORKDIR /app
 COPY project.clj .
 RUN lein deps
@@ -18,13 +16,12 @@ COPY ./src ./src
 COPY ./test ./test
 COPY ./resources ./resources
 COPY ./*.cljs.edn ./
-RUN lein test
-RUN lein fig:test
-RUN lein with-profile provided do clean, garden once, minify-assets, fig:min
-RUN ./scripts/tag-assets.sh
-RUN lein uberjar
+RUN lein do test, fig:test \
+    && lein with-profile provided do clean, garden once, minify-assets, fig:min \
+    && ./scripts/tag-assets.sh \
+    && lein uberjar
 
-FROM openjdk:11-jre-slim
+FROM adoptopenjdk/openjdk12-openj9:alpine-jre
 WORKDIR /app
 COPY --from=builder /app/target/luma.jar .
 CMD ["java", "-jar", "luma.jar"]
