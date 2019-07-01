@@ -23,7 +23,9 @@
 
 #?(:clj (deftest ->hex-test
           (testing "->hex"
-            (is (= "deadbeef" (->hex (byte-array [222 173 190 239])))))))
+            (is (= "deadbeef" (->hex (byte-array [222 173 190 239]))))
+            (testing "handles leading zeros"
+              (is (= "0a0b0c0d" (->hex (byte-array [10 11 12 13]))))))))
 
 (deftest map-values-test
   (testing "map-values"

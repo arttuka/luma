@@ -15,8 +15,8 @@
              (lazy-mapcat f (rest coll))))))
 
 #?(:clj
-   (defn ->hex [#^bytes bytes]
-     (.toString (BigInteger. 1 bytes) 16)))
+   (defn ->hex [bytes]
+     (apply str (for [b bytes] (format "%02x" b)))))
 
 #?(:clj
    (defn throttle [f calls-per-second]
