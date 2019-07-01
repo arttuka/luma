@@ -94,7 +94,7 @@
     (fn tag-filter-render []
       [:div.tag-filter
        [autosuggest {:disabled             (not @all-tags)
-                     :datasource           @all-tags
+                     :datasource           (comp @all-tags str/lower-case)
                      :on-change            #(re-frame/dispatch [::events/select-tag %])
                      :floating-label-text  "Tag search"
                      :floating-label-fixed true
