@@ -44,9 +44,7 @@
           uid (or (:uid session) (UUID/randomUUID))]
       (assoc response :session (assoc session :uid uid))))
   (GET "/logout" []
-    (->
-     (redirect "/")
-     (assoc :session {})))
+    (assoc (redirect "/") :session {}))
   spotify/routes
   lastfm/routes
   websocket/routes

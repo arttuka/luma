@@ -14,8 +14,14 @@ RUN lein deps
 COPY ./src ./src
 COPY ./test ./test
 COPY ./resources ./resources
+COPY ./test-resources ./test-resources
 COPY ./*.cljs.edn ./
-RUN lein do test, fig:test \
+RUN lein do \
+         test, \
+         fig:test, \
+         kibit, \
+         eastwood, \
+         cljfmt check \
     && lein with-profile provided do \
          clean, \
          garden once, \

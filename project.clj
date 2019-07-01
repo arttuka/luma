@@ -24,6 +24,7 @@
             [lein-asset-minifier "0.4.6"]
             [lein-cljfmt "0.6.4"]
             [lein-garden "0.3.0" :exclusions [org.apache.commons/commons-compress]]
+            [lein-kibit "0.1.6"]
             [no.terjedahl/lein-buster "0.2.0"]
             [jonase/eastwood "0.3.5"]]
 
@@ -53,6 +54,9 @@
 
   :cljfmt {:indents {async [[:inner 0]]}}
 
+  :eastwood {:namespaces   [:source-paths :test-paths]
+             :config-files ["test-resources/eastwood.clj"]}
+
   :aliases {"fig"      ["trampoline" "run" "-m" "figwheel.main"]
             "fig:test" ["run" "-m" "figwheel.main" "-co" "test.cljs.edn" "-m" luma.figwheel-test-runner]
             "fig:min"  ["run" "-m" "figwheel.main" "-bo" "prod"]}
@@ -68,9 +72,7 @@
                                          [ring/ring-devel "1.7.1"]]
                         :source-paths   ["dev"]
                         :test-paths     ["test/clj" "test/cljc" "test/cljs"]
-                        :resource-paths ["dev-resources" "target"]
-                        :eastwood       {:namespaces   [:source-paths :test-paths]
-                                         :config-files ["dev-resources/eastwood.clj"]}}
+                        :resource-paths ["dev-resources" "target"]}
              :provided {:dependencies [[org.clojure/clojurescript "1.10.520"]
                                        [com.bhauman/figwheel-main "0.2.1" :exclusions [org.clojure/clojurescript]]
                                        [com.google.errorprone/error_prone_annotations "2.3.3"]

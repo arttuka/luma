@@ -19,10 +19,8 @@
                        (sort-by key)
                        (mapcat (juxt (comp name key) val))
                        (apply str))
-        param-str (str param-str (env :lastfm-shared-secret))
-        md5-str (md5 param-str)
-        pad (apply str (repeat (- 32 (count md5-str)) "0"))]
-    (str pad md5-str)))
+        param-str (str param-str (env :lastfm-shared-secret))]
+    (md5 param-str)))
 
 (defn lastfm-request*
   ([method params]
@@ -73,5 +71,4 @@
   (GET "/lastfm-callback" [token :as req]
     (let [lastfm-user (get-session token)
           session (assoc (:session req) :lastfm-user lastfm-user)]
-      (-> (redirect "/")
-          (assoc :session session)))))
+      (assoc (redirect "/") :session session))))
