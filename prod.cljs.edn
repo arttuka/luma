@@ -1,6 +1,6 @@
 ^{:watch-dirs ["src/cljs" "src/cljc"]}
 {:main            luma.core
- :output-to       "target/js/prod-main.js"
- :output-dir      "target/js/compiled"
+ :output-to       "target/public/js/prod-main.js"
+ :output-dir      "target/public/js/compiled"
  :optimizations   :advanced
  :closure-defines {goog.DEBUG false}}

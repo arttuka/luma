@@ -6,3 +6,4 @@ config.edn
 /*-init.clj
 /resources/public/js
 /resources/public/css
+/resources/manifest.json

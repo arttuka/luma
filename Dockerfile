@@ -11,15 +11,18 @@ RUN apk --no-cache add bash curl chromium \
 WORKDIR /app
 COPY project.clj .
 RUN lein deps
-COPY ./scripts ./scripts
 COPY ./src ./src
 COPY ./test ./test
 COPY ./resources ./resources
 COPY ./*.cljs.edn ./
 RUN lein do test, fig:test \
-    && lein with-profile provided do clean, garden once, minify-assets, fig:min \
-    && ./scripts/tag-assets.sh \
-    && lein uberjar
+    && lein with-profile provided do \
+         clean, \
+         garden once, \
+         minify-assets, \
+         fig:min, \
+         buster, \
+         uberjar
 
 FROM adoptopenjdk/openjdk12-openj9:alpine-jre
 WORKDIR /app

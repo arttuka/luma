@@ -2,6 +2,8 @@
   (:require [config.core :refer [env]]
             [compojure.core :refer [GET defroutes]]
             [compojure.route :refer [resources not-found]]
+            [clojure.java.io :as io]
+            [cheshire.core :as json]
             [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
             [ring.util.response :refer [content-type header redirect response]]
             [hiccup.page :refer [include-js include-css html5]]
@@ -9,6 +11,10 @@
             [luma.integration.lastfm :as lastfm]
             [luma.websocket :as websocket])
   (:import (java.util UUID)))
+
+(def asset-manifest (delay (some-> (io/resource "manifest.json")
+                                   (io/reader)
+                                   (json/parse-stream))))
 
 (defn index []
   (let [html (html5
@@ -19,13 +25,13 @@
                        :content "width=device-width, initial-scale=1"}]
                (include-css (if (env :dev)
                               "/css/screen.css"
-                              (env :main-css)))]
+                              (@asset-manifest "css/screen.min.css")))]
               [:body
                [:div#app]
                [:script (str "var csrf_token = '" *anti-forgery-token* "';")]
                (include-js (if (env :dev)
                              "/js/dev-main.js"
-                             (env :main-js)))
+                             (@asset-manifest "js/prod-main.js")))
                [:script "luma.core.init();"]])]
     (-> (response html)
         (content-type "text/html")

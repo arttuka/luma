@@ -24,6 +24,7 @@
             [lein-asset-minifier "0.4.6"]
             [lein-cljfmt "0.6.4"]
             [lein-garden "0.3.0" :exclusions [org.apache.commons/commons-compress]]
+            [no.terjedahl/lein-buster "0.2.0"]
             [jonase/eastwood "0.3.5"]]
 
   :min-lein-version "2.8.2"
@@ -31,7 +32,10 @@
   :source-paths ["src/clj" "src/cljc" "src/cljs"]
   :test-paths []
 
-  :clean-targets ^{:protect false} ["target"]
+  :clean-targets ^{:protect false} ["target"
+                                    "resources/public/js"
+                                    "resources/public/css"
+                                    "resources/manifest.json"]
 
   :garden {:builds [{:id           "screen"
                      :source-paths ["src/clj" "src/cljc"]
@@ -40,6 +44,12 @@
                                     :pretty-print? true}}]}
   :minify-assets [[:css {:source "target/public/css/screen.css"
                          :target "target/public/css/screen.min.css"}]]
+
+  :buster {:files       ["target/public/js/prod-main.js"
+                         "target/public/css/screen.min.css"]
+           :files-base  "target/public"
+           :output-base "resources/public"
+           :manifest    "resources/manifest.json"}
 
   :cljfmt {:indents {async [[:inner 0]]}}
 
@@ -78,7 +88,8 @@
                                        [com.andrewmcveigh/cljs-time "0.5.2"]]}
              :uberjar  {:dependencies [[com.fzakaria/slf4j-timbre "0.3.12"]]
                         :main         luma.main
-                        :uberjar-name "luma.jar"}}
+                        :uberjar-name "luma.jar"
+                        :auto-clean   false}}
 
   :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
   :aot [luma.main])
