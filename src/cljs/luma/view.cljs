@@ -1,8 +1,8 @@
 (ns luma.view
-  (:require [cljsjs.material-ui]
-            [cljs-react-material-ui.core :refer [get-mui-theme]]
-            [cljs-react-material-ui.reagent :as ui]
-            [cljs-react-material-ui.icons :as icons]
+  (:require [reagent-material-ui.components :as ui]
+            [reagent-material-ui.icons.sort-by-alpha :refer [sort-by-alpha]]
+            [reagent-material-ui.icons.cancel :refer [cancel]]
+            [reagent-material-ui.styles :as styles]
             [clojure.string :as str]
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :as re-frame]
@@ -11,7 +11,7 @@
             [luma.components.autosuggest :refer [autosuggest]]
             [luma.events :as events]
             [luma.subs :as subs]
-            [luma.util :refer [debounce]]
+            [luma.util :refer [debounce wrap-on-change]]
             [luma.websocket :as ws]))
 
 (defn spotify-login []
@@ -82,7 +82,7 @@
             {:class             :selected-tag
              :style             {:margin-right  "16px"
                                  :margin-bottom "16px"}
-             :on-request-delete #(re-frame/dispatch [::events/unselect-tag tag])}
+             :on-delete #(re-frame/dispatch [::events/unselect-tag tag])}
             tag])
          [:div.progress-bar-container
           [:div "Loading tags..."]
@@ -93,14 +93,14 @@
         mobile? (re-frame/subscribe [::subs/mobile?])]
     (fn tag-filter-render []
       [:div.tag-filter
-       [autosuggest {:disabled             (not @all-tags)
-                     :datasource           (comp @all-tags str/lower-case)
-                     :on-change            #(re-frame/dispatch [::events/select-tag %])
-                     :floating-label-text  "Tag search"
-                     :floating-label-fixed true
-                     :hint-text            "Tag"
-                     :styles               (when @mobile? {:container {:width "calc(100vw - 80px)"}
-                                                           :input     {:width "calc(100vw - 80px)"}})}]])))
+       [autosuggest {:disabled   (not @all-tags)
+                     :datasource (comp @all-tags str/lower-case)
+                     :on-change  #(re-frame/dispatch [::events/select-tag %])
+                     #_#_:floating-label-text "Tag search"
+                     #_#_:floating-label-fixed true
+                     #_#_:hint-text "Tag"
+                     :styles     (when @mobile? {:container {:width "calc(100vw - 80px)"}
+                                                 :input     {:width "calc(100vw - 80px)"}})}]])))
 
 (defn sort-dropdown []
   (let [lastfm-id (re-frame/subscribe [::subs/lastfm-id])
@@ -108,49 +108,53 @@
         sort-asc (re-frame/subscribe [::subs/sort-asc])
         mobile? (re-frame/subscribe [::subs/mobile?])
         value (atom @sort-key)
-        palette (oget (get-mui-theme) "palette")]
+        on-change (wrap-on-change
+                   (fn [new-value]
+                     (reset! value new-value)
+                     (re-frame/dispatch [::events/sort-albums (keyword new-value)])))]
     (fn sort-dropdown-render []
       [:div.sort-container
-       [ui/select-field {:floating-label-text "Sort by"
-                         :value               @value
-                         :on-change           (fn [_ _ new-value]
-                                                (reset! value new-value)
-                                                (re-frame/dispatch [::events/sort-albums (keyword new-value)]))
-                         :style               (when @mobile? {:width "calc(100vw - 80px)"})}
-        [ui/menu-item {:value        :artist
-                       :primary-text "Artist"}]
-        [ui/menu-item {:value        :album
-                       :primary-text "Album title"}]
-        [ui/menu-item {:value        :added
-                       :primary-text "Added at"}]
-        (when @lastfm-id
-          [ui/menu-item {:value        :playcount
-                         :primary-text "Scrobbles"}])]
+       [ui/form-control
+        [ui/input-label {:html-for "sort-select"}
+         "Sort by"]
+        [ui/select {:input-props {:id   "sort-select"
+                                  :name "sort-select"}
+                    :value       @value
+                    :on-change   on-change
+                    :style       (when @mobile? {:width "calc(100vw - 80px)"})}
+         [ui/menu-item {:value        :artist
+                        :primary-text "Artist"}]
+         [ui/menu-item {:value        :album
+                        :primary-text "Album title"}]
+         [ui/menu-item {:value        :added
+                        :primary-text "Added at"}]
+         (when @lastfm-id
+           [ui/menu-item {:value        :playcount
+                          :primary-text "Scrobbles"}])]]
        [ui/icon-button {:on-click #(re-frame/dispatch [::events/change-sort-dir])
                         :style    {:position :absolute
                                    :top      "24px"}}
-        [icons/av-sort-by-alpha {:color (if @sort-asc
-                                          (oget palette "primary1Color")
-                                          (oget palette "accent1Color"))}]]])))
+        [sort-by-alpha]]])))
 
 (defn text-search []
   (let [db-value (re-frame/subscribe [::subs/text-search])
         mobile? (re-frame/subscribe [::subs/mobile?])
         value (atom @db-value)
         delayed-dispatch (debounce (fn [v] (re-frame/dispatch [::events/set-text-search v]))
-                                   250)]
+                                   250)
+        on-change (wrap-on-change
+                   (fn [v]
+                     (reset! value v)
+                     (delayed-dispatch v)))]
     (fn text-search-render []
       [:div.text-search
        [ui/text-field
-        {:floating-label-text  "Free text search"
-         :floating-label-fixed true
-         :hint-text            "Title or artist"
-         :value                @value
-         :on-change            (fn [e]
-                                 (let [v (oget e "target" "value")]
-                                   (reset! value v)
-                                   (delayed-dispatch v)))
-         :style                (when @mobile? {:width "calc(100vw - 80px)"})}]
+        {:label           "Free text search"
+         :InputLabelProps {:shrink true}
+         :placeholder     "Title or artist"
+         :value           @value
+         :on-change       on-change
+         :style           (when @mobile? {:width "calc(100vw - 80px)"})}]
        (when-not (str/blank? @db-value)
          [ui/icon-button
           {:style    {:position :absolute
@@ -158,7 +162,7 @@
            :on-click (fn []
                        (reset! value "")
                        (re-frame/dispatch [::events/set-text-search ""]))}
-          [icons/navigation-cancel
+          [cancel
            {:class-name  :clear-icon
             :color       "rgba(0, 0, 0, 0.28)"
             :hover-color "rgba(0, 0, 0, 0.4)"}]])])))
@@ -197,7 +201,7 @@
       [ui/card {:class         :album-card
                 :on-mouse-over #(reset! depth 5)
                 :on-mouse-out  #(reset! depth 1)
-                :z-depth       @depth}
+                :elevation     @depth}
        (when-let [playcount (:playcount a)]
          [ui/chip {:class             :album-playcount
                    :background-color  "#b90000"
@@ -216,19 +220,18 @@
         {:href  (:uri a)
          :title (str "Open " (album-name a) " in Spotify")}
 
-        [ui/card-media {:class :album-image}
-         [:img.cover {:src (:image a)}]]
-        [ui/card-title {:title          (:title a)
-                        :title-style    {:white-space   :nowrap
-                                         :text-overflow :ellipsis
-                                         :overflow      :hidden}
-                        :subtitle       (interpose " · " (map :name (:artists a)))
-                        :subtitle-style {:font-size     "16px"
-                                         :white-space   :nowrap
-                                         :text-overflow :ellipsis
-                                         :overflow      :hidden}}]
-        [ui/card-text {:style {:padding-top 0}}
-         (interpose " · " (:tags a))]]])))
+        [ui/card-media {:class :album-image
+                        :image (:image a)}]
+        [ui/card-content
+         [ui/typography {:variant :h5
+                         :no-wrap true}
+          (:title a)]
+         [ui/typography {:color         :textSecondary
+                         :no-wrap       true
+                         :gutter-bottom true}
+          (interpose " · " (map :name (:artists a)))]
+         [ui/typography
+          (interpose " · " (:tags a))]]]])))
 
 (defn welcome-screen []
   [ui/paper {:style {:max-width  "600px"
@@ -314,58 +317,56 @@
          [:img {:src "/images/GitHub_Logo.png"
                 :alt "GitHub"}]
          "."]]
-       [ui/dialog {:class-name               :terms-of-use-dialog
-                   :title                    "Terms of Use"
-                   :modal                    false
-                   :open                     @dialog-open
-                   :on-request-close         #(reset! dialog-open false)
-                   :auto-scroll-body-content true
-                   :actions                  [(reagent/as-element [ui/flat-button {:label    "Close"
-                                                                                   :primary  true
-                                                                                   :on-click #(reset! dialog-open false)}])]
-                   :content-style            {:width "90%"}}
-        [:p "Terms of use of LUMA Ultimate Music Archive (\"service\") as required by European Union General Data Protection Regulation (EU 2016/679) and Finnish Personal Data Act (FI 523/1999)"]
+       [ui/dialog {:class-name :terms-of-use-dialog
+                   :open       @dialog-open
+                   :on-close   #(reset! dialog-open false)}
+        [ui/dialog-title
+         "Terms of Use"]
+        [ui/dialog-content {:dividers true}
+         [:p "Terms of use of LUMA Ultimate Music Archive (\"service\") as required by European Union General Data Protection Regulation (EU 2016/679) and Finnish Personal Data Act (FI 523/1999)"]
 
-        [:h4 "Controller of data"]
-        [:p
-         "LUMA Ultimate Music Archive, representative Arttu Kaipiainen ("
-         [:a {:href "mailto:admin@luma.dy.fi"}
-          "admin@luma.dy.fi"]
-         ")"]
-        [:h4 "Purpose of processing personal data"]
-        [:p
-         "Augmenting and displaying data from user's Spotify music library."]
-        [:h4 "Personal data processed"]
-        [:p
-         "User's Spotify ID and saved albums in their Spotify music library. User's Last.fm ID and playcount data."]
-        [:h4 "Storage of personal data"]
-        [:p
-         "Personal data from Spotify is not stored anywhere except the user's web browser and browsing session."
-         "Personal data from Last.fm is stored in the service."]
-        [:h4 "Consent to process personal data"]
-        [:p
-         "The user gives their consent to process any personal data from their Spotify account by logging into the service with their Spotify account.
-          The user may withdraw this consent at any time by logging out of the service."]
-        [:p
-         "The user gives their consent to process any personal data from their Last.fm account by logging into the service with their Last.fm account.
-          The user may withdraw this consent at any time by using the button under the heading \"Right to be forgotten\"."]
-        [:h4 "Right to obtain personal data"]
-        [:p
-         "All personal data being processed is visible on the front page of the service. No other personal data is stored by the service."]
-        [:h4 "Right to be forgotten"]
-        [:p
-         "Personal data from Spotify is erased when the user logs out or otherwise stops using the service.
-          Personal data from Last.fm can be erased using this button:"]
-        [erase-lastfm-data]
-        [:h4 "Processing of sensitive personal data"]
-        [:p
-         "The service doesn't process any sensitive personal data."]]])))
+         [:h4 "Controller of data"]
+         [:p
+          "LUMA Ultimate Music Archive, representative Arttu Kaipiainen ("
+          [:a {:href "mailto:admin@luma.dy.fi"}
+           "admin@luma.dy.fi"]
+          ")"]
+         [:h4 "Purpose of processing personal data"]
+         [:p
+          "Augmenting and displaying data from user's Spotify music library."]
+         [:h4 "Personal data processed"]
+         [:p
+          "User's Spotify ID and saved albums in their Spotify music library. User's Last.fm ID and playcount data."]
+         [:h4 "Storage of personal data"]
+         [:p
+          "Personal data from Spotify is not stored anywhere except the user's web browser and browsing session."
+          "Personal data from Last.fm is stored in the service."]
+         [:h4 "Consent to process personal data"]
+         [:p
+          "The user gives their consent to process any personal data from their Spotify account by logging into the service with their Spotify account.
+           The user may withdraw this consent at any time by logging out of the service."]
+         [:p
+          "The user gives their consent to process any personal data from their Last.fm account by logging into the service with their Last.fm account.
+           The user may withdraw this consent at any time by using the button under the heading \"Right to be forgotten\"."]
+         [:h4 "Right to obtain personal data"]
+         [:p
+          "All personal data being processed is visible on the front page of the service. No other personal data is stored by the service."]
+         [:h4 "Right to be forgotten"]
+         [:p
+          "Personal data from Spotify is erased when the user logs out or otherwise stops using the service.
+           Personal data from Last.fm can be erased using this button:"]
+         [erase-lastfm-data]
+         [:h4 "Processing of sensitive personal data"]
+         [:p
+          "The service doesn't process any sensitive personal data."]]
+        [ui/dialog-actions
+         [ui/button {:color    :primary
+                     :on-click #(reset! dialog-open false)}
+          "Close"]]]])))
 
 (defn header []
-  (let [palette (oget (get-mui-theme) "palette")]
-    [:div#header {:style {:background-color (oget palette "primary1Color")
-                          :color            :white}}
-     "LUMA Ultimate Music Archive"]))
+  [:div#header {:style {:color :white}}
+   "LUMA Ultimate Music Archive"])
 
 (defn snackbar []
   (let [error (re-frame/subscribe [::subs/error])]
@@ -378,8 +379,7 @@
                                               (re-frame/dispatch [::ws/send [(:retry-event @error)]]))}])))
 
 (defn main-panel []
-  [ui/mui-theme-provider
-   {:mui-theme (get-mui-theme)}
+  [styles/theme-provider (styles/create-mui-theme {})
    [:div
     [header]
     [toolbar]

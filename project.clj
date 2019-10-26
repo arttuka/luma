@@ -79,7 +79,7 @@
                                        [com.google.code.findbugs/jsr305 "3.0.2"]
                                        [reagent "0.8.1"]
                                        [re-frame "0.10.9" :exclusions [org.clojure/clojurescript]]
-                                       [cljs-react-material-ui "0.2.50" :exclusions [org.clojure/clojurescript]]
+                                       [arttuka/reagent-material-ui "4.5.1-0"]
                                        [cljsjs/react "16.9.0-0"]
                                        [cljsjs/react-dom "16.9.0-0"]
                                        [cljsjs/react-dom-server "16.9.0-0"]

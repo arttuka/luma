@@ -79,3 +79,7 @@
 
 #?(:cljs (defn mobile? []
            (<= (oget js/window "innerWidth") mobile-max-width)))
+
+#?(:cljs (defn wrap-on-change [f]
+           (fn [event]
+             (f (oget event "target" "value")))))
