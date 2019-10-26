@@ -2,29 +2,25 @@
   (:require [reagent.core :as reagent]
             [re-frame.core :as re-frame]
             [mount.core :as mount]
+            [oops.core :refer [oget]]
+            [luma.app :refer [app]]
             [luma.events :as events]
-            [luma.view :as view]
-            [luma.config :as config]
+            [luma.transit :as transit]
             [luma.websocket :as ws]))
 
 (defn dev-setup []
-  (when config/debug?
+  (when goog.DEBUG
     (enable-console-print!)
     (println "dev mode")))
 
-(defn listen-resize []
-  (.addEventListener js/window "resize"
-                     (fn [_] (re-frame/dispatch [::events/window-resized]))))
-
 (defn ^:after-load mount-root []
   (re-frame/clear-subscription-cache!)
-  (reagent/render [view/main-panel]
+  (reagent/render [app]
                   (.getElementById js/document "app")))
 
 (defn ^:export init []
   (re-frame/dispatch-sync [::events/initialize-db])
   (dev-setup)
-  (listen-resize)
   (mount/start)
   (mount-root))
 

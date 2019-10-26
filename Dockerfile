@@ -27,8 +27,6 @@ RUN npm i \
          cljfmt check \
     && lein with-profile provided do \
          clean, \
-         garden once, \
-         minify-assets, \
          fig:min, \
          buster, \
          uberjar

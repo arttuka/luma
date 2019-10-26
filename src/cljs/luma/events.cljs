@@ -1,9 +1,8 @@
 (ns luma.events
   (:require [re-frame.core :as re-frame]
             [clojure.set :refer [union]]
-            [luma.db :as db]
             [luma.trie :refer [trie]]
-            [luma.util :refer [mobile? map-by]]
+            [luma.util :refer [map-by]]
             [luma.websocket :as ws]))
 
 (re-frame/reg-fx
@@ -14,12 +13,11 @@
 (re-frame/reg-event-db
  ::initialize-db
  (fn [_ _]
-   db/default-db))
-
-(re-frame/reg-event-db
- ::window-resized
- (fn [db _]
-   (assoc db :mobile? (mobile?))))
+   {:selected-tags #{}
+    :sort-key      :artist
+    :sort-asc      true
+    :text-search   ""
+    :progress      0}))
 
 (re-frame/reg-event-db
  ::set-env

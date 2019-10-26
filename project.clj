@@ -21,9 +21,7 @@
                  [clj-time "0.15.2"]]
 
   :plugins [[lein-ancient "0.6.15"]
-            [lein-asset-minifier "0.4.6"]
             [lein-cljfmt "0.6.4"]
-            [lein-garden "0.3.0" :exclusions [org.apache.commons/commons-compress]]
             [lein-kibit "0.1.7"]
             [no.terjedahl/lein-buster "0.2.0"]
             [jonase/eastwood "0.3.6"]]
@@ -35,19 +33,9 @@
 
   :clean-targets ^{:protect false} ["target"
                                     "resources/public/js"
-                                    "resources/public/css"
                                     "resources/manifest.json"]
 
-  :garden {:builds [{:id           "screen"
-                     :source-paths ["src/clj" "src/cljc"]
-                     :stylesheet   luma.styles.main/screen
-                     :compiler     {:output-to     "target/public/css/screen.css"
-                                    :pretty-print? true}}]}
-  :minify-assets [[:css {:source "target/public/css/screen.css"
-                         :target "target/public/css/screen.min.css"}]]
-
-  :buster {:files       ["target/public/js/prod-main.js"
-                         "target/public/css/screen.min.css"]
+  :buster {:files       ["target/public/js/prod-main.js"]
            :files-base  "target/public"
            :output-base "resources/public"
            :manifest    "resources/manifest.json"}
@@ -64,11 +52,9 @@
   :profiles {:dev      {:dependencies   [[binaryage/devtools "0.9.10"]
                                          [com.bhauman/rebel-readline-cljs "0.1.4" :exclusions [org.clojure/clojurescript]]
                                          [cider/piggieback "0.4.2" :exclusions [org.clojure/clojurescript]]
-                                         [hawk "0.2.11"]
                                          [re-frisk "0.5.4.1" :exclusions [org.clojure/clojurescript]]
                                          [day8.re-frame/test "0.1.5"]
                                          [org.clojure/tools.namespace "0.3.1"]
-                                         [garden "1.3.9"]
                                          [ring/ring-devel "1.7.1"]]
                         :source-paths   ["dev"]
                         :test-paths     ["test/clj" "test/cljc" "test/cljs"]
@@ -77,15 +63,13 @@
                                        [com.bhauman/figwheel-main "0.2.3" :exclusions [org.clojure/clojurescript]]
                                        [com.google.errorprone/error_prone_annotations "2.3.3"]
                                        [com.google.code.findbugs/jsr305 "3.0.2"]
-                                       [reagent "0.8.1"]
+                                       [reagent "0.9.0-rc2"]
                                        [re-frame "0.10.9" :exclusions [org.clojure/clojurescript]]
                                        [arttuka/reagent-material-ui "4.5.1-0"]
                                        [cljsjs/react "16.9.0-0"]
                                        [cljsjs/react-dom "16.9.0-0"]
                                        [cljsjs/react-dom-server "16.9.0-0"]
-                                       [cljsjs/react-autosuggest "9.4.3-0"]
                                        [binaryage/oops "0.7.0"]
-                                       [garden "1.3.9"]
                                        [com.cognitect/transit-cljs "0.8.256"]
                                        [com.andrewmcveigh/cljs-time "0.5.2"]]}
              :uberjar  {:dependencies [[com.fzakaria/slf4j-timbre "0.3.14"]]
