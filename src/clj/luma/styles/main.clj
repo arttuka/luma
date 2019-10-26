@@ -4,37 +4,6 @@
             [garden.stylesheet :refer [at-import]]
             [luma.util :refer [when-desktop when-mobile]]))
 
-(defn album-card [width margin]
-  [:.album-card
-   {:width  width
-    :margin margin}
-   [:.album-image
-    {:width  width
-     :height width}]])
-
-(defstyles album-list
-  [:#albums
-   [:.album-card
-    {:position :relative}
-    [:.album-playcount
-     [:.bold
-      {:font-weight :bold}]]
-    [:.title
-     {:font-size     "24px"
-      :font-weight   :bold
-      :margin-bottom "5px"}]
-    [:.artist
-     {:font-size "16px"}]]
-   (when-mobile
-    (album-card "calc(100vw - 32px)" "16px"))
-   (when-desktop
-    (album-card "320px" "8px")
-    [:&
-     {:display         :flex
-      :flex-wrap       :wrap
-      :justify-content :center
-      :padding         "8px 16px"}])])
-
 (defn flipping [selector]
   [[:&
     {:position :relative}
@@ -106,7 +75,6 @@
   [:a {:text-decoration :none}]
   [:#content
    {:min-height "1000px"}]
-  album-list
   header
   terms-of-use)
 

@@ -8,58 +8,12 @@
             [re-frame.core :as re-frame]
             [goog.string :as gstring]
             [oops.core :refer [oget]]
+            [luma.components.album :refer [albums]]
             [luma.components.toolbar :refer [toolbar]]
             [luma.events :as events]
             [luma.subs :as subs]
             [luma.util :refer [debounce wrap-on-change]]
             [luma.websocket :as ws]))
-
-(defn lastfm-url [album]
-  (str "https://www.last.fm/music/"
-       (str/replace (:name (first (:artists album))) \space \+)
-       "/"
-       (str/replace (:title album) \space \+)))
-
-(defn album-name [album]
-  (str (:title album) " by " (:name (first (:artists album)))))
-
-(defn album [a]
-  (let [depth (atom 1)]
-    (fn album-render [a]
-      [ui/card {:class         :album-card
-                :on-mouse-over #(reset! depth 5)
-                :on-mouse-out  #(reset! depth 1)
-                :elevation     @depth}
-       (when-let [playcount (:playcount a)]
-         [ui/chip {:class             :album-playcount
-                   :background-color  "#b90000"
-                   :label-color       "white"
-                   :style             {:position  :absolute
-                                       :top       5
-                                       :right     5
-                                       :width     :fit-content
-                                       :min-width nil
-                                       :cursor    :pointer}
-                   :container-element :a
-                   :href              (lastfm-url a)
-                   :title             (str "Find " (album-name a) " on last.fm")}
-          [:span.bold playcount] " scrobbles"])
-       [:a.album
-        {:href  (:uri a)
-         :title (str "Open " (album-name a) " in Spotify")}
-
-        [ui/card-media {:class :album-image
-                        :image (:image a)}]
-        [ui/card-content
-         [ui/typography {:variant :h5
-                         :no-wrap true}
-          (:title a)]
-         [ui/typography {:color         :textSecondary
-                         :no-wrap       true
-                         :gutter-bottom true}
-          (interpose " · " (map :name (:artists a)))]
-         [ui/typography
-          (interpose " · " (:tags a))]]]])))
 
 (defn welcome-screen []
   [ui/paper {:style {:max-width  "600px"
@@ -71,23 +25,6 @@
    [:p "To begin, login with your Spotify account. Loading the tags for your albums will take some time on the first login."]
    [:p "You can also login with your Last.fm account to see play counts for the albums. Loading the playcounts will take a lot of time on the first login."]
    [:p "By logging in, you allow LUMA to use and process data about your Spotify and Last.fm accounts. For more information, see terms of use."]])
-
-(defn albums []
-  (let [has-albums? (re-frame/subscribe [::subs/albums])
-        filtered-albums (re-frame/subscribe [::subs/sorted-albums])
-        spotify-id (re-frame/subscribe [::subs/spotify-id])]
-    (fn albums-render []
-      [:div#albums
-       (cond
-         (not @spotify-id) [welcome-screen]
-         (not @has-albums?) [ui/circular-progress {:style     {:margin  "48px auto 0"
-                                                               :display :block}
-                                                   :size      100
-                                                   :thickness 5}]
-         (seq @filtered-albums) (for [a @filtered-albums]
-                                  ^{:key (:id a)}
-                                  [album a])
-         :else [:p.no-matches "No matching albums found in your library."])])))
 
 (defn erase-lastfm-data []
   (let [confirm (atom false)
