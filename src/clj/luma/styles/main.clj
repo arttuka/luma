@@ -55,102 +55,6 @@
     [:.back
      {:transform "rotateX(360deg)"}]]])
 
-(defstyles login-button
-  [:.login-button-container
-   {:width         "200px"
-    :height        "30px"
-    :margin-bottom "16px"
-    :cursor        :pointer}
-   [:.login-button
-    {:color         :white
-     :font-family   "Helvetica Neue, sans-serif"
-     :font-weight   :bold
-     :white-space   :nowrap
-     :height        "30px"
-     :line-height   "30px"
-     :width         "200px"
-     :border-radius "15px"
-     :text-align    :center
-     :overflow      :hidden
-     :text-overflow :ellipsis
-     :cursor        :pointer}
-    [:img
-     {:position :absolute}]
-    [:&.back
-     {:background-color :black}]]
-   (flipping :&.enabled:hover)
-   (when-desktop
-    [:&
-     {:margin-top "32px"
-      :float      :right}])])
-
-(defstyles spotify-login-button
-  [:.spotify
-   [:.login-button
-    {:background-color "#1db954"
-     :padding-right    "6px"
-     :padding-left     "33px"}
-    [:img
-     {:height "24px"
-      :left   "3px"
-      :top    "3px"}]]])
-
-(defstyles lastfm-login-button
-  [:.lastfm
-   {:margin-right "16px"}
-   [:.login-button
-    {:background-color "#b90000"
-     :padding-left     "86px"
-     :padding-right    "6px"}
-    [:img
-     {:height "22px"
-      :left   "6px"
-      :top    "4px"}]]])
-
-(defstyles toolbar
-  [:#toolbar
-   [:.progress-bar-container
-    {:float  :left
-     :height "32px"}]
-   [:.tag-filter
-    {:float        :left
-     :margin-right "12px"}]
-   [:.text-search
-    {:float         :left
-     :padding-right "48px"
-     :position      :relative}]
-   [:.sort-container
-    {:float         :left
-     :padding-right "48px"
-     :position      :relative}]
-   [:.selected-tags
-    {:float      :left
-     :clear      :left
-     :display    :flex
-     :flex-wrap  :wrap
-     :min-height "48px"}]
-   (when-desktop
-    [:&
-     {:padding "0 16px"}
-     [:.progress-bar-container
-      {:width         "256px"
-       :margin-bottom "16px"}]]
-    [:&.empty
-     [:.login-button-container
-      {:margin-top "16px"}]])
-   (when-mobile
-    [:&
-     {:padding "16px"}
-     [:.progress-bar-container
-      {:width      "calc(100vw - 80px)"
-       :margin-top "8px"}]]
-    [:&.empty
-     [:.login-button-container
-      {:margin 0}]])
-   login-button
-   spotify-login-button
-   lastfm-login-button])
-
 (defstyles last-fm-erase-button
   [:.erase-data
    {:display :inline-block
@@ -203,7 +107,6 @@
   [:#content
    {:min-height "1000px"}]
   album-list
-  toolbar
   header
   terms-of-use)
 

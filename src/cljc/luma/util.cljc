@@ -83,3 +83,9 @@
 #?(:cljs (defn wrap-on-change [f]
            (fn [event]
              (f (oget event "target" "value")))))
+
+(defn on-mobile [theme]
+  ((get-in theme [:breakpoints :down]) "sm"))
+
+(defn on-desktop [theme]
+  ((get-in theme [:breakpoints :up]) "sm"))
