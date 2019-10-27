@@ -175,7 +175,7 @@
      :asc-icon              {:transform "scaleY(-1)"}
      :tag-filter-menu       {:z-index 2}
      :sort-dropdown-root    {:display     :flex
-                             :align-items "flex-end"}
+                             :align-items :flex-end}
      :separator             {on-desktop {:flex 1}}
      :toolbar               {on-mobile {:flex-direction :column}}}))
 

@@ -37,9 +37,7 @@
                [:title "LUMA Ultimate Music Archive"]
                [:meta {:name    "viewport"
                        :content "width=device-width, initial-scale=1, maximum-scale=1"}]
-               (include-css "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap")
-               [:style
-                "body{font-family:Roboto,sans-serif;margin:0;}*{box-sizing: border-box;}"]]
+               (include-css "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap")]
               [:body
                [:div#app]
                [:script (str "var csrf_token = '" *anti-forgery-token* "'; "
