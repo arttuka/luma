@@ -19,7 +19,7 @@
                    (cond
                      (or @done (not @lastfm-id)) :no-op
                      @confirm (do
-                                (re-frame/dispatch [::ws/send [::events/erase-lastfm-data]])
+                                (ws/send! [::events/erase-lastfm-data])
                                 (reset! done true)
                                 (js/setTimeout #(set! (.-location js/window) "/logout") 3000))
                      :else (do

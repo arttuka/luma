@@ -19,7 +19,7 @@
                   (.getElementById js/document "app")))
 
 (defn ^:export init []
-  (re-frame/dispatch-sync [::events/initialize-db])
+  (re-frame/dispatch-sync [::events/initialize-db (transit/read (oget js/window "initial_db"))])
   (dev-setup)
   (mount/start)
   (mount-root))
@@ -28,12 +28,11 @@
   [{:keys [?data]}]
   (let [[_ new-data] ?data]
     (when (:first-open? new-data)
-      (re-frame/dispatch [::ws/send [::ws/connect]])
-      (re-frame/dispatch [::events/set-uid (:uid new-data)]))))
+      (ws/send! [::ws/connect]))))
 
 (defmethod ws/event-handler :chsk/recv
-  [{:keys [?data send-fn]}]
+  [{:keys [?data]}]
   (let [[event data] ?data]
-    (if (= event :chsk/ws-ping)
-      (send-fn :chsk/ws-ping)
+    (when (not= :chsk/ws-ping event)
       (re-frame/dispatch [event data]))))
+

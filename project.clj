@@ -40,9 +40,10 @@
            :output-base "resources/public"
            :manifest    "resources/manifest.json"}
 
-  :cljfmt {:indents {async [[:inner 0]]}}
+  :cljfmt {:indents {async     [[:inner 0]]
+                     when-let+ [[:inner 0]]}}
 
-  :eastwood {:namespaces   [:source-paths :test-paths]
+  :eastwood {:namespaces   [:source-paths]
              :config-files ["test-resources/eastwood.clj"]}
 
   :aliases {"fig"      ["trampoline" "run" "-m" "figwheel.main"]

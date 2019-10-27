@@ -6,7 +6,7 @@
             [luma.websocket :as ws]
             [luma.integration.spotify :as spotify]
             [luma.integration.lastfm :as lastfm]
-            [luma.util :refer [map-values older-than-1-month?]]))
+            [luma.util :refer [map-values older-than-1-month? when-let+]]))
 
 (defmethod ws/event-handler
   :chsk/uidport-open
@@ -51,17 +51,24 @@
       (db/save-tags! artist-tags album-tags)
       (db/get-tags album-ids))))
 
+(defn get-and-send-tags [uid albums]
+  (try
+    (ws/send! uid [::tags (load-tags uid albums)])
+    (catch Exception e
+      (log/error e "Error while loading tags")
+      (ws/send! uid [::error {:msg         "Unable to load tags. Try reloading the page later."
+                              :retry-event ::retry-load-tags}]))))
+
 (defn get-and-send-albums [uid spotify-access-token]
-  (let [albums (spotify/get-user-albums spotify-access-token)]
-    (ws/send! uid [::albums albums])
-    (go
-      (try
-        (ws/send! uid [::tags (load-tags uid albums)])
-        (catch Exception e
-          (log/error e "Error while loading tags")
-          (ws/send! uid [::error {:msg         "Unable to load tags. Try reloading the page later."
-                                  :retry-event ::retry-load-tags}]))))
-    albums))
+  (try
+    (let [albums (spotify/get-user-albums spotify-access-token)]
+      (ws/send! uid [::albums albums])
+      (go (get-and-send-tags uid albums))
+      (seq albums))
+    (catch Exception e
+      (log/error e "Error while loading albums")
+      (ws/send! uid [::error {:msg         "Unable to load albums. Try reloading the page later."
+                              :retry-event ::retry-load-tags}]))))
 
 (defn send-playcounts [uid username albums]
   (try
@@ -90,19 +97,10 @@
 (defmethod ws/event-handler
   ::ws/connect
   [{:keys [uid ring-req]}]
-  (ws/send! uid [::set-env {:spotify-client-id    (env :spotify-client-id)
-                            :spotify-redirect-uri (str (env :baseurl) "/spotify-callback")
-                            :lastfm-api-key       (env :lastfm-api-key)
-                            :lastfm-redirect-uri  (str (env :baseurl) "/lastfm-callback")}])
-  (let [spotify-user (get-in ring-req [:session :spotify-user])
-        lastfm-user (get-in ring-req [:session :lastfm-user])]
-    (when lastfm-user
-      (ws/send! uid [::set-lastfm-id (:name lastfm-user)]))
-    (when spotify-user
-      (ws/send! uid [::set-spotify-id (:id spotify-user)])
-      (let [albums (get-and-send-albums uid (:access_token spotify-user))]
-        (when (and lastfm-user albums)
-          (send-playcounts uid (:name lastfm-user) albums))))))
+  (when-let+ [spotify-user (get-in ring-req [:session :spotify-user])
+              albums (get-and-send-albums uid (:access_token spotify-user))
+              lastfm-user (get-in ring-req [:session :lastfm-user])]
+    (send-playcounts uid (:name lastfm-user) albums)))
 
 (defmethod ws/event-handler
   ::erase-lastfm-data

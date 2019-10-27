@@ -27,7 +27,7 @@
                 "album-3" ["tag-2"]})
 
 (defn init-db []
-  (re-frame/dispatch [::events/initialize-db])
+  (re-frame/dispatch [::events/initialize-db {}])
   (re-frame/dispatch [::events/albums test-albums])
   (re-frame/dispatch [::events/tags test-tags]))
 

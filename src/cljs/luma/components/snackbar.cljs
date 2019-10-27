@@ -19,7 +19,7 @@
   (let [error (re-frame/subscribe [::subs/error])
         close #(re-frame/dispatch [::events/close-error])
         retry #(do (re-frame/dispatch [::events/close-error])
-                   (re-frame/dispatch [::ws/send [(:retry-event @error)]]))]
+                   (ws/send! [(:retry-event @error)]))]
     (fn [{:keys [classes]}]
       [ui/snackbar {:open     (boolean @error)
                     :on-close close}

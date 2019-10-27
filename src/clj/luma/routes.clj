@@ -3,12 +3,14 @@
             [compojure.core :refer [GET defroutes]]
             [compojure.route :refer [resources not-found]]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [cheshire.core :as json]
             [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
             [ring.util.response :refer [content-type header redirect response]]
             [hiccup.page :refer [include-js include-css html5]]
             [luma.integration.spotify :as spotify]
             [luma.integration.lastfm :as lastfm]
+            [luma.transit :as transit]
             [luma.websocket :as websocket])
   (:import (java.util UUID)))
 
@@ -16,7 +18,19 @@
                                    (io/reader)
                                    (json/parse-stream))))
 
-(defn index []
+(defn escape-quotes [s]
+  (str/escape s {\' "\\'"}))
+
+(defn initial-db [req uid]
+  {:env        {:spotify-client-id    (env :spotify-client-id)
+                :spotify-redirect-uri (str (env :baseurl) "/spotify-callback")
+                :lastfm-api-key       (env :lastfm-api-key)
+                :lastfm-redirect-uri  (str (env :baseurl) "/lastfm-callback")}
+   :spotify-id (get-in req [:session :spotify-user :id])
+   :lastfm-id  (get-in req [:session :lastfm-user :name])
+   :uid        uid})
+
+(defn index [req uid]
   (let [html (html5
               {:lang :en}
               [:head
@@ -28,7 +42,8 @@
                 "body{font-family:Roboto,sans-serif;margin:0;}*{box-sizing: border-box;}"]]
               [:body
                [:div#app]
-               [:script (str "var csrf_token = '" *anti-forgery-token* "';")]
+               [:script (str "var csrf_token = '" *anti-forgery-token* "'; "
+                             "var initial_db = '" (escape-quotes (transit/write (initial-db req uid))) "';")]
                (include-js (if (env :dev)
                              "/js/dev-main.js"
                              (@asset-manifest "js/prod-main.js")))
@@ -40,8 +55,8 @@
 (defroutes routes
   (GET "/" req
     (let [session (:session req)
-          response (index)
-          uid (or (:uid session) (UUID/randomUUID))]
+          uid (or (:uid session) (UUID/randomUUID))
+          response (index req uid)]
       (assoc response :session (assoc session :uid uid))))
   (GET "/logout" []
     (assoc (redirect "/") :session {}))

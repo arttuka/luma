@@ -44,13 +44,13 @@
 
 (defn ^:private get-all-pages [url access-token]
   (let [get-next-page (fn get-next-page [url]
-                        (when url
-                          (let [{:keys [items next]} (oauth2/http-get url access-token)]
-                            (concat items (lazy-seq (get-next-page next))))))]
+                        (let [{:keys [items next]} (oauth2/http-get url access-token)]
+                          (concat items (when next
+                                          (lazy-seq (get-next-page next))))))]
     (get-next-page url)))
 
 (defn get-user-albums [access-token]
-  (for [a (get-all-pages "https://api.spotify.com/v1/me/albums" access-token)
+  (for [a (get-all-pages "https://api.spotify.com/v1/me/albums?limit=50" access-token)
         :let [album (:album a)]]
     {:id      (:id album)
      :uri     (:uri album)

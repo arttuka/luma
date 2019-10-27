@@ -28,6 +28,9 @@
          (<!! c)
          (apply f args)))))
 
+(defn update! [m k f & args]
+  (assoc! m k (apply f (get m k) args)))
+
 (defn map-values
   [m f]
   (persistent!
@@ -50,7 +53,7 @@
    (reduce (fn [acc x]
              (let [k (keyfn x)
                    v (valfn x)]
-               (assoc! acc k (conj (get acc k []) v))))
+               (update! acc k (fnil conj []) v)))
            (transient {})
            coll)))
 
@@ -76,3 +79,12 @@
 
 (defn on-desktop [theme]
   ((get-in theme [:breakpoints :up]) "sm"))
+
+#?(:clj (defmacro when-let+ [bindings & body]
+          (assert (vector? bindings) "when-let+ requires a vector for its bindings")
+          (assert (even? (count bindings)) "when-let+ requires an even number of forms in binding vector")
+          (if-let [[sym expr & more] (seq bindings)]
+            `(when-let [~sym ~expr]
+               (when-let+ ~(vec more)
+                 ~@body))
+            `(do ~@body))))

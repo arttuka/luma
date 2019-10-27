@@ -2,42 +2,17 @@
   (:require [re-frame.core :as re-frame]
             [clojure.set :refer [union]]
             [luma.trie :refer [trie]]
-            [luma.util :refer [map-by]]
-            [luma.websocket :as ws]))
-
-(re-frame/reg-fx
- ::ws/send
- (fn [event]
-   (ws/send! event)))
+            [luma.util :refer [map-by]]))
 
 (re-frame/reg-event-db
  ::initialize-db
- (fn [_ _]
-   {:selected-tags #{}
-    :sort-key      :artist
-    :sort-asc      true
-    :text-search   ""
-    :progress      0}))
-
-(re-frame/reg-event-db
- ::set-env
- (fn [db [_ env]]
-   (assoc db :env env)))
-
-(re-frame/reg-event-db
- ::set-uid
- (fn [db [_ uid]]
-   (assoc db :uid uid)))
-
-(re-frame/reg-event-db
- ::set-spotify-id
- (fn [db [_ spotify-id]]
-   (assoc db :spotify-id spotify-id)))
-
-(re-frame/reg-event-db
- ::set-lastfm-id
- (fn [db [_ lastfm-id]]
-   (assoc db :lastfm-id lastfm-id)))
+ (fn [_ [_ initial-db]]
+   (merge {:selected-tags #{}
+           :sort-key      :artist
+           :sort-asc      true
+           :text-search   ""
+           :progress      0}
+          initial-db)))
 
 (defn ^:private add-to-albums [key albums vals]
   (reduce (fn [m [id val]]
@@ -112,11 +87,6 @@
  ::close-error
  (fn [db _]
    (dissoc db :error)))
-
-(re-frame/reg-event-fx
- ::ws/send
- (fn [_ [_ event]]
-   {::ws/send event}))
 
 (re-frame/reg-event-db
  ::playcounts
