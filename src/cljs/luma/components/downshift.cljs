@@ -1,8 +1,8 @@
 (ns luma.components.downshift
   (:require [downshift]
-            [reagent-material-ui.util :refer [wrap-clj-function wrap-js-function clj->js' js->clj']]))
+            [reagent-material-ui.util :refer [wrap-clj-function wrap-js-function js->clj']]))
 
-(def state-change-types (js->clj' (.-stateChangeTypes downshift)))
+(def state-change-types (js->clj' downshift/stateChangeTypes))
 
 (defn component [props render-fn]
   (let [wrapped-props (reduce-kv (fn [m k v]

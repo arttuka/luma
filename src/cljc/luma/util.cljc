@@ -1,7 +1,6 @@
 (ns luma.util
   (:require #?(:clj  [clojure.core.async :refer [>! <! <!! alts! put! go go-loop chan dropping-buffer sliding-buffer timeout]]
                :cljs [clojure.core.async :refer [<! alts! put! chan sliding-buffer timeout] :refer-macros [go]])
-            #?(:cljs [oops.core :refer [oget]])
             [#?(:clj  clj-time.core
                 :cljs cljs-time.core)
              :as time]))
@@ -71,8 +70,8 @@
       (put! c (or args [])))))
 
 #?(:cljs (defn wrap-on-change [f]
-           (fn [event]
-             (f (oget event "target" "value")))))
+           (fn [^js/Event event]
+             (f (.. event -target -value)))))
 
 (defn on-mobile [theme]
   ((get-in theme [:breakpoints :down]) "sm"))

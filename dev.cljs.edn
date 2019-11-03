@@ -2,7 +2,8 @@
   :auto-testing true
   :open-url     "http://[[server-hostname]]:[[server-port]]/figwheel-extra-main/auto-testing"}
 {:main         luma.core
- :preloads     [re-frisk.preload]
+ :preloads     [devtools.preload
+                re-frisk.preload]
  :output-to    "target/public/js/dev-main.js"
  :output-dir   "target/public/js/dev"
  :npm-deps     false

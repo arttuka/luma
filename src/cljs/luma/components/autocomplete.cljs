@@ -2,7 +2,6 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [reagent-material-ui.components :as ui]
             [clojure.string :as str]
-            [oops.core :refer [oget]]
             [luma.components.downshift :as downshift]))
 
 (def max-results 10)
@@ -22,7 +21,7 @@
                                                               :input-value ""
                                                               :selected-item nil)
                           changes))
-        popper-anchor (.createRef js/React)]
+        ^js/React.Ref popper-anchor (.createRef js/React)]
     (fn [{:keys [classes label placeholder]}]
       [downshift/component {:on-select     on-select
                             :selected-item nil
@@ -52,7 +51,7 @@
                          :placement :bottom-start
                          :class     (:menu classes)}
               [ui/paper {:style {:width (some-> anchor-el
-                                                (oget "clientWidth"))}}
+                                                (.-clientWidth))}}
                [ui/menu-list (if menu-open? (get-menu-props {} {:suppress-ref-error true}) {})
                 (for [[index item] (map-indexed vector (take max-results items))]
                   ^{:key item}

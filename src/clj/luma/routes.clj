@@ -40,8 +40,8 @@
                (include-css "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap")]
               [:body
                [:div#app]
-               [:script (str "var csrf_token = '" *anti-forgery-token* "'; "
-                             "var initial_db = '" (escape-quotes (transit/write (initial-db req uid))) "';")]
+               [:script (str "var csrfToken = '" *anti-forgery-token* "'; "
+                             "var initialDb = '" (escape-quotes (transit/write (initial-db req uid))) "';")]
                (include-js (if (env :dev)
                              "/js/dev-main.js"
                              (@asset-manifest "js/prod-main.js")))

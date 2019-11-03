@@ -141,7 +141,7 @@
         reset-value (fn []
                       (reset! value "")
                       (re-frame/dispatch [::events/set-text-search ""]))
-        prevent-default (fn [event]
+        prevent-default (fn [^js/Event event]
                           (.preventDefault event))]
     (fn [{:keys [classes]}]
       [ui/text-field

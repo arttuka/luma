@@ -5,7 +5,6 @@
             #?(:clj [taoensso.sente.server-adapters.aleph :refer [get-sch-adapter]])
             #?(:clj [compojure.core :refer [defroutes GET POST]])
             #?(:clj [config.core :refer [env]])
-            #?(:cljs [oops.core :refer [oget]])
             [luma.transit :as transit]))
 
 (def path "/chsk")
@@ -21,8 +20,8 @@
         :ajax-get-or-ws-handshake-fn ajax-get-or-ws-handshake-fn})
      :cljs
      (let [{:keys [ch-recv send-fn chsk state]}
-           (sente/make-channel-socket-client! path (oget js/window "csrf_token") {:packer transit/packer
-                                                                                  :type   :auto})]
+           (sente/make-channel-socket-client! path js/csrfToken {:packer transit/packer
+                                                                 :type   :auto})]
        {:receive ch-recv
         :send!   send-fn
         :state   state

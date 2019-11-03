@@ -2,8 +2,7 @@
   (:refer-clojure :exclude [read])
   (:require [cognitect.transit :as transit]
             [taoensso.sente.packers.transit :as sente-transit]
-            #?(:cljs [goog.string :as gs])
-            #?(:cljs goog.date.UtcDateTime))
+            #?(:cljs [goog.string :as gs]))
   (:import #?(:clj  (org.joda.time DateTime DateTimeZone)
               :cljs (goog.date UtcDateTime))
            #?(:clj (java.io ByteArrayOutputStream ByteArrayInputStream))))
@@ -16,8 +15,9 @@
 
 (defn write-date-time
   "Represent DateTime in RFC3339 format string."
-  [d]
-  #?(:clj  (.toString (.withZone ^DateTime d (DateTimeZone/forID "UTC")))
+  [#?(:clj  ^DateTime d
+      :cljs ^UtcDateTime d)]
+  #?(:clj  (.toString (.withZone d (DateTimeZone/forID "UTC")))
      :cljs (str (.getUTCFullYear d)
                 "-" (gs/padNumber (inc (.getUTCMonth d)) 2)
                 "-" (gs/padNumber (.getUTCDate d) 2)

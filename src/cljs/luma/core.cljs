@@ -2,7 +2,6 @@
   (:require [reagent.core :as reagent]
             [re-frame.core :as re-frame]
             [mount.core :as mount]
-            [oops.core :refer [oget]]
             [luma.app :refer [app]]
             [luma.events :as events]
             [luma.transit :as transit]
@@ -19,7 +18,7 @@
                   (.getElementById js/document "app")))
 
 (defn ^:export init []
-  (re-frame/dispatch-sync [::events/initialize-db (transit/read (oget js/window "initial_db"))])
+  (re-frame/dispatch-sync [::events/initialize-db (transit/read js/initialDb)])
   (dev-setup)
   (mount/start)
   (mount-root))
