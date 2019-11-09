@@ -1,7 +1,6 @@
 (ns luma.events
   (:require [re-frame.core :as re-frame]
             [clojure.set :refer [union]]
-            [luma.trie :refer [trie]]
             [luma.util :refer [map-by]]))
 
 (re-frame/reg-event-db
@@ -47,7 +46,7 @@
                                                   {tag #{id}}))]
      (assoc db
             :albums (add-tags-to-albums (:albums db) tags)
-            :tags (into (trie) (mapcat val) tags)
+            :tags (sort (distinct (mapcat val tags)))
             :albums-to-tags tags
             :tags-to-albums tags-to-albums))))
 

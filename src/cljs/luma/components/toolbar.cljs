@@ -90,12 +90,13 @@
 
 (defn tag-filter [props]
   (let [all-tags (re-frame/subscribe [::subs/all-tags])
+        all-tags-js (reaction (clj->js (or (seq @all-tags) [])))
         selected-tags (re-frame/subscribe [::subs/selected-tags])
         selected-tags-js (reaction (clj->js @selected-tags))
         on-select #(re-frame/dispatch [::events/select-tags %])]
     (fn [{:keys [classes]}]
       [autocomplete {:classes     classes
-                     :options     (or (seq @all-tags) [])
+                     :options     @all-tags-js
                      :label       "Tag search"
                      :on-select   on-select
                      :placeholder "Tag"

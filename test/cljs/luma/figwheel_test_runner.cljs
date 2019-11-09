@@ -4,7 +4,6 @@
    [figwheel.main.testing :refer-macros [run-tests-async]]
 
    ;; CLJC
-   [luma.trie-test]
    [luma.util-test]
 
    ;; CLJS
