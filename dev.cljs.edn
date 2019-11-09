@@ -1,13 +1,8 @@
 ^{:watch-dirs   ["src/cljs" "src/cljc" "test/cljs" "test/cljc"]
   :auto-testing true
   :open-url     "http://[[server-hostname]]:[[server-port]]/figwheel-extra-main/auto-testing"}
-{:main         luma.core
- :preloads     [devtools.preload
-                re-frisk.preload]
- :output-to    "target/public/js/dev-main.js"
- :output-dir   "target/public/js/dev"
- :npm-deps     false
- :foreign-libs [{:file           "dist/downshift.inc.js"
-                 :file-min       "dist/downshift.min.inc.js"
-                 :provides       ["downshift"]
-                 :global-exports {downshift Downshift}}]}
+{:main       luma.core
+ :preloads   [devtools.preload
+              re-frisk.preload]
+ :output-to  "target/public/js/dev-main.js"
+ :output-dir "target/public/js/dev"}

@@ -1,8 +1,3 @@
 ^{:watch-dirs ["src/cljs" "src/cljc" "test/cljs" "test/cljc"]
   :launch-js  "/usr/bin/chromium-browser"}
-{:main         luma.figwheel-test-runner
- :npm-deps     false
- :foreign-libs [{:file           "dist/downshift.inc.js"
-                 :file-min       "dist/downshift.min.inc.js"
-                 :provides       ["downshift"]
-                 :global-exports {downshift Downshift}}]}
+{:main luma.figwheel-test-runner}

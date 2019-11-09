@@ -1,6 +1,6 @@
 FROM adoptopenjdk/openjdk12-openj9:alpine AS builder
 ENV LEIN_ROOT true
-RUN apk --no-cache add bash curl chromium nodejs npm \
+RUN apk --no-cache add bash curl chromium \
     # Create chromium wrapper with required flags
     && mv /usr/bin/chromium-browser /usr/bin/chromium-browser-origin \
     && echo $'#!/usr/bin/env sh\n\
@@ -15,11 +15,8 @@ COPY ./src ./src
 COPY ./test ./test
 COPY ./resources ./resources
 COPY ./test-resources ./test-resources
-COPY ./*.cljs.edn package.json package-lock.json webpack.config.js ./
-RUN npm i \
-    && npm run build:dev \
-    && npm run build:prod \
-    && lein do \
+COPY ./*.cljs.edn ./
+RUN lein do \
          test, \
          fig:test, \
          kibit, \
