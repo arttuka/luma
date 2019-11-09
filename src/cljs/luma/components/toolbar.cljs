@@ -1,5 +1,6 @@
 (ns luma.components.toolbar
   (:require [reagent.core :as reagent :refer [atom]]
+            [reagent.ratom :refer-macros [reaction]]
             [re-frame.core :as re-frame]
             [reagent-material-ui.components :as ui]
             [reagent-material-ui.icons.sort :refer [sort]]
@@ -89,13 +90,16 @@
 
 (defn tag-filter [props]
   (let [all-tags (re-frame/subscribe [::subs/all-tags])
-        on-select #(re-frame/dispatch [::events/select-tag %])]
+        selected-tags (re-frame/subscribe [::subs/selected-tags])
+        selected-tags-js (reaction (clj->js @selected-tags))
+        on-select #(re-frame/dispatch [::events/select-tags %])]
     (fn [{:keys [classes]}]
       [autocomplete {:classes     classes
-                     :datasource  all-tags
+                     :options     (or (seq @all-tags) [])
                      :label       "Tag search"
                      :on-select   on-select
-                     :placeholder "Tag"}])))
+                     :placeholder "Tag"
+                     :value       @selected-tags-js}])))
 
 (defn sort-dropdown [props]
   (let [lastfm-id (re-frame/subscribe [::subs/lastfm-id])
@@ -159,21 +163,23 @@
                                                :on-mouse-down prevent-default}
                                               [cancel]]]))}}])))
 
-(defn styles [{:keys [spacing] :as theme}]
+(defn styles [{:keys [palette spacing] :as theme}]
   (let [on-desktop (util/on-desktop theme)
-        on-mobile (util/on-mobile theme)]
+        on-mobile (util/on-mobile theme)
+        filter-width {on-desktop {:width        256
+                                  :margin-right (spacing 1)}
+                      on-mobile  {:width  "100%"
+                                  :margin (spacing 1 0)}}]
     {:root                  {:padding-top (spacing 2)}
-     :filter                {on-desktop {:width        256
-                                         :margin-right (spacing 1)}
-                             on-mobile  {:width  "100%"
-                                         :margin (spacing 1 0)}}
+     :filter                filter-width
      :selected-tags-toolbar {on-mobile {:flex-wrap :wrap}}
      :progress              {:margin-top (spacing 1)}
      :chip                  {on-desktop {:margin-right (spacing 1)}
                              on-mobile  {:margin (spacing 0 1 1 0)}}
      :chip-label            {:max-width 280}
      :asc-icon              {:transform "scaleY(-1)"}
-     :tag-filter-menu       {:z-index 2}
+     :tag-filter-popup      filter-width
+     :tag-filter-menu-item  {"&[data-focus=\"true\"]" {:background-color (get-in palette [:action :selected])}}
      :sort-dropdown-root    {:display     :flex
                              :align-items :flex-end}
      :separator             {on-desktop {:flex 1}}
@@ -186,8 +192,9 @@
        [ui/toolbar {:classes {:root (:toolbar classes)}}
         (if @spotify-id
           [:<>
-           [tag-filter {:classes {:root (:filter classes)
-                                  :menu (:tag-filter-menu classes)}}]
+           [tag-filter {:classes {:root      (:filter classes)
+                                  :popup     (:tag-filter-popup classes)
+                                  :menu-item (:tag-filter-menu-item classes)}}]
            [text-search {:classes {:root (:filter classes)}}]
            [sort-dropdown {:classes {:root     [(:sort-dropdown-root classes) (:filter classes)]
                                      :asc-icon (:asc-icon classes)}}]

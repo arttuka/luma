@@ -39,9 +39,9 @@
        (let [sub (re-frame/subscribe [::subs/filtered-albums])
              albums #(into #{} (map :id @sub))]
          (is (= #{"album-1" "album-2" "album-3"} (albums)))
-         (re-frame/dispatch [::events/select-tag "tag-3"])
+         (re-frame/dispatch [::events/select-tags ["tag-3"]])
          (is (= #{"album-1" "album-2"} (albums)))
-         (re-frame/dispatch [::events/select-tag "tag-2"])
+         (re-frame/dispatch [::events/select-tags ["tag-2"]])
          (is (= #{"album-2"} (albums)))
          (re-frame/dispatch [::events/unselect-tag "tag-3"])
          (is (= #{"album-2" "album-3"} (albums))))))
@@ -65,7 +65,7 @@
        (let [sub (re-frame/subscribe [::subs/filtered-albums])
              albums #(into #{} (map :id @sub))]
          (re-frame/dispatch [::events/set-text-search "Daft"])
-         (re-frame/dispatch [::events/select-tag "tag-2"])
+         (re-frame/dispatch [::events/select-tags ["tag-2"]])
          (is (= #{"album-2"} (albums))))))))
 
 (deftest sorted-albums-test
@@ -81,5 +81,5 @@
        (is (= ["album-1" "album-3" "album-2"] (albums)))
        (re-frame/dispatch [::events/sort-albums :album])
        (is (= ["album-2" "album-1" "album-3"] (albums)))
-       (re-frame/dispatch [::events/select-tag "tag-3"])
+       (re-frame/dispatch [::events/select-tags ["tag-3"]])
        (is (= ["album-2" "album-1"] (albums)))))))

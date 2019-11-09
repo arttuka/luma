@@ -52,11 +52,9 @@
             :tags-to-albums tags-to-albums))))
 
 (re-frame/reg-event-db
- ::select-tag
- (fn [db [_ tag]]
-   (if (contains? (:tags db) tag)
-     (update db :selected-tags conj tag)
-     db)))
+ ::select-tags
+ (fn [db [_ tags]]
+   (update db :selected-tags into tags)))
 
 (re-frame/reg-event-db
  ::unselect-tag
