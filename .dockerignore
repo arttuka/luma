@@ -1,6 +1,8 @@
 /dev
 /dev-resources
-/target
+/target/classes
+/target/public
+/target/stale
 .project
 *.log
 *.iml
