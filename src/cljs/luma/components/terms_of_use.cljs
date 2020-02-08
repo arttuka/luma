@@ -1,7 +1,14 @@
 (ns luma.components.terms-of-use
   (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :as re-frame]
-            [reagent-material-ui.components :as ui]
+            [reagent-material-ui.core.button :refer [button]]
+            [reagent-material-ui.core.dialog :refer [dialog]]
+            [reagent-material-ui.core.dialog-actions :refer [dialog-actions]]
+            [reagent-material-ui.core.dialog-content :refer [dialog-content]]
+            [reagent-material-ui.core.dialog-title :refer [dialog-title]]
+            [reagent-material-ui.core.divider :refer [divider]]
+            [reagent-material-ui.core.link :refer [link]]
+            [reagent-material-ui.core.typography :refer [typography]]
             [reagent-material-ui.styles :refer [with-styles]]
             [luma.events :as events]
             [luma.subs :as subs]
@@ -26,14 +33,14 @@
                              (reset! confirm true)
                              (js/setTimeout #(reset! confirm false) 5000))))]
     (fn [{:keys [classes]}]
-      [ui/button {:classes  {:root (:erase-button classes)}
-                  :variant  :contained
-                  :disabled (not @lastfm-id)
-                  :color    (cond
-                              @done :primary
-                              @confirm :secondary
-                              :else :default)
-                  :on-click on-click}
+      [button {:classes  {:root (:erase-button classes)}
+               :variant  :contained
+               :disabled (not @lastfm-id)
+               :color    (cond
+                           @done :primary
+                           @confirm :secondary
+                           :else :default)
+               :on-click on-click}
        (cond
          @done "Last.fm data erased!"
          @confirm "Really erase my Last.fm data"
@@ -41,7 +48,7 @@
          :else "Not logged in with Last.fm")])))
 
 (defn subtitle [text]
-  [ui/typography {:variant :h6}
+  [typography {:variant :h6}
    text])
 
 (defn terms-of-use* [props]
@@ -50,31 +57,31 @@
         close-dialog #(reset! dialog-open? false)]
     (fn [{:keys [classes]}]
       [:<>
-       [ui/divider]
-       [ui/typography {:align :center}
-        [ui/link {:on-click  open-dialog
-                  :href      "#"
-                  :underline :none}
+       [divider]
+       [typography {:align :center}
+        [link {:on-click  open-dialog
+               :href      "#"
+               :underline :none}
          "View terms of use."]
         [:br]
         "Data from "
-        [ui/link {:href      "https://www.spotify.com"
-                  :underline :none}
+        [link {:href      "https://www.spotify.com"
+               :underline :none}
          [:img {:class (:image classes)
                 :src   "/images/Spotify_Logo_RGB_Black.png"
                 :alt   "Spotify"}]]
         " used with permission."
         [:br]
         "Data from "
-        [ui/link {:href      "https://www.last.fm"
-                  :underline :none}
+        [link {:href      "https://www.last.fm"
+               :underline :none}
          [:img {:class (:image classes)
                 :src   "/images/Last.fm_Logo_Black.png"
                 :alt   "Last.fm"}]]
         " used with permission."
         [:br]
-        [ui/link {:href      "https://github.com/arttuka/luma"
-                  :underline :none}
+        [link {:href      "https://github.com/arttuka/luma"
+               :underline :none}
          "View source on "
          [:img {:class (:image classes)
                 :src   "/images/GitHub-Mark-32px.png"
@@ -83,18 +90,18 @@
                 :src   "/images/GitHub_Logo.png"
                 :alt   "GitHub"}]
          "."]]
-       [ui/dialog {:class-name :terms-of-use-dialog
-                   :open       @dialog-open?
-                   :on-close   close-dialog}
-        [ui/dialog-title
+       [dialog {:class-name :terms-of-use-dialog
+                :open       @dialog-open?
+                :on-close   close-dialog}
+        [dialog-title
          "Terms of Use"]
-        [ui/dialog-content {:dividers true}
+        [dialog-content {:dividers true}
          [:p "Terms of use of LUMA Ultimate Music Archive (\"service\") as required by European Union General Data Protection Regulation (EU 2016/679) and Finnish Personal Data Act (FI 523/1999)"]
 
          [subtitle "Controller of data"]
          [:p
           "LUMA Ultimate Music Archive, representative Arttu Kaipiainen ("
-          [ui/link {:href "mailto:admin@luma.dy.fi"}
+          [link {:href "mailto:admin@luma.dy.fi"}
            "admin@luma.dy.fi"]
           ")"]
          [subtitle "Purpose of processing personal data"]
@@ -125,9 +132,9 @@
          [subtitle "Processing of sensitive personal data"]
          [:p
           "The service doesn't process any sensitive personal data."]]
-        [ui/dialog-actions
-         [ui/button {:color    :primary
-                     :on-click close-dialog}
+        [dialog-actions
+         [button {:color    :primary
+                  :on-click close-dialog}
           "Close"]]]])))
 
 (def terms-of-use ((with-styles styles) terms-of-use*))

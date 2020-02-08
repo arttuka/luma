@@ -2,7 +2,18 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [reagent.ratom :refer-macros [reaction]]
             [re-frame.core :as re-frame]
-            [reagent-material-ui.components :as ui]
+            [reagent-material-ui.core.chip :refer [chip]]
+            [reagent-material-ui.core.divider :refer [divider]]
+            [reagent-material-ui.core.form-control :refer [form-control]]
+            [reagent-material-ui.core.icon-button :refer [icon-button]]
+            [reagent-material-ui.core.input-adornment :refer [input-adornment]]
+            [reagent-material-ui.core.input-label :refer [input-label]]
+            [reagent-material-ui.core.linear-progress :refer [linear-progress]]
+            [reagent-material-ui.core.menu-item :refer [menu-item]]
+            [reagent-material-ui.core.select :refer [select]]
+            [reagent-material-ui.core.text-field :refer [text-field]]
+            [reagent-material-ui.core.toolbar :refer [toolbar] :rename {toolbar mui-toolbar}]
+            [reagent-material-ui.core.typography :refer [typography]]
             [reagent-material-ui.icons.sort :refer [sort]]
             [reagent-material-ui.icons.cancel :refer [cancel]]
             [reagent-material-ui.styles :refer [with-styles]]
@@ -60,13 +71,13 @@
   (let [progress (re-frame/subscribe [::subs/progress])
         albums (re-frame/subscribe [::subs/albums])]
     (fn [{:keys [class]}]
-      [ui/linear-progress {:class class
-                           :mode  (if (seq @albums)
-                                    :determinate
-                                    :indeterminate)
-                           :max   100
-                           :min   0
-                           :value @progress}])))
+      [linear-progress {:class class
+                        :mode  (if (seq @albums)
+                                 :determinate
+                                 :indeterminate)
+                        :max   100
+                        :min   0
+                        :value @progress}])))
 
 (defn selected-tags [props]
   (let [selected-tags (re-frame/subscribe [::subs/selected-tags])
@@ -76,16 +87,16 @@
         [:<>
          (for [tag @selected-tags]
            ^{:key (str "selected-tag-" tag)}
-           [ui/chip {:classes   {:root  (:chip classes)
-                                 :label (:chip-label classes)}
-                     :on-delete #(re-frame/dispatch [::events/unselect-tag tag])
-                     :label     (reagent/as-element
-                                 [ui/typography {:no-wrap   true
-                                                 :component :span
-                                                 :variant   :inherit}
-                                  tag])}])]
+           [chip {:classes   {:root  (:chip classes)
+                              :label (:chip-label classes)}
+                  :on-delete #(re-frame/dispatch [::events/unselect-tag tag])
+                  :label     (reagent/as-element
+                              [typography {:no-wrap   true
+                                           :component :span
+                                           :variant   :inherit}
+                               tag])}])]
         [:div {:class (:progress-container classes)}
-         [ui/typography
+         [typography
           "Loading tags..."]
          [progress-bar {:class (:progress classes)}]]))))
 
@@ -120,24 +131,24 @@
         on-click #(re-frame/dispatch [::events/change-sort-dir])]
     (fn [{:keys [classes]}]
       [:div {:class (:root classes)}
-       [ui/form-control {:full-width true}
-        [ui/input-label {:html-for "sort-select"}
+       [form-control {:full-width true}
+        [input-label {:html-for "sort-select"}
          "Sort by"]
-        [ui/select {:input-props {:id   "sort-select"
-                                  :name "sort-select"}
-                    :value       @value
-                    :on-change   on-change}
-         [ui/menu-item {:value :artist}
+        [select {:input-props {:id   "sort-select"
+                               :name "sort-select"}
+                 :value       @value
+                 :on-change   on-change}
+         [menu-item {:value :artist}
           "Artist"]
-         [ui/menu-item {:value :album}
+         [menu-item {:value :album}
           "Album title"]
-         [ui/menu-item {:value :added}
+         [menu-item {:value :added}
           "Added at"]
          (when @lastfm-id
-           [ui/menu-item {:value :playcount}
+           [menu-item {:value :playcount}
             "Scrobbles"])]]
-       [ui/icon-button {:on-click on-click
-                        :color    (if @sort-asc :primary :secondary)}
+       [icon-button {:on-click on-click
+                     :color    (if @sort-asc :primary :secondary)}
         [sort {:class (when @sort-asc (:asc-icon classes))}]]])))
 
 (defn text-search [props]
@@ -155,7 +166,7 @@
         prevent-default (fn [^js/Event event]
                           (.preventDefault event))]
     (fn [{:keys [classes]}]
-      [ui/text-field
+      [text-field
        {:classes         classes
         :label           "Free text search"
         :placeholder     "Title or artist"
@@ -164,8 +175,8 @@
         :InputLabelProps {:shrink true}
         :InputProps      {:end-adornment (when-not (str/blank? @value)
                                            (reagent/as-element
-                                            [ui/input-adornment {:position :end}
-                                             [ui/icon-button
+                                            [input-adornment {:position :end}
+                                             [icon-button
                                               {:on-click      reset-value
                                                :on-mouse-down prevent-default}
                                               [cancel]]]))}}])))
@@ -196,7 +207,7 @@
   (let [spotify-id (re-frame/subscribe [::subs/spotify-id])]
     (fn [{:keys [classes]}]
       [:div {:class (:root classes)}
-       [ui/toolbar {:classes {:root (:toolbar classes)}}
+       [mui-toolbar {:classes {:root (:toolbar classes)}}
         (if @spotify-id
           [:<>
            [tag-filter {:classes {:root      (:filter classes)
@@ -209,12 +220,12 @@
            [lastfm-login]]
           [:div {:class (:separator classes)}])
         [spotify-login]]
-       [ui/toolbar {:class (:selected-tags-toolbar classes)}
+       [mui-toolbar {:class (:selected-tags-toolbar classes)}
         (when @spotify-id
           [selected-tags {:classes {:progress-container (:filter classes)
                                     :progress           (:progress classes)
                                     :chip               (:chip classes)
                                     :chip-label         (:chip-label classes)}}])]
-       [ui/divider]])))
+       [divider]])))
 
 (def toolbar ((with-styles styles) toolbar*))

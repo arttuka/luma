@@ -1,6 +1,6 @@
 (ns luma.components.flip-button
   (:require [reagent.core :as reagent :refer [atom]]
-            [reagent-material-ui.components :as ui]
+            [reagent-material-ui.core.button :refer [button]]
             [reagent-material-ui.styles :refer [with-styles]]
             [luma.util :as util]))
 
@@ -43,22 +43,22 @@
     [:div {:class [(:container classes)
                    class-name
                    (when flip-enabled? (:enabled-container classes))]}
-     [ui/button {:classes        {:root             (str (:face classes) " " (:front classes) " " class-name)
-                                  :icon-size-medium (:icon classes)}
-                 :href           (:href front)
-                 :start-icon     (:icon front)
-                 :disable-ripple true
-                 :full-width     true
-                 :variant        :contained}
+     [button {:classes        {:root             (str (:face classes) " " (:front classes) " " class-name)
+                               :icon-size-medium (:icon classes)}
+              :href           (:href front)
+              :start-icon     (:icon front)
+              :disable-ripple true
+              :full-width     true
+              :variant        :contained}
       (:label front)]
      (when flip-enabled?
-       [ui/button {:classes        {:root             (str (:face classes) " " (:back classes) " " class-name)
-                                    :icon-size-medium (:icon classes)}
-                   :href           (:href back)
-                   :start-icon     (:icon back)
-                   :disable-ripple true
-                   :full-width     true
-                   :variant        :contained}
+       [button {:classes        {:root             (str (:face classes) " " (:back classes) " " class-name)
+                                 :icon-size-medium (:icon classes)}
+                :href           (:href back)
+                :start-icon     (:icon back)
+                :disable-ripple true
+                :full-width     true
+                :variant        :contained}
         (:label back)])]))
 
 (def flip-button ((with-styles styles) flip-button*))

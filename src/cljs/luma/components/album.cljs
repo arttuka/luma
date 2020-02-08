@@ -1,7 +1,13 @@
 (ns luma.components.album
   (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :as re-frame]
-            [reagent-material-ui.components :as ui]
+            [reagent-material-ui.core.button :refer [button]]
+            [reagent-material-ui.core.card :refer [card]]
+            [reagent-material-ui.core.card-action-area :refer [card-action-area]]
+            [reagent-material-ui.core.card-content :refer [card-content]]
+            [reagent-material-ui.core.card-media :refer [card-media]]
+            [reagent-material-ui.core.circular-progress :refer [circular-progress]]
+            [reagent-material-ui.core.typography :refer [typography]]
             [reagent-material-ui.styles :refer [with-styles]]
             [clojure.string :as str]
             [luma.subs :as subs]
@@ -46,30 +52,30 @@
         on-mouse-over #(reset! depth 10)
         on-mouse-out #(reset! depth 1)]
     (fn [{:keys [classes data]}]
-      [ui/card {:classes       {:root (:album-card classes)}
-                :on-mouse-over on-mouse-over
-                :on-mouse-out  on-mouse-out
-                :elevation     @depth}
+      [card {:classes       {:root (:album-card classes)}
+             :on-mouse-over on-mouse-over
+             :on-mouse-out  on-mouse-out
+             :elevation     @depth}
        (when-let [playcount (:playcount data)]
-         [ui/button {:classes {:root (:playcount-root classes)}
-                     :color   :secondary
-                     :variant :contained
-                     :size    :small
-                     :href    (lastfm-url data)}
+         [button {:classes {:root (:playcount-root classes)}
+                  :color   :secondary
+                  :variant :contained
+                  :size    :small
+                  :href    (lastfm-url data)}
           [:span [:span {:class (:bold classes)} playcount] " scrobbles"]])
-       [ui/card-action-area {:classes {:root (:album-link classes)}
-                             :href    (:uri data)}
-        [ui/card-media {:classes {:root (:album-media classes)}
-                        :image   (:image data)}]
-        [ui/card-content
-         [ui/typography {:variant :h5
-                         :no-wrap true}
+       [card-action-area {:classes {:root (:album-link classes)}
+                          :href    (:uri data)}
+        [card-media {:classes {:root (:album-media classes)}
+                     :image   (:image data)}]
+        [card-content
+         [typography {:variant :h5
+                      :no-wrap true}
           (:title data)]
-         [ui/typography {:color         :textSecondary
-                         :no-wrap       true
-                         :gutter-bottom true}
+         [typography {:color         :textSecondary
+                      :no-wrap       true
+                      :gutter-bottom true}
           (interpose " · " (map :name (:artists data)))]
-         [ui/typography {:variant :body2}
+         [typography {:variant :body2}
           (interpose " · " (:tags data))]]]])))
 
 (defn albums* [props]
@@ -78,15 +84,15 @@
     (fn [{:keys [classes]}]
       [:div {:class (:root classes)}
        (cond
-         (not @has-albums?) [ui/circular-progress {:classes   {:root (:progress-root classes)
-                                                               :svg  (:progress-svg classes)}
-                                                   :size      100
-                                                   :thickness 5}]
+         (not @has-albums?) [circular-progress {:classes   {:root (:progress-root classes)
+                                                            :svg  (:progress-svg classes)}
+                                                :size      100
+                                                :thickness 5}]
          (seq @filtered-albums) (for [a @filtered-albums]
                                   ^{:key (:id a)}
                                   [album {:classes classes
                                           :data    a}])
-         :else [ui/typography {:variant :h6}
+         :else [typography {:variant :h6}
                 "No matching albums found in your library."])])))
 
 (def albums ((with-styles styles) albums*))
