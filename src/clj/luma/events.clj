@@ -1,6 +1,5 @@
 (ns luma.events
-  (:require [clojure.core.async :refer [go]]
-            [config.core :refer [env]]
+  (:require [config.core :refer [env]]
             [taoensso.timbre :as log]
             [luma.db :as db]
             [luma.websocket :as ws]
@@ -63,7 +62,7 @@
   (try
     (let [albums (spotify/get-user-albums spotify-access-token)]
       (ws/send! uid [::albums albums])
-      (go (get-and-send-tags uid albums))
+      (future (get-and-send-tags uid albums))
       (seq albums))
     (catch Exception e
       (log/error e "Error while loading albums")
