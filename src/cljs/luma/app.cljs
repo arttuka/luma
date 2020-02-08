@@ -51,19 +51,17 @@
                        :secondary {:main (:A700 colors/red)}
                        :spotify   "#1db954"}}))
 
-(defn app* [props]
-  (let [spotify-id (re-frame/subscribe [::subs/spotify-id])]
-    (fn [{:keys [classes]}]
-      [styles/theme-provider theme
-       [css-baseline]
-       [:div {:class (:app classes)}
-        [header]
-        [toolbar]
-        (if @spotify-id
-          [albums]
-          [welcome-screen (:welcome classes)])
-        [:div {:class (:separator classes)}]
-        [terms-of-use]
-        [snackbar]]])))
+(defn app* [{:keys [classes]}]
+  [styles/theme-provider theme
+   [css-baseline]
+   [:div {:class (:app classes)}
+    [header]
+    [toolbar]
+    (if @(re-frame/subscribe [::subs/spotify-id])
+      [albums]
+      [welcome-screen (:welcome classes)])
+    [:div {:class (:separator classes)}]
+    [terms-of-use]
+    [snackbar]]])
 
 (def app ((with-styles styles) app*))

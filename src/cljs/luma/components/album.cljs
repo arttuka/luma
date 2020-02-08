@@ -1,5 +1,5 @@
 (ns luma.components.album
-  (:require [reagent.core :as reagent :refer [atom]]
+  (:require [reagent.core :as reagent :refer [atom with-let]]
             [re-frame.core :as re-frame]
             [reagent-material-ui.core.button :refer [button]]
             [reagent-material-ui.core.card :refer [card]]
@@ -47,52 +47,50 @@
      :album-media    {on-desktop {:height 320}
                       on-mobile  {:height mobile-width}}}))
 
-(defn album [props]
-  (let [depth (atom 1)
-        on-mouse-over #(reset! depth 10)
-        on-mouse-out #(reset! depth 1)]
-    (fn [{:keys [classes data]}]
-      [card {:classes       {:root (:album-card classes)}
-             :on-mouse-over on-mouse-over
-             :on-mouse-out  on-mouse-out
-             :elevation     @depth}
-       (when-let [playcount (:playcount data)]
-         [button {:classes {:root (:playcount-root classes)}
-                  :color   :secondary
-                  :variant :contained
-                  :size    :small
-                  :href    (lastfm-url data)}
-          [:span [:span {:class (:bold classes)} playcount] " scrobbles"]])
-       [card-action-area {:classes {:root (:album-link classes)}
-                          :href    (:uri data)}
-        [card-media {:classes {:root (:album-media classes)}
-                     :image   (:image data)}]
-        [card-content
-         [typography {:variant :h5
-                      :no-wrap true}
-          (:title data)]
-         [typography {:color         :textSecondary
-                      :no-wrap       true
-                      :gutter-bottom true}
-          (interpose " · " (map :name (:artists data)))]
-         [typography {:variant :body2}
-          (interpose " · " (:tags data))]]]])))
+(defn album [{:keys [classes data]}]
+  (with-let [depth (atom 1)
+             on-mouse-over #(reset! depth 10)
+             on-mouse-out #(reset! depth 1)]
+    [card {:classes       {:root (:album-card classes)}
+           :on-mouse-over on-mouse-over
+           :on-mouse-out  on-mouse-out
+           :elevation     @depth}
+     (when-let [playcount (:playcount data)]
+       [button {:classes {:root (:playcount-root classes)}
+                :color   :secondary
+                :variant :contained
+                :size    :small
+                :href    (lastfm-url data)}
+        [:span [:span {:class (:bold classes)} playcount] " scrobbles"]])
+     [card-action-area {:classes {:root (:album-link classes)}
+                        :href    (:uri data)}
+      [card-media {:classes {:root (:album-media classes)}
+                   :image   (:image data)}]
+      [card-content
+       [typography {:variant :h5
+                    :no-wrap true}
+        (:title data)]
+       [typography {:color         :textSecondary
+                    :no-wrap       true
+                    :gutter-bottom true}
+        (interpose " · " (map :name (:artists data)))]
+       [typography {:variant :body2}
+        (interpose " · " (:tags data))]]]]))
 
-(defn albums* [props]
-  (let [has-albums? (re-frame/subscribe [::subs/albums])
-        filtered-albums (re-frame/subscribe [::subs/sorted-albums])]
-    (fn [{:keys [classes]}]
-      [:div {:class (:root classes)}
-       (cond
-         (not @has-albums?) [circular-progress {:classes   {:root (:progress-root classes)
-                                                            :svg  (:progress-svg classes)}
-                                                :size      100
-                                                :thickness 5}]
-         (seq @filtered-albums) (for [a @filtered-albums]
-                                  ^{:key (:id a)}
-                                  [album {:classes classes
-                                          :data    a}])
-         :else [typography {:variant :h6}
-                "No matching albums found in your library."])])))
+(defn albums* [{:keys [classes]}]
+  (with-let [has-albums? (re-frame/subscribe [::subs/albums])
+             filtered-albums (re-frame/subscribe [::subs/sorted-albums])]
+    [:div {:class (:root classes)}
+     (cond
+       (not @has-albums?) [circular-progress {:classes   {:root (:progress-root classes)
+                                                          :svg  (:progress-svg classes)}
+                                              :size      100
+                                              :thickness 5}]
+       (seq @filtered-albums) (for [a @filtered-albums]
+                                ^{:key (:id a)}
+                                [album {:classes classes
+                                        :data    a}])
+       :else [typography {:variant :h6}
+              "No matching albums found in your library."])]))
 
 (def albums ((with-styles styles) albums*))
