@@ -1,0 +1,3 @@
+[submodule "reagent-util"]
+	path = reagent-util
+	url = git@github.com:arttuka/reagent-util.git

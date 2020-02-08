@@ -6,7 +6,13 @@ A web service that presents the user a sortable and filterable view of their Spo
 
 ## Development Mode
 
-Start a REPL, then run `(user/start!)` to run figwheel, garden and server with automatic reload of all resources.
+Clone the `reagent-util` submodule first:
+```
+git submodule init
+git submodule update
+```
+
+Start a REPL, then run `(user/start!)` to run Figwheel and web server with automatic reload of all resources. The server runs at http://localhost:8080
 
 ### Run Clojure tests:
 
@@ -21,6 +27,6 @@ When you start figwheel in the REPL, it opens an interactive test runner in a br
 ## Production Build
 
 ```
-docker build . -t arttuka/luma:latest
+./build.sh
 ```
 

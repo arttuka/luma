@@ -28,7 +28,7 @@
 
   :min-lein-version "2.8.2"
 
-  :source-paths ["src/clj" "src/cljc" "src/cljs"]
+  :source-paths ["src/clj" "src/cljc" "src/cljs" "reagent-util/src/cljs"]
   :test-paths []
 
   :clean-targets ^{:protect false} ["target"
@@ -60,13 +60,13 @@
                         :source-paths   ["dev"]
                         :test-paths     ["test/clj" "test/cljc" "test/cljs"]
                         :resource-paths ["dev-resources" "target"]}
-             :provided {:dependencies [[org.clojure/clojurescript "1.10.520"]
+             :provided {:dependencies [[org.clojure/clojurescript "1.10.597"]
                                        [com.bhauman/figwheel-main "0.2.3" :exclusions [org.clojure/clojurescript]]
                                        [com.google.errorprone/error_prone_annotations "2.3.3"]
                                        [com.google.code.findbugs/jsr305 "3.0.2"]
-                                       [reagent "0.9.0-rc2"]
+                                       [reagent "0.9.1"]
                                        [re-frame "0.10.9" :exclusions [org.clojure/clojurescript]]
-                                       [arttuka/reagent-material-ui "4.6.0-0"]
+                                       [arttuka/reagent-material-ui "4.8.3-0"]
                                        [cljsjs/react "16.11.0-0"]
                                        [cljsjs/react-dom "16.11.0-0"]
                                        [cljsjs/react-dom-server "16.11.0-0"]

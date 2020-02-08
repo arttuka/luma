@@ -8,7 +8,8 @@
             [reagent-material-ui.styles :refer [with-styles]]
             [clojure.string :as str]
             [goog.string :as gstring]
-            [luma.components.autocomplete :refer [autocomplete]]
+            [reagent-util.autocomplete :refer [autocomplete]]
+            [reagent-util.material-ui-lab.create-filter-options :refer [create-filter-options]]
             [luma.components.flip-button :refer [flip-button]]
             [luma.events :as events]
             [luma.subs :as subs]
@@ -93,14 +94,19 @@
         all-tags-js (reaction (clj->js (or (seq @all-tags) [])))
         selected-tags (re-frame/subscribe [::subs/selected-tags])
         selected-tags-js (reaction (clj->js @selected-tags))
-        on-select #(re-frame/dispatch [::events/select-tags %])]
+        on-select #(re-frame/dispatch [::events/select-tags %])
+        filter-options (create-filter-options {:match-from :start
+                                               :stringify  identity})]
     (fn [{:keys [classes]}]
-      [autocomplete {:classes     classes
-                     :options     @all-tags-js
-                     :label       "Tag search"
-                     :on-select   on-select
-                     :placeholder "Tag"
-                     :value       @selected-tags-js}])))
+      [autocomplete {:classes        classes
+                     :options        @all-tags-js
+                     :label          "Tag search"
+                     :on-select      on-select
+                     :placeholder    "Tag"
+                     :value          @selected-tags-js
+                     :max-results    10
+                     :filter-options filter-options
+                     :shrink-label   true}])))
 
 (defn sort-dropdown [props]
   (let [lastfm-id (re-frame/subscribe [::subs/lastfm-id])
