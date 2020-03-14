@@ -1,5 +1,6 @@
 (ns ^:figwheel-hooks luma.core
   (:require [reagent.core :as reagent]
+            [reagent.dom :as dom]
             [re-frame.core :as re-frame]
             [mount.core :as mount]
             [luma.app :refer [app]]
@@ -14,8 +15,8 @@
 
 (defn ^:after-load mount-root []
   (re-frame/clear-subscription-cache!)
-  (reagent/render [app]
-                  (.getElementById js/document "app")))
+  (dom/render [app]
+              (.getElementById js/document "app")))
 
 (defn ^:export init []
   (re-frame/dispatch-sync [::events/initialize-db (transit/read js/initialDb)])
@@ -34,4 +35,3 @@
   (let [[event data] ?data]
     (when (not= :chsk/ws-ping event)
       (re-frame/dispatch [event data]))))
-
