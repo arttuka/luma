@@ -3,13 +3,13 @@ set -euxo pipefail
 
 lein clean
 lein test
-lein fig:test
+npm test
 lein kibit
 lein eastwood
 lein cljfmt check
-lein with-profile provided do \
-  clean, \
-  fig:min, \
+lein clean
+npm run build
+lein do \
   buster, \
   uberjar
 

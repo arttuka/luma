@@ -1,0 +1,20 @@
+{
+  "devDependencies": {
+    "shadow-cljs": "2.8.94",
+    "karma": "^4.4.1",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-cljs-test": "^0.1.0"
+  },
+  "dependencies": {
+    "@material-ui/core": "4.9.7",
+    "@material-ui/lab": "4.0.0-alpha.46",
+    "@material-ui/pickers": "3.2.10",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "react-transition-group": "4.3.0"
+  },
+  "scripts": {
+    "test": "shadow-cljs compile test && karma start --single-run",
+    "build": "shadow-cljs release prod"
+  }
+}

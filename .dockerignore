@@ -13,3 +13,7 @@
 .DS_Store
 .git
 .idea
+/.shadow-cljs
+/node_modules
+package.json
+package-lock.json

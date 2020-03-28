@@ -43,9 +43,8 @@
                [:script (str "var csrfToken = '" *anti-forgery-token* "'; "
                              "var initialDb = '" (escape-quotes (transit/write (initial-db req uid))) "';")]
                (include-js (if (env :dev)
-                             "/js/dev-main.js"
-                             (@asset-manifest "js/prod-main.js")))
-               [:script "luma.core.init();"]])]
+                             "/js/main.js"
+                             (@asset-manifest "js/main.js")))])]
     (-> (response html)
         (content-type "text/html")
         (header "Cache-Control" "no-cache"))))

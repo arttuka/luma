@@ -9,3 +9,6 @@ config.edn
 /resources/manifest.json
 /node_modules
 /dist
+.shadow-cljs
+/checkouts
+.eastwood
