@@ -57,11 +57,10 @@
                        :resource-paths ["dev-resources" "target"]}
              :provided {:dependencies [[reagent "0.10.0"]
                                        [re-frame "1.0.0" :exclusions [org.clojure/clojurescript]]
-                                       [arttuka/reagent-material-ui "4.11.0-0"]
+                                       [arttuka/reagent-material-ui "4.11.0-1"]
                                        [com.cognitect/transit-cljs "0.8.264"]
                                        [com.cognitect/transit-js "0.8.861"]
                                        [com.andrewmcveigh/cljs-time "0.5.2"]
-                                       [thheller/shadow-cljsjs "0.0.21"]
                                        [thheller/shadow-cljs "2.10.17"]]}
              :uberjar {:dependencies [[com.fzakaria/slf4j-timbre "0.3.19"]]
                        :main         luma.main

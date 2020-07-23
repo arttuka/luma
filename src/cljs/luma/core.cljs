@@ -1,8 +1,5 @@
 (ns luma.core
-  (:require [cljsjs.react]
-            [cljsjs.react.dom]
-            [reagent.core :as reagent]
-            [reagent.dom :as dom]
+  (:require [reagent.dom :as dom]
             [re-frame.core :as re-frame]
             [mount.core :as mount]
             [luma.app :refer [app]]
