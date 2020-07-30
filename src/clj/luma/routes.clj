@@ -2,9 +2,9 @@
   (:require [config.core :refer [env]]
             [compojure.core :refer [GET defroutes]]
             [compojure.route :refer [resources not-found]]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [cheshire.core :as json]
             [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
             [ring.util.response :refer [content-type header redirect response]]
             [hiccup.page :refer [include-js include-css html5]]
@@ -14,9 +14,9 @@
             [luma.websocket :as websocket])
   (:import (java.util UUID)))
 
-(def asset-manifest (delay (some-> (io/resource "manifest.json")
-                                   (io/reader)
-                                   (json/parse-stream))))
+(def js-file (delay (let [manifest (edn/read-string (slurp (io/resource "manifest.edn")))
+                          main-module (first (filter #(= :main (:name %)) manifest))]
+                      (:output-name main-module))))
 
 (defn escape-quotes [s]
   (str/escape s {\' "\\'"}))
@@ -44,7 +44,7 @@
                              "var initialDb = '" (escape-quotes (transit/write (initial-db req uid))) "';")]
                (include-js (if (env :dev)
                              "/js/main.js"
-                             (@asset-manifest "js/main.js")))])]
+                             (str "/js/" @js-file)))])]
     (-> (response html)
         (content-type "text/html")
         (header "Cache-Control" "no-cache"))))

@@ -11,10 +11,10 @@
 (defstate shadow-cljs
   :start (do
            (shadow/start!)
-           (cljs/watch :dev))
+           (cljs/watch :app))
   :stop (do
           (shadow/stop!)
-          (cljs/stop-worker :dev)))
+          (cljs/stop-worker :app)))
 
 (defn stop! []
   (mount/stop))

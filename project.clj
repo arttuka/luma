@@ -23,7 +23,6 @@
   :plugins [[lein-ancient "0.6.15"]
             [lein-cljfmt "0.6.8"]
             [lein-kibit "0.1.8"]
-            [no.terjedahl/lein-buster "0.2.0"]
             [jonase/eastwood "0.3.11"]]
 
   :min-lein-version "2.8.2"
@@ -33,13 +32,8 @@
 
   :clean-targets ^{:protect false} ["target"
                                     "resources/public/js"
-                                    "resources/manifest.json"
+                                    "resources/manifest.edn"
                                     ".shadow-cljs"]
-
-  :buster {:files       ["target/public/js/main.js"]
-           :files-base  "target/public"
-           :output-base "resources/public"
-           :manifest    "resources/manifest.json"}
 
   :cljfmt {:indents {async     [[:inner 0]]
                      when-let+ [[:inner 0]]}}

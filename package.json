@@ -15,6 +15,6 @@
   },
   "scripts": {
     "test": "shadow-cljs compile test && karma start --single-run",
-    "build": "shadow-cljs release prod"
+    "build": "shadow-cljs release app"
   }
 }
