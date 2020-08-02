@@ -1,4 +1,4 @@
-{:source-paths ["src/cljc" "src/cljs" "reagent-util/src/cljs" "test/cljc" "test/cljs"]
+{:source-paths ["src/cljc" "src/cljs" "test/cljc" "test/cljs"]
  :dependencies [[mount "0.1.16"]
                 [com.taoensso/sente "1.15.0"]
                 [reagent "0.10.0"]

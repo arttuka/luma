@@ -16,11 +16,12 @@
             [reagent-material-ui.core.typography :refer [typography]]
             [reagent-material-ui.icons.sort :refer [sort]]
             [reagent-material-ui.icons.cancel :refer [cancel]]
+            [reagent-material-ui.lab.autocomplete :refer [autocomplete]]
             [reagent-material-ui.lab.create-filter-options :refer [create-filter-options]]
             [reagent-material-ui.styles :refer [with-styles]]
+            [reagent-material-ui.util :refer [js->clj']]
             [clojure.string :as str]
             [goog.string :as gstring]
-            [reagent-util.autocomplete :refer [autocomplete]]
             [luma.components.flip-button :refer [flip-button]]
             [luma.events :as events]
             [luma.subs :as subs]
@@ -94,21 +95,26 @@
 
 (defn tag-filter [{:keys [classes]}]
   (with-let [all-tags (re-frame/subscribe [::subs/all-tags])
-             all-tags-js (reaction (clj->js (or (seq @all-tags) [])))
              selected-tags (re-frame/subscribe [::subs/selected-tags])
-             selected-tags-js (reaction (clj->js @selected-tags))
-             on-select #(re-frame/dispatch [::events/select-tags %])
+             on-change #(re-frame/dispatch [::events/select-tags %2])
              filter-options (create-filter-options {:match-from :start
-                                                    :stringify  identity})]
-    [autocomplete {:classes        classes
-                   :options        @all-tags-js
-                   :label          "Tag search"
-                   :on-select      on-select
-                   :placeholder    "Tag"
-                   :value          @selected-tags-js
-                   :max-results    10
-                   :filter-options filter-options
-                   :shrink-label   true}]))
+                                                    :limit      10})]
+    [autocomplete {:classes                 classes
+                   :options                 (or @all-tags [])
+                   :value                   @selected-tags
+                   :on-change               on-change
+                   :multiple                true
+                   :disable-clearable       true
+                   :render-input            (fn [params]
+                                              (reagent/as-element
+                                               [text-field (-> (js->clj' params)
+                                                               (merge {:variant     :standard
+                                                                       :label       "Tag search"
+                                                                       :placeholder "Tag"})
+                                                               (assoc-in [:InputLabelProps :shrink] true))]))
+                   :render-tags             (constantly nil)
+                   :filter-options          filter-options
+                   :filter-selected-options true}]))
 
 (defn sort-dropdown [{:keys [classes]}]
   (with-let [lastfm-id (re-frame/subscribe [::subs/lastfm-id])
@@ -170,7 +176,7 @@
                                              :on-mouse-down prevent-default}
                                             [cancel]]]))}}]))
 
-(defn styles [{:keys [palette spacing] :as theme}]
+(defn styles [{:keys [spacing] :as theme}]
   (let [on-desktop (util/on-desktop theme)
         on-mobile (util/on-mobile theme)
         filter-width {on-desktop {:width        256
@@ -185,8 +191,6 @@
                              on-mobile  {:margin (spacing 0 1 1 0)}}
      :chip-label            {:max-width 280}
      :asc-icon              {:transform "scaleY(-1)"}
-     :tag-filter-popup      filter-width
-     :tag-filter-menu-item  {"&[data-focus=\"true\"]" {:background-color (get-in palette [:action :selected])}}
      :sort-dropdown-root    {:display     :flex
                              :align-items :flex-end}
      :separator             {on-desktop {:flex 1}}
@@ -198,9 +202,7 @@
      [mui-toolbar {:classes {:root (:toolbar classes)}}
       (if @spotify-id
         [:<>
-         [tag-filter {:classes {:root      (:filter classes)
-                                :popup     (:tag-filter-popup classes)
-                                :menu-item (:tag-filter-menu-item classes)}}]
+         [tag-filter {:classes {:root (:filter classes)}}]
          [text-search {:classes {:root (:filter classes)}}]
          [sort-dropdown {:classes {:root     [(:sort-dropdown-root classes) (:filter classes)]
                                    :asc-icon (:asc-icon classes)}}]

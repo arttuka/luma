@@ -41,7 +41,7 @@
          (is (= #{"album-1" "album-2" "album-3"} (albums)))
          (re-frame/dispatch [::events/select-tags ["tag-3"]])
          (is (= #{"album-1" "album-2"} (albums)))
-         (re-frame/dispatch [::events/select-tags ["tag-2"]])
+         (re-frame/dispatch [::events/select-tags ["tag-2" "tag-3"]])
          (is (= #{"album-2"} (albums)))
          (re-frame/dispatch [::events/unselect-tag "tag-3"])
          (is (= #{"album-2" "album-3"} (albums))))))

@@ -6,7 +6,7 @@
 (re-frame/reg-event-db
  ::initialize-db
  (fn [_ [_ initial-db]]
-   (merge {:selected-tags #{}
+   (merge {:selected-tags []
            :sort-key      :artist
            :sort-asc      true
            :text-search   ""
@@ -53,12 +53,12 @@
 (re-frame/reg-event-db
  ::select-tags
  (fn [db [_ tags]]
-   (update db :selected-tags into tags)))
+   (assoc db :selected-tags tags)))
 
 (re-frame/reg-event-db
  ::unselect-tag
  (fn [db [_ tag]]
-   (update db :selected-tags disj tag)))
+   (update db :selected-tags #(remove #{tag} %))))
 
 (re-frame/reg-event-db
  ::set-text-search

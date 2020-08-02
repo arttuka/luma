@@ -27,7 +27,7 @@
 
   :min-lein-version "2.8.2"
 
-  :source-paths ["src/clj" "src/cljc" "src/cljs" "reagent-util/src/cljs"]
+  :source-paths ["src/clj" "src/cljc" "src/cljs"]
   :test-paths []
 
   :clean-targets ^{:protect false} ["target"
