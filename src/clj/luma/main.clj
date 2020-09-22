@@ -7,7 +7,7 @@
             luma.db)
   (:gen-class))
 
-(def timbre-config {:level     :info
+(def timbre-config {:min-level :info
                     :appenders {:rolling (rolling-appender {:path "/var/log/luma/luma.log" :pattern :daily})}})
 
 (defn -main []
