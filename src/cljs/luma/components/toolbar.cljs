@@ -1,8 +1,11 @@
 (ns luma.components.toolbar
+  (:require-macros [reagent-material-ui.util :refer [react-component]])
   (:require [reagent.core :as reagent :refer [atom with-let]]
             [reagent.ratom :refer-macros [reaction]]
             [re-frame.core :as re-frame]
+            [reagent-material-ui.core.autocomplete :refer [autocomplete]]
             [reagent-material-ui.core.chip :refer [chip]]
+            [reagent-material-ui.core.create-filter-options :refer [create-filter-options]]
             [reagent-material-ui.core.divider :refer [divider]]
             [reagent-material-ui.core.form-control :refer [form-control]]
             [reagent-material-ui.core.icon-button :refer [icon-button]]
@@ -16,10 +19,7 @@
             [reagent-material-ui.core.typography :refer [typography]]
             [reagent-material-ui.icons.sort :refer [sort]]
             [reagent-material-ui.icons.cancel :refer [cancel]]
-            [reagent-material-ui.lab.autocomplete :refer [autocomplete]]
-            [reagent-material-ui.lab.create-filter-options :refer [create-filter-options]]
             [reagent-material-ui.styles :refer [with-styles]]
-            [reagent-material-ui.util :refer [js->clj']]
             [clojure.string :as str]
             [goog.string :as gstring]
             [luma.components.flip-button :refer [flip-button]]
@@ -105,13 +105,12 @@
                    :on-change               on-change
                    :multiple                true
                    :disable-clearable       true
-                   :render-input            (fn [params]
-                                              (reagent/as-element
-                                               [text-field (-> (js->clj' params)
-                                                               (merge {:variant     :standard
-                                                                       :label       "Tag search"
-                                                                       :placeholder "Tag"})
-                                                               (assoc-in [:InputLabelProps :shrink] true))]))
+                   :render-input            (react-component [params]
+                                              [text-field (-> params
+                                                              (merge {:variant     :standard
+                                                                      :label       "Tag search"
+                                                                      :placeholder "Tag"})
+                                                              (assoc-in [:InputLabelProps :shrink] true))])
                    :render-tags             (constantly nil)
                    :filter-options          filter-options
                    :filter-selected-options true}]))
