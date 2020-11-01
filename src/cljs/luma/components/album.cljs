@@ -22,7 +22,7 @@
 (defn styles [{:keys [spacing] :as theme}]
   (let [on-desktop (util/on-desktop theme)
         on-mobile (util/on-mobile theme)
-        mobile-width (str "calc(100vw - " (spacing 4) "px)")]
+        mobile-width (str "calc(100vw - " (spacing 4) ")")]
     {:bold           {:font-weight :bold}
      :playcount-root {:z-index  2
                       :position :absolute

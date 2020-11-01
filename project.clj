@@ -16,7 +16,7 @@
                  [com.taoensso/timbre "5.1.0"]
                  [com.cognitect/transit-clj "1.0.324" :exclusions [javax.xml.bind/jaxb-api]]
                  [org.clojure/java.jdbc "0.7.11"]
-                 [org.postgresql/postgresql "42.2.17"]
+                 [org.postgresql/postgresql "42.2.18"]
                  [hikari-cp "2.13.0"]
                  [clj-time "0.15.2"]]
 
@@ -52,11 +52,11 @@
                         :resource-paths ["dev-resources" "target"]}
              :provided {:dependencies [[reagent "0.10.0"]
                                        [re-frame "1.1.1"]
-                                       [arttuka/reagent-material-ui "5.0.0-alpha.12-0"]
+                                       [arttuka/reagent-material-ui "5.0.0-alpha.14-0"]
                                        [com.cognitect/transit-cljs "0.8.264"]
                                        [com.cognitect/transit-js "0.8.867"]
                                        [com.andrewmcveigh/cljs-time "0.5.2"]
-                                       [thheller/shadow-cljs "2.11.5"]]}
+                                       [thheller/shadow-cljs "2.11.6"]]}
              :uberjar  {:dependencies [[com.fzakaria/slf4j-timbre "0.3.20"]]
                         :main         luma.main
                         :uberjar-name "luma.jar"
