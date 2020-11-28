@@ -2,7 +2,7 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/core.async "1.3.610"]
                  [org.clojure/tools.logging "1.1.0"]
-                 [org.clojure/tools.reader "1.3.3"]
+                 [org.clojure/tools.reader "1.3.4"]
                  [compojure "1.6.2"]
                  [yogthos/config "1.1.7"]
                  [ring/ring-core "1.8.2"]
@@ -51,12 +51,12 @@
                         :test-paths     ["test/clj" "test/cljc" "test/cljs"]
                         :resource-paths ["dev-resources" "target"]}
              :provided {:dependencies [[reagent "0.10.0"]
-                                       [re-frame "1.1.1"]
-                                       [arttuka/reagent-material-ui "5.0.0-alpha.14-0"]
+                                       [re-frame "1.1.2"]
+                                       [arttuka/reagent-material-ui "5.0.0-alpha.17-0"]
                                        [com.cognitect/transit-cljs "0.8.264"]
                                        [com.cognitect/transit-js "0.8.867"]
                                        [com.andrewmcveigh/cljs-time "0.5.2"]
-                                       [thheller/shadow-cljs "2.11.6"]]}
+                                       [thheller/shadow-cljs "2.11.8"]]}
              :uberjar  {:dependencies [[com.fzakaria/slf4j-timbre "0.3.20"]]
                         :main         luma.main
                         :uberjar-name "luma.jar"

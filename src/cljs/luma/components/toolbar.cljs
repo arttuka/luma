@@ -166,6 +166,7 @@
       :placeholder     "Title or artist"
       :value           @value
       :on-change       on-change
+      :variant         :standard
       :InputLabelProps {:shrink true}
       :InputProps      {:end-adornment (when-not (str/blank? @value)
                                          (reagent/as-element
