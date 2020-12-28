@@ -23,7 +23,7 @@
   :plugins [[lein-ancient "0.6.15"]
             [lein-cljfmt "0.7.0"]
             [lein-kibit "0.1.8"]
-            [jonase/eastwood "0.3.11"]]
+            [jonase/eastwood "0.3.12"]]
 
   :min-lein-version "2.8.2"
 
@@ -43,20 +43,20 @@
              :config-files ["test-resources/eastwood.clj"]}
 
   :profiles {:dev      {:dependencies   [[binaryage/devtools "1.0.2"]
-                                         [re-frisk "1.3.4" :exclusions [org.clojure/clojurescript]]
+                                         [re-frisk "1.3.5" :exclusions [org.clojure/clojurescript]]
                                          [day8.re-frame/test "0.1.5"]
-                                         [org.clojure/tools.namespace "1.0.0"]
+                                         [org.clojure/tools.namespace "1.1.0"]
                                          [ring/ring-devel "1.8.2"]]
                         :source-paths   ["dev"]
                         :test-paths     ["test/clj" "test/cljc" "test/cljs"]
                         :resource-paths ["dev-resources" "target"]}
-             :provided {:dependencies [[reagent "0.10.0"]
+             :provided {:dependencies [[reagent "1.0.0"]
                                        [re-frame "1.1.2"]
-                                       [arttuka/reagent-material-ui "5.0.0-alpha.17-0"]
+                                       [arttuka/reagent-material-ui "5.0.0-alpha.20-0"]
                                        [com.cognitect/transit-cljs "0.8.264"]
                                        [com.cognitect/transit-js "0.8.867"]
                                        [com.andrewmcveigh/cljs-time "0.5.2"]
-                                       [thheller/shadow-cljs "2.11.8"]]}
+                                       [thheller/shadow-cljs "2.11.11"]]}
              :uberjar  {:dependencies [[com.fzakaria/slf4j-timbre "0.3.20"]]
                         :main         luma.main
                         :uberjar-name "luma.jar"
