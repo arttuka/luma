@@ -1,29 +1,29 @@
 (defproject luma "0.1.0-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.10.1"]
+  :dependencies [[org.clojure/clojure "1.10.3"]
                  [org.clojure/core.async "1.3.610"]
                  [org.clojure/tools.logging "1.1.0"]
-                 [org.clojure/tools.reader "1.3.4"]
+                 [org.clojure/tools.reader "1.3.5"]
                  [compojure "1.6.2"]
                  [yogthos/config "1.1.7"]
-                 [ring/ring-core "1.8.2"]
+                 [ring/ring-core "1.9.1"]
                  [ring/ring-defaults "0.3.2"]
                  [ring/ring-json "0.5.0"]
                  [aleph "0.4.6"]
                  [byte-streams "0.2.4"]
                  [hiccup "1.0.5"]
                  [mount "0.1.16"]
-                 [com.taoensso/sente "1.16.0"]
-                 [com.taoensso/timbre "5.1.0"]
+                 [com.taoensso/sente "1.16.2"]
+                 [com.taoensso/timbre "5.1.2"]
                  [com.cognitect/transit-clj "1.0.324" :exclusions [javax.xml.bind/jaxb-api]]
-                 [org.clojure/java.jdbc "0.7.11"]
-                 [org.postgresql/postgresql "42.2.18"]
+                 [org.clojure/java.jdbc "0.7.12"]
+                 [org.postgresql/postgresql "42.2.19"]
                  [hikari-cp "2.13.0"]
                  [clj-time "0.15.2"]]
 
-  :plugins [[lein-ancient "0.6.15"]
+  :plugins [[lein-ancient "0.7.0"]
             [lein-cljfmt "0.7.0"]
             [lein-kibit "0.1.8"]
-            [jonase/eastwood "0.3.12"]]
+            [jonase/eastwood "0.3.14"]]
 
   :min-lein-version "2.8.2"
 
@@ -43,20 +43,20 @@
              :config-files ["test-resources/eastwood.clj"]}
 
   :profiles {:dev      {:dependencies   [[binaryage/devtools "1.0.2"]
-                                         [re-frisk "1.3.5" :exclusions [org.clojure/clojurescript]]
+                                         [re-frisk "1.3.10" :exclusions [org.clojure/clojurescript]]
                                          [day8.re-frame/test "0.1.5"]
                                          [org.clojure/tools.namespace "1.1.0"]
-                                         [ring/ring-devel "1.8.2"]]
+                                         [ring/ring-devel "1.9.1"]]
                         :source-paths   ["dev"]
                         :test-paths     ["test/clj" "test/cljc" "test/cljs"]
                         :resource-paths ["dev-resources" "target"]}
              :provided {:dependencies [[reagent "1.0.0"]
-                                       [re-frame "1.1.2"]
-                                       [arttuka/reagent-material-ui "5.0.0-alpha.20-0"]
+                                       [re-frame "1.2.0"]
+                                       [arttuka/reagent-material-ui "5.0.0-alpha.27-0"]
                                        [com.cognitect/transit-cljs "0.8.264"]
                                        [com.cognitect/transit-js "0.8.867"]
                                        [com.andrewmcveigh/cljs-time "0.5.2"]
-                                       [thheller/shadow-cljs "2.11.11"]]}
+                                       [thheller/shadow-cljs "2.11.20"]]}
              :uberjar  {:dependencies [[com.fzakaria/slf4j-timbre "0.3.20"]]
                         :main         luma.main
                         :uberjar-name "luma.jar"

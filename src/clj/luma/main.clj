@@ -1,17 +1,13 @@
 (ns luma.main
   (:require [mount.core :as mount]
             [taoensso.timbre :as timbre]
-            [taoensso.timbre.appenders.3rd-party.rolling :refer [rolling-appender]]
             luma.server
             luma.websocket
             luma.db)
   (:gen-class))
 
-(def timbre-config {:min-level :info
-                    :appenders {:rolling (rolling-appender {:path "/var/log/luma/luma.log" :pattern :daily})}})
-
 (defn -main []
-  (timbre/merge-config! timbre-config)
+  (timbre/merge-config! {:min-level :info})
   (mount/in-cljc-mode)
   (try
     (mount/start)

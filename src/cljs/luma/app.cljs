@@ -4,6 +4,7 @@
             [reagent-material-ui.colors :as colors]
             [reagent-material-ui.core.app-bar :refer [app-bar]]
             [reagent-material-ui.core.css-baseline :refer [css-baseline]]
+            [reagent-material-ui.core.styled-engine-provider :refer [styled-engine-provider]]
             [reagent-material-ui.core.toolbar :refer [toolbar] :rename {toolbar mui-toolbar}]
             [reagent-material-ui.core.typography :refer [typography]]
             [reagent-material-ui.styles :as styles :refer [with-styles]]
@@ -52,16 +53,17 @@
                        :spotify   "#1db954"}}))
 
 (defn app* [{:keys [classes]}]
-  [styles/theme-provider theme
-   [css-baseline]
-   [:div {:class (:app classes)}
-    [header]
-    [toolbar]
-    (if @(re-frame/subscribe [::subs/spotify-id])
-      [albums]
-      [welcome-screen (:welcome classes)])
-    [:div {:class (:separator classes)}]
-    [terms-of-use]
-    [snackbar]]])
+  [styled-engine-provider {:inject-first true}
+   [styles/theme-provider theme
+    [css-baseline]
+    [:div {:class (:app classes)}
+     [header]
+     [toolbar]
+     (if @(re-frame/subscribe [::subs/spotify-id])
+       [albums]
+       [welcome-screen (:welcome classes)])
+     [:div {:class (:separator classes)}]
+     [terms-of-use]
+     [snackbar]]]])
 
 (def app ((with-styles styles) app*))
