@@ -10,7 +10,7 @@ lein cljfmt check
 lein clean
 npm run build
 mkdir -p resources/public/js
-cp target/public/js/main.*.js resources/public/js/
+cp target/public/js/main.*.js target/public/js/main.*.js.map resources/public/js/
 cp target/public/js/manifest.edn resources
 lein uberjar
 
