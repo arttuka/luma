@@ -1,6 +1,5 @@
 (ns luma.util
-  (:require #?(:clj  [clojure.core.async :refer [>! <! <!! alts! put! go go-loop chan dropping-buffer sliding-buffer timeout]]
-               :cljs [clojure.core.async :refer [<! alts! put! chan sliding-buffer timeout] :refer-macros [go]])
+  (:require #?(:clj  [clojure.core.async :refer [>! <! <!! go-loop chan dropping-buffer timeout]])
             [#?(:clj  clj-time.core
                 :cljs cljs-time.core)
              :as time]))
@@ -56,18 +55,12 @@
            (transient {})
            coll)))
 
-(defn debounce [f ms]
-  (let [c (chan (sliding-buffer 1))]
-    (go
-      (loop [args (<! c)]
-        (let [[val port] (alts! [c (timeout ms)])]
-          (when (not= port c)
-            (apply f args))
-          (recur (if (= port c)
-                   val
-                   (<! c))))))
-    (fn [& args]
-      (put! c (or args [])))))
+#?(:cljs (defn debounce [f ms]
+           (let [timeout (atom 0)]
+             (fn [& args]
+               (swap! timeout (fn [t]
+                                (js/clearTimeout t)
+                                (js/setTimeout #(apply f args) ms)))))))
 
 #?(:cljs (defn wrap-on-change [f]
            (fn [^js/Event event]

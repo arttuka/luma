@@ -55,41 +55,42 @@
     (is (not (older-than-1-month? (time/minus (time/now) (time/days 27)))))
     (is (older-than-1-month? (time/minus (time/now) (time/days 32))))))
 
-(deftest debounce-test
-  (test-async
-   (go
-     (testing "debounce"
-       (testing "waits until timeout"
-         (let [a (atom false)
-               f (debounce #(reset! a true) 50)]
-           (f)
-           (is (not @a) "should not call f yet")
-           (<! (timeout 100))
-           (is @a "f should have been called")))
-       (testing "only lets the last call through"
-         (let [a (atom [])
-               f (debounce #(swap! a conj %) 50)]
-           (f 1)
-           (f 2)
-           (f 3)
-           (<! (timeout 100))
-           (is (= [3] @a))))
-       (testing "still works after first timeout"
-         (let [a (atom [])
-               f (debounce #(swap! a conj %) 50)]
-           (f 1)
-           (<! (timeout 100))
-           (f 2)
-           (f 3)
-           (<! (timeout 100))
-           (is (= [1 3] @a))))
-       (testing "works for any number of arguments"
-         (let [a (atom nil)
-               f (debounce #(reset! a (+ %1 %2 %3)) 50)]
-           (f 1 2 3)
-           (f 4 5 6)
-           (<! (timeout 100))
-           (is (= 15 @a))))))))
+#?(:cljs
+   (deftest debounce-test
+     (test-async
+      (go
+        (testing "debounce"
+          (testing "waits until timeout"
+            (let [a (atom false)
+                  f (debounce #(reset! a true) 50)]
+              (f)
+              (is (not @a) "should not call f yet")
+              (<! (timeout 100))
+              (is @a "f should have been called")))
+          (testing "only lets the last call through"
+            (let [a (atom [])
+                  f (debounce #(swap! a conj %) 50)]
+              (f 1)
+              (f 2)
+              (f 3)
+              (<! (timeout 100))
+              (is (= [3] @a))))
+          (testing "still works after first timeout"
+            (let [a (atom [])
+                  f (debounce #(swap! a conj %) 50)]
+              (f 1)
+              (<! (timeout 100))
+              (f 2)
+              (f 3)
+              (<! (timeout 100))
+              (is (= [1 3] @a))))
+          (testing "works for any number of arguments"
+            (let [a (atom nil)
+                  f (debounce #(reset! a (+ %1 %2 %3)) 50)]
+              (f 1 2 3)
+              (f 4 5 6)
+              (<! (timeout 100))
+              (is (= 15 @a)))))))))
 
 #?(:clj (deftest when-let+-test
           (testing "multiple bindings are evaluated sequentially"
