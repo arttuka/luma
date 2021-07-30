@@ -7,24 +7,33 @@
             [reagent-material-ui.core.styled-engine-provider :refer [styled-engine-provider]]
             [reagent-material-ui.core.toolbar :refer [toolbar] :rename {toolbar mui-toolbar}]
             [reagent-material-ui.core.typography :refer [typography]]
-            [reagent-material-ui.styles :as styles :refer [with-styles]]
+            [reagent-material-ui.styles :as styles :refer [styled]]
             [luma.components.album :refer [albums]]
             [luma.components.snackbar :refer [snackbar]]
             [luma.components.terms-of-use :refer [terms-of-use]]
             [luma.components.toolbar :refer [toolbar]]
-            [luma.subs :as subs]))
+            [luma.subs :as subs]
+            [luma.util :as util]))
 
-(defn styles [{:keys [spacing]}]
-  {:app       {:min-height     "100vh"
-               :display        :flex
-               :flex-direction :column}
-   :separator {:flex 1000}
-   :welcome   {:align-self :center
-               :max-width  640
-               :padding    (spacing 2)}})
+(def classes
+  (util/make-classes "luma-app"
+                     [:root
+                      :separator
+                      :welcome]))
 
-(defn welcome-screen [class]
-  [:div {:class class}
+(defn styles [{{:keys [spacing]} :theme}]
+  (util/set-classes
+   classes
+   {:root      {:min-height     "100vh"
+                :display        :flex
+                :flex-direction :column}
+    :separator {:flex 1000}
+    :welcome   {:align-self :center
+                :max-width  640
+                :padding    (spacing 2)}}))
+
+(defn welcome-screen []
+  [:div {:class (:welcome classes)}
    [typography {:variant       :h5
                 :gutter-bottom true}
     "LUMA Ultimate Music Archive"]
@@ -47,23 +56,23 @@
     [typography {:variant :h5}
      "LUMA Ultimate Music Archive"]]])
 
-(def theme (styles/create-mui-theme
+(def theme (styles/create-theme
             {:palette {:primary   colors/blue
                        :secondary {:main (:A700 colors/red)}
                        :spotify   "#1db954"}}))
 
-(defn app* [{:keys [classes]}]
+(defn app* [{:keys [class-name]}]
   [styled-engine-provider {:inject-first true}
    [styles/theme-provider theme
     [css-baseline]
-    [:div {:class (:app classes)}
+    [:div {:class [class-name (:root classes)]}
      [header]
      [toolbar]
      (if @(re-frame/subscribe [::subs/spotify-id])
        [albums]
-       [welcome-screen (:welcome classes)])
+       [welcome-screen])
      [:div {:class (:separator classes)}]
      [terms-of-use]
      [snackbar]]]])
 
-(def app ((with-styles styles) app*))
+(def app (styled app* styles))

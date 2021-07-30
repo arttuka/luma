@@ -1,14 +1,14 @@
 {:source-paths ["src/cljc" "src/cljs" "test/cljc" "test/cljs"]
  :dependencies [[mount "0.1.16"]
                 [com.taoensso/sente "1.16.2"]
-                [reagent "1.0.0"]
+                [reagent "1.1.0"]
                 [re-frame "1.2.0"]
-                [arttuka/reagent-material-ui "5.0.0-alpha.29-0"]
-                [com.cognitect/transit-cljs "0.8.264"]
-                [com.cognitect/transit-js "0.8.867"]
+                [arttuka/reagent-material-ui "5.0.0-beta.2-0"]
+                [com.cognitect/transit-cljs "0.8.269"]
+                [com.cognitect/transit-js "0.8.874"]
                 [com.andrewmcveigh/cljs-time "0.5.2"]
                 [binaryage/devtools "1.0.3"]
-                [re-frisk "1.4.0"]
+                [re-frisk "1.5.1"]
                 [day8.re-frame/test "0.1.5"]]
  :builds       {:app  {:target            :browser
                        :output-dir        "target/public/js"
@@ -18,7 +18,8 @@
                        :compiler-options  {:optimizations :advanced
                                            :source-map    true}
                        :infer-externs     :auto
-                       :js-options        {:anon-fn-naming-policy :unmapped}
+                       :js-options        {:anon-fn-naming-policy :unmapped
+                                           :entry-keys ["module" "browser" "main"]}
                        :module-hash-names 8}
                 :test {:target    :karma
                        :output-to "target/test.js"}}}

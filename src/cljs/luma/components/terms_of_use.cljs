@@ -9,16 +9,12 @@
             [reagent-material-ui.core.divider :refer [divider]]
             [reagent-material-ui.core.link :refer [link]]
             [reagent-material-ui.core.typography :refer [typography]]
-            [reagent-material-ui.styles :refer [with-styles]]
+            [reagent-material-ui.styles :refer [styled]]
             [luma.events :as events]
             [luma.subs :as subs]
             [luma.websocket :as ws]))
 
-(def styles
-  {:image        {:height "1em"}
-   :erase-button {:width 260}})
-
-(defn erase-lastfm-data [{:keys [classes]}]
+(defn erase-lastfm-data []
   (with-let [confirm (atom false)
              done (atom false)
              lastfm-id (re-frame/subscribe [::subs/lastfm-id])
@@ -32,13 +28,13 @@
                           :else (do
                                   (reset! confirm true)
                                   (js/setTimeout #(reset! confirm false) 5000))))]
-    [button {:classes  {:root (:erase-button classes)}
+    [button {:sx       {:width 260}
              :variant  :contained
              :disabled (not @lastfm-id)
              :color    (cond
                          @done :primary
                          @confirm :secondary
-                         :else :default)
+                         :else :inherit)
              :on-click on-click}
      (cond
        @done "Last.fm data erased!"
@@ -50,7 +46,9 @@
   [typography {:variant :h6}
    text])
 
-(defn terms-of-use* [{:keys [classes]}]
+(def img (styled "img" {:height "1em"}))
+
+(defn terms-of-use []
   (with-let [dialog-open? (atom false)
              open-dialog #(reset! dialog-open? true)
              close-dialog #(reset! dialog-open? false)]
@@ -65,28 +63,24 @@
       "Data from "
       [link {:href      "https://www.spotify.com"
              :underline :none}
-       [:img {:class (:image classes)
-              :src   "/images/Spotify_Logo_RGB_Black.png"
-              :alt   "Spotify"}]]
+       [img {:src "/images/Spotify_Logo_RGB_Black.png"
+             :alt "Spotify"}]]
       " used with permission."
       [:br]
       "Data from "
       [link {:href      "https://www.last.fm"
              :underline :none}
-       [:img {:class (:image classes)
-              :src   "/images/Last.fm_Logo_Black.png"
-              :alt   "Last.fm"}]]
+       [img {:src "/images/Last.fm_Logo_Black.png"
+             :alt "Last.fm"}]]
       " used with permission."
       [:br]
       [link {:href      "https://github.com/arttuka/luma"
              :underline :none}
        "View source on "
-       [:img {:class (:image classes)
-              :src   "/images/GitHub-Mark-32px.png"
-              :alt   "GitHub logo"}]
-       [:img {:class (:image classes)
-              :src   "/images/GitHub_Logo.png"
-              :alt   "GitHub"}]
+       [img {:src "/images/GitHub-Mark-32px.png"
+             :alt "GitHub logo"}]
+       [img {:src "/images/GitHub_Logo.png"
+             :alt "GitHub"}]
        "."]]
      [dialog {:class-name :terms-of-use-dialog
               :open       @dialog-open?
@@ -126,7 +120,7 @@
        [:p
         "Personal data from Spotify is erased when the user logs out or otherwise stops using the service.
          Personal data from Last.fm can be erased using this button:"]
-       [erase-lastfm-data {:classes classes}]
+       [erase-lastfm-data]
        [subtitle "Processing of sensitive personal data"]
        [:p
         "The service doesn't process any sensitive personal data."]]
@@ -134,5 +128,3 @@
        [button {:color    :primary
                 :on-click close-dialog}
         "Close"]]]]))
-
-(def terms-of-use ((with-styles styles) terms-of-use*))

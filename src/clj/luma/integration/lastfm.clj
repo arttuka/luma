@@ -58,11 +58,13 @@
        (map (comp str/lower-case :name))))
 
 (defn get-album-playcount [username artist album]
-  (-> (lastfm-request :album.getinfo {:artist   artist
-                                      :album    album
-                                      :username username})
-      (get-in [:album :userplaycount] "0")
-      (Integer/parseInt)))
+  (let [response (lastfm-request :album.getinfo {:artist   artist
+                                                 :album    album
+                                                 :username username})
+        playcount (get-in response [:album :userplaycount] 0)]
+    (if (string? playcount)
+      (Integer/parseInt playcount)
+      playcount)))
 
 (defn get-session [token]
   (:session (lastfm-request :auth.getsession {:token token} true)))

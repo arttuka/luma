@@ -87,3 +87,15 @@
                (when-let+ ~(vec more)
                  ~@body))
             `(do ~@body))))
+
+(defn make-classes [prefix classes]
+  (into {} (for [c classes]
+             [c (str prefix (name c))])))
+
+(defn set-classes [classes styles]
+  (into {} (for [[k v] styles
+                 :let [k' (cond
+                            (string? k) k
+                            (= :root k) (str "&." (:root classes))
+                            :else (str "& ." (get classes k)))]]
+             [k' v])))

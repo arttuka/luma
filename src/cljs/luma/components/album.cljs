@@ -8,7 +8,7 @@
             [reagent-material-ui.core.card-media :refer [card-media]]
             [reagent-material-ui.core.circular-progress :refer [circular-progress]]
             [reagent-material-ui.core.typography :refer [typography]]
-            [reagent-material-ui.styles :refer [with-styles]]
+            [reagent-material-ui.styles :refer [styled]]
             [clojure.string :as str]
             [luma.subs :as subs]
             [luma.util :as util]))
@@ -19,35 +19,49 @@
        "/"
        (str/replace (:title album) \space \+)))
 
-(defn styles [{:keys [spacing] :as theme}]
-  (let [on-desktop (util/on-desktop theme)
+(def classes
+  (util/make-classes "luma-album-"
+                     [:bold
+                      :playcount-root
+                      :progress-root
+                      :progress-svg
+                      :root
+                      :album-card
+                      :album-link
+                      :album-media]))
+
+(defn styles [{:keys [theme]}]
+  (let [spacing (:spacing theme)
+        on-desktop (util/on-desktop theme)
         on-mobile (util/on-mobile theme)
         mobile-width (str "calc(100vw - " (spacing 4) ")")]
-    {:bold           {:font-weight :bold}
-     :playcount-root {:z-index  2
-                      :position :absolute
-                      :top      5
-                      :right    5}
-     :progress-root  {:margin-top (spacing 4)
-                      on-mobile   {:display :block
-                                   :margin  [[(spacing 4) :auto 0]]}}
-     :progress-svg   {:stroke-linecap :round}
-     :root           {:padding   (spacing 0 2)
-                      on-desktop {:display         :flex
-                                  :flex-wrap       :wrap
-                                  :justify-content :center}}
-     :album-card     {:display        :flex
-                      :flex-direction :column
-                      :position       :relative
-                      on-desktop      {:width  320
-                                       :margin (spacing 1)}
-                      on-mobile       {:width  mobile-width
-                                       :margin (spacing 2 0)}}
-     :album-link     {:flex 1}
-     :album-media    {on-desktop {:height 320}
-                      on-mobile  {:height mobile-width}}}))
+    (util/set-classes
+     classes
+     {:bold           {:font-weight :bold}
+      :playcount-root {:z-index  2
+                       :position :absolute
+                       :top      5
+                       :right    5}
+      :progress-root  {:margin-top (spacing 4)
+                       on-mobile   {:display :block
+                                    :margin  [[(spacing 4) :auto 0]]}}
+      :progress-svg   {:stroke-linecap :round}
+      :root           {:padding   (spacing 0 2)
+                       on-desktop {:display         :flex
+                                   :flex-wrap       :wrap
+                                   :justify-content :center}}
+      :album-card     {:display        :flex
+                       :flex-direction :column
+                       :position       :relative
+                       on-desktop      {:width  320
+                                        :margin (spacing 1)}
+                       on-mobile       {:width  mobile-width
+                                        :margin (spacing 2 0)}}
+      :album-link     {:flex 1}
+      :album-media    {on-desktop {:height 320}
+                       on-mobile  {:height mobile-width}}})))
 
-(defn album [{:keys [classes data]}]
+(defn album [{:keys [data]}]
   (with-let [depth (atom 1)
              on-mouse-over #(reset! depth 10)
              on-mouse-out #(reset! depth 1)]
@@ -77,10 +91,10 @@
        [typography {:variant :body2}
         (interpose " · " (:tags data))]]]]))
 
-(defn albums* [{:keys [classes]}]
+(defn albums* [{:keys [class-name]}]
   (with-let [has-albums? (re-frame/subscribe [::subs/albums])
              filtered-albums (re-frame/subscribe [::subs/sorted-albums])]
-    [:div {:class (:root classes)}
+    [:div {:class [class-name (:root classes)]}
      (cond
        (not @has-albums?) [circular-progress {:classes   {:root (:progress-root classes)
                                                           :svg  (:progress-svg classes)}
@@ -93,4 +107,4 @@
        :else [typography {:variant :h6}
               "No matching albums found in your library."])]))
 
-(def albums ((with-styles styles) albums*))
+(def albums (styled albums* styles))
