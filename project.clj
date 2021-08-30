@@ -23,7 +23,7 @@
   :plugins [[lein-ancient "0.7.0"]
             [lein-cljfmt "0.8.0"]
             [lein-kibit "0.1.8"]
-            [jonase/eastwood "0.9.4"]]
+            [jonase/eastwood "0.9.9"]]
 
   :min-lein-version "2.8.2"
 
@@ -52,11 +52,11 @@
                         :resource-paths ["dev-resources" "target"]}
              :provided {:dependencies [[reagent "1.1.0"]
                                        [re-frame "1.2.0"]
-                                       [arttuka/reagent-material-ui "5.0.0-beta.2-0"]
+                                       [arttuka/reagent-material-ui "5.0.0-beta.5-0"]
                                        [com.cognitect/transit-cljs "0.8.269"]
                                        [com.cognitect/transit-js "0.8.874"]
                                        [com.andrewmcveigh/cljs-time "0.5.2"]
-                                       [thheller/shadow-cljs "2.15.2"]]}
+                                       [thheller/shadow-cljs "2.15.6"]]}
              :uberjar  {:dependencies [[com.fzakaria/slf4j-timbre "0.3.21"]]
                         :main         luma.main
                         :uberjar-name "luma.jar"
