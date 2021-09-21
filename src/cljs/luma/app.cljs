@@ -1,13 +1,12 @@
 (ns luma.app
   (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :as re-frame]
-            [reagent-material-ui.colors :as colors]
-            [reagent-material-ui.core.app-bar :refer [app-bar]]
-            [reagent-material-ui.core.css-baseline :refer [css-baseline]]
-            [reagent-material-ui.core.styled-engine-provider :refer [styled-engine-provider]]
-            [reagent-material-ui.core.toolbar :refer [toolbar] :rename {toolbar mui-toolbar}]
-            [reagent-material-ui.core.typography :refer [typography]]
-            [reagent-material-ui.styles :as styles :refer [styled]]
+            [reagent-mui.colors :as colors]
+            [reagent-mui.material.app-bar :refer [app-bar]]
+            [reagent-mui.material.css-baseline :refer [css-baseline]]
+            [reagent-mui.material.toolbar :refer [toolbar] :rename {toolbar mui-toolbar}]
+            [reagent-mui.material.typography :refer [typography]]
+            [reagent-mui.styles :as styles :refer [styled]]
             [luma.components.album :refer [albums]]
             [luma.components.snackbar :refer [snackbar]]
             [luma.components.terms-of-use :refer [terms-of-use]]
@@ -62,17 +61,16 @@
                        :spotify   "#1db954"}}))
 
 (defn app* [{:keys [class-name]}]
-  [styled-engine-provider {:inject-first true}
-   [styles/theme-provider theme
-    [css-baseline]
-    [:div {:class [class-name (:root classes)]}
-     [header]
-     [toolbar]
-     (if @(re-frame/subscribe [::subs/spotify-id])
-       [albums]
-       [welcome-screen])
-     [:div {:class (:separator classes)}]
-     [terms-of-use]
-     [snackbar]]]])
+  [styles/theme-provider theme
+   [css-baseline]
+   [:div {:class [class-name (:root classes)]}
+    [header]
+    [toolbar]
+    (if @(re-frame/subscribe [::subs/spotify-id])
+      [albums]
+      [welcome-screen])
+    [:div {:class (:separator classes)}]
+    [terms-of-use]
+    [snackbar]]])
 
 (def app (styled app* styles))

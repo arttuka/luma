@@ -1,6 +1,6 @@
 (defproject luma "0.1.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.10.3"]
-                 [org.clojure/core.async "1.3.618"]
+                 [org.clojure/core.async "1.3.622"]
                  [org.clojure/tools.logging "1.1.0"]
                  [org.clojure/tools.reader "1.3.6"]
                  [compojure "1.6.2"]
@@ -52,11 +52,11 @@
                         :resource-paths ["dev-resources" "target"]}
              :provided {:dependencies [[reagent "1.1.0"]
                                        [re-frame "1.2.0"]
-                                       [arttuka/reagent-material-ui "5.0.0-beta.5-0"]
+                                       [arttuka/reagent-material-ui "5.0.0-0"]
                                        [com.cognitect/transit-cljs "0.8.269"]
                                        [com.cognitect/transit-js "0.8.874"]
                                        [com.andrewmcveigh/cljs-time "0.5.2"]
-                                       [thheller/shadow-cljs "2.15.6"]]}
+                                       [thheller/shadow-cljs "2.15.10"]]}
              :uberjar  {:dependencies [[com.fzakaria/slf4j-timbre "0.3.21"]]
                         :main         luma.main
                         :uberjar-name "luma.jar"

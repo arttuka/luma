@@ -1,7 +1,7 @@
 (ns luma.components.flip-button
   (:require [reagent.core :as reagent :refer [atom]]
-            [reagent-material-ui.core.button :refer [button]]
-            [reagent-material-ui.styles :refer [styled]]
+            [reagent-mui.material.button :refer [button]]
+            [reagent-mui.styles :refer [styled]]
             [luma.util :as util]))
 
 (def classes (util/make-classes

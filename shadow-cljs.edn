@@ -3,7 +3,7 @@
                 [com.taoensso/sente "1.16.2"]
                 [reagent "1.1.0"]
                 [re-frame "1.2.0"]
-                [arttuka/reagent-material-ui "5.0.0-beta.5-0"]
+                [arttuka/reagent-material-ui "5.0.0-0"]
                 [com.cognitect/transit-cljs "0.8.269"]
                 [com.cognitect/transit-js "0.8.874"]
                 [com.andrewmcveigh/cljs-time "0.5.2"]
