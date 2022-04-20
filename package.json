@@ -1,15 +1,14 @@
 {
   "devDependencies": {
-    "karma": "^6.3.4",
-    "karma-chrome-launcher": "^3.1.0",
+    "karma": "^6.3.19",
+    "karma-chrome-launcher": "^3.1.1",
     "karma-cljs-test": "^0.1.0",
-    "shadow-cljs": "^2.15.10"
+    "shadow-cljs": "^2.18.0"
   },
   "dependencies": {
-    "@emotion/react": "^11.4.1",
-    "@emotion/styled": "^11.3.0",
-    "@mui/material": "5.0.0",
-    "@mui/lab": "5.0.0-alpha.47",
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/material": "5.6.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-transition-group": "^4.4.2"
